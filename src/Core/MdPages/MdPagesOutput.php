@@ -23,11 +23,11 @@ class MdPagesOutput
     }
 
     /**
-     * Register /md rewrite endpoint for posts and pages.
+     * Register /md rewrite endpoint for posts, pages, and static front page.
      */
     public function addRewriteEndpoints(): void
     {
-        add_rewrite_endpoint('md', EP_PERMALINK | EP_PAGES);
+        add_rewrite_endpoint('md', EP_PERMALINK | EP_PAGES | EP_ROOT);
     }
 
     /**
@@ -49,12 +49,25 @@ class MdPagesOutput
     {
         global $wp_query;
 
-        if (!is_singular() || !isset($wp_query->query_vars['md'])) {
+        if (!isset($wp_query->query_vars['md'])) {
             return;
         }
 
-        $post = get_queried_object();
-        if (!$post || !$post instanceof \WP_Post) {
+        $post = null;
+
+        if (is_singular()) {
+            $queried = get_queried_object();
+            if ($queried instanceof \WP_Post) {
+                $post = $queried;
+            }
+        } elseif (get_option('show_on_front') === 'page') {
+            $frontPageId = (int) get_option('page_on_front');
+            if ($frontPageId > 0) {
+                $post = get_post($frontPageId);
+            }
+        }
+
+        if (!$post instanceof \WP_Post) {
             return;
         }
 
