@@ -46,10 +46,17 @@ class HtmlToMarkdownConverter
     /**
      * Recursively convert DOM nodes into Markdown.
      *
+     * Each HTML element is passed through the `iz_md_pages_convert_tag` filter
+     * before the built-in conversion logic runs. Returning a non-null string
+     * from the filter replaces the default conversion for that tag entirely.
+     *
+     * Filter signature:
+     *   apply_filters('iz_md_pages_convert_tag', null, string $tagName, \DOMElement $element, string $innerText)
+     *
      * @param \DOMNode $node DOM node to process.
      * @return string Converted Markdown snippet.
      */
-    private function convertNode(\DOMNode $node): string
+    protected function convertNode(\DOMNode $node): string
     {
         $output = '';
 
@@ -65,6 +72,30 @@ class HtmlToMarkdownConverter
 
             $tagName = strtolower($child->nodeName);
             $innerText = $this->convertNode($child);
+
+            /**
+             * Allows overriding the Markdown conversion of any HTML tag.
+             *
+             * Return a non-null string to replace the default conversion
+             * for this tag. Return null to fall through to the built-in logic.
+             *
+             * @param string|null  $override  Markdown override (null = use default).
+             * @param string       $tagName   Lowercase HTML tag name (e.g. 'p', 'h1', 'div').
+             * @param \DOMElement  $element   The DOM element being converted.
+             * @param string       $innerText Already-converted inner content of the element.
+             */
+            $override = apply_filters(
+                'iz_md_pages_convert_tag',
+                null,
+                $tagName,
+                $child,
+                $innerText
+            );
+
+            if (is_string($override)) {
+                $output .= $override;
+                continue;
+            }
 
             switch ($tagName) {
                 case 'h1':
@@ -173,7 +204,7 @@ class HtmlToMarkdownConverter
                     break;
 
                 default:
-                    $output .= $innerText;
+                    $output .= trim($innerText);
                     break;
             }
         }
