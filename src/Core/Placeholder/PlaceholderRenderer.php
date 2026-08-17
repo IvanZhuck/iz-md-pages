@@ -107,42 +107,37 @@ class PlaceholderRenderer
      */
     public function getPlaceholderReplacements(\WP_Post $post): array
     {
-        $permalink = (string) get_permalink($post->ID);
-        $thumbnailUrl = $this->getFeaturedImageUrl($post);
-        $thumbnailMarkdown = $this->renderFeaturedImageMarkdown($post, $thumbnailUrl);
-        $authorId = (int) $post->post_author;
-
         $replacements = [
             // Post core fields
-            self::PLACEHOLDER_POST_TITLE => $this->renderPostTitle($post),
+            self::PLACEHOLDER_POST_TITLE => $this->renderPostField('post_title', $post),
             self::PLACEHOLDER_POST_CONTENT => $this->renderPostContent($post),
             self::PLACEHOLDER_POST_EXCERPT => $this->renderPostExcerpt($post),
-            self::PLACEHOLDER_POST_ID => (string) $post->ID,
-            self::PLACEHOLDER_POST_SLUG => (string) $post->post_name,
-            self::PLACEHOLDER_POST_NAME => (string) $post->post_name,
-            self::PLACEHOLDER_POST_TYPE => (string) $post->post_type,
-            self::PLACEHOLDER_POST_STATUS => (string) $post->post_status,
-            self::PLACEHOLDER_POST_DATE => (string) get_the_date('', $post),
-            self::PLACEHOLDER_POST_DATE_GMT => (string) $post->post_date_gmt,
-            self::PLACEHOLDER_POST_TIME => (string) get_the_time('', $post),
-            self::PLACEHOLDER_POST_MODIFIED => (string) get_the_modified_date('', $post),
-            self::PLACEHOLDER_POST_MODIFIED_GMT => (string) $post->post_modified_gmt,
-            self::PLACEHOLDER_POST_PERMALINK => $permalink,
-            self::PLACEHOLDER_POST_URL => $permalink,
-            self::PLACEHOLDER_POST_THUMBNAIL_URL => $thumbnailUrl,
-            self::PLACEHOLDER_POST_FEATURED_IMAGE_URL => $thumbnailUrl,
-            self::PLACEHOLDER_POST_THUMBNAIL => $thumbnailMarkdown,
-            self::PLACEHOLDER_POST_FEATURED_IMAGE => $thumbnailMarkdown,
+            self::PLACEHOLDER_POST_ID => $this->renderPostField('ID', $post),
+            self::PLACEHOLDER_POST_SLUG => $this->renderPostField('post_name', $post),
+            self::PLACEHOLDER_POST_NAME => $this->renderPostField('post_name', $post),
+            self::PLACEHOLDER_POST_TYPE => $this->renderPostField('post_type', $post),
+            self::PLACEHOLDER_POST_STATUS => $this->renderPostField('post_status', $post),
+            self::PLACEHOLDER_POST_DATE => $this->renderPostField('post_date', $post),
+            self::PLACEHOLDER_POST_DATE_GMT => $this->renderPostField('post_date_gmt', $post),
+            self::PLACEHOLDER_POST_TIME => $this->renderPostField('post_time', $post),
+            self::PLACEHOLDER_POST_MODIFIED => $this->renderPostField('post_modified', $post),
+            self::PLACEHOLDER_POST_MODIFIED_GMT => $this->renderPostField('post_modified_gmt', $post),
+            self::PLACEHOLDER_POST_PERMALINK => $this->renderPostField('permalink', $post),
+            self::PLACEHOLDER_POST_URL => $this->renderPostField('permalink', $post),
+            self::PLACEHOLDER_POST_THUMBNAIL_URL => $this->renderPostField('thumbnail_url', $post),
+            self::PLACEHOLDER_POST_FEATURED_IMAGE_URL => $this->renderPostField('thumbnail_url', $post),
+            self::PLACEHOLDER_POST_THUMBNAIL => $this->renderFeaturedImageMarkdown($post),
+            self::PLACEHOLDER_POST_FEATURED_IMAGE => $this->renderFeaturedImageMarkdown($post),
 
             // Author fields
-            self::PLACEHOLDER_AUTHOR_NAME => (string) get_the_author_meta('display_name', $authorId),
-            self::PLACEHOLDER_POST_AUTHOR => (string) get_the_author_meta('display_name', $authorId),
-            self::PLACEHOLDER_AUTHOR_EMAIL => (string) get_the_author_meta('user_email', $authorId),
-            self::PLACEHOLDER_AUTHOR_URL => (string) get_author_posts_url($authorId),
-            self::PLACEHOLDER_AUTHOR_BIO => (string) get_the_author_meta('description', $authorId),
-            self::PLACEHOLDER_AUTHOR_FIRST_NAME => (string) get_the_author_meta('first_name', $authorId),
-            self::PLACEHOLDER_AUTHOR_LAST_NAME => (string) get_the_author_meta('last_name', $authorId),
-            self::PLACEHOLDER_AUTHOR_NICKNAME => (string) get_the_author_meta('nickname', $authorId),
+            self::PLACEHOLDER_AUTHOR_NAME => $this->renderAuthorField('display_name', $post),
+            self::PLACEHOLDER_POST_AUTHOR => $this->renderAuthorField('display_name', $post),
+            self::PLACEHOLDER_AUTHOR_EMAIL => $this->renderAuthorField('user_email', $post),
+            self::PLACEHOLDER_AUTHOR_URL => $this->renderAuthorField('author_url', $post),
+            self::PLACEHOLDER_AUTHOR_BIO => $this->renderAuthorField('description', $post),
+            self::PLACEHOLDER_AUTHOR_FIRST_NAME => $this->renderAuthorField('first_name', $post),
+            self::PLACEHOLDER_AUTHOR_LAST_NAME => $this->renderAuthorField('last_name', $post),
+            self::PLACEHOLDER_AUTHOR_NICKNAME => $this->renderAuthorField('nickname', $post),
 
             // Standard taxonomy shortcuts
             self::PLACEHOLDER_CATEGORIES => $this->renderTaxonomyTerms($post, 'category'),
@@ -157,6 +152,85 @@ class PlaceholderRenderer
         }
 
         return $replacements;
+    }
+
+    /**
+     * Render a post field value and pass it through an extensible filter hook.
+     *
+     * @param string   $fieldName Post field name (e.g. 'post_title', 'post_name', 'ID', 'permalink').
+     * @param \WP_Post $post      Current post object.
+     * @return string Rendered post field value.
+     */
+    public function renderPostField(string $fieldName, \WP_Post $post): string
+    {
+        switch ($fieldName) {
+            case 'post_title':
+                $value = trim((string) get_the_title($post));
+                break;
+
+            case 'post_date':
+                $value = (string) get_the_date('', $post);
+                break;
+
+            case 'post_time':
+                $value = (string) get_the_time('', $post);
+                break;
+
+            case 'post_modified':
+                $value = (string) get_the_modified_date('', $post);
+                break;
+
+            case 'permalink':
+                $value = (string) get_permalink($post->ID);
+                break;
+
+            case 'thumbnail_url':
+                $url = get_the_post_thumbnail_url($post, 'full');
+                $value = is_string($url) ? $url : '';
+                break;
+
+            default:
+                $value = isset($post->{$fieldName}) && is_scalar($post->{$fieldName})
+                    ? (string) $post->{$fieldName}
+                    : '';
+                break;
+        }
+
+        /**
+         * Filter to override a rendered post field value.
+         *
+         * @param string   $value     Rendered field value.
+         * @param string   $fieldName Post field identifier.
+         * @param \WP_Post $post      Current post object.
+         */
+        return (string) apply_filters('iz_md_render_post_field', $value, $fieldName, $post);
+    }
+
+    /**
+     * Render an author field value and pass it through an extensible filter hook.
+     *
+     * @param string   $fieldName Author field name (e.g. 'display_name', 'user_email', 'author_url').
+     * @param \WP_Post $post      Current post object.
+     * @return string Rendered author field value.
+     */
+    public function renderAuthorField(string $fieldName, \WP_Post $post): string
+    {
+        $authorId = (int) $post->post_author;
+
+        if ($fieldName === 'author_url') {
+            $value = (string) get_author_posts_url($authorId);
+        } else {
+            $value = (string) get_the_author_meta($fieldName, $authorId);
+        }
+
+        /**
+         * Filter to override a rendered author field value.
+         *
+         * @param string   $value     Rendered author field value.
+         * @param string   $fieldName Author field identifier.
+         * @param \WP_Post $post      Current post object.
+         */
+        return (string) apply_filters('iz_md_render_author_field', $value, $fieldName, $post);
     }
 
     /**
@@ -215,19 +289,6 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render post title placeholder value.
-     *
-     * @param \WP_Post $post Current post object.
-     * @return string Post title.
-     */
-    protected function renderPostTitle(\WP_Post $post): string
-    {
-        $title = get_the_title($post);
-        $title = (string) apply_filters('iz_md_placeholder_render_post_title', $title, $post);
-        return trim((string) $title);
-    }
-
-    /**
      * Render post content placeholder value as Markdown.
      *
      * @param \WP_Post $post Current post object.
@@ -259,37 +320,27 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render featured image URL for post.
-     *
-     * @param \WP_Post $post Current post object.
-     * @return string Image URL or empty string.
-     */
-    protected function getFeaturedImageUrl(\WP_Post $post): string
-    {
-        $url = get_the_post_thumbnail_url($post, 'full');
-        return is_string($url) ? $url : '';
-    }
-
-    /**
      * Render featured image Markdown syntax.
      *
-     * @param \WP_Post $post Current post object.
-     * @param string   $url  Featured image URL.
+     * @param \WP_Post    $post Current post object.
+     * @param string|null $url  Optional featured image URL.
      * @return string Markdown image snippet or empty string.
      */
-    protected function renderFeaturedImageMarkdown(\WP_Post $post, string $url): string
+    protected function renderFeaturedImageMarkdown(\WP_Post $post, ?string $url = null): string
     {
-        if ($url === '') {
+        $imageUrl = $url ?? $this->renderPostField('thumbnail_url', $post);
+
+        if ($imageUrl === '') {
             return '';
         }
 
         $thumbnailId = get_post_thumbnail_id($post);
         $alt = $thumbnailId ? (string) get_post_meta($thumbnailId, '_wp_attachment_image_alt', true) : '';
         if ($alt === '') {
-            $alt = $this->renderPostTitle($post);
+            $alt = $this->renderPostField('post_title', $post);
         }
 
-        return '![' . $alt . '](' . esc_url($url) . ')';
+        return '![' . $alt . '](' . esc_url($imageUrl) . ')';
     }
 
     /**
