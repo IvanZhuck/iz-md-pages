@@ -6,13 +6,29 @@ namespace IZMDPages\Core\MdPages;
 
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
-use IZMDPages\Core\Converter\HtmlToMarkdownConverter;
+use IZMDPages\Admin\Settings\TemplatesSettingsPage;
+use IZMDPages\Core\Placeholder\PlaceholderRenderer;
 
 /**
  * Handles Markdown page output and URL routing.
  */
 class MdPagesOutput
 {
+    /**
+     * Placeholder renderer instance.
+     */
+    private PlaceholderRenderer $placeholderRenderer;
+
+    /**
+     * MdPagesOutput constructor.
+     *
+     * @param PlaceholderRenderer|null $placeholderRenderer Placeholder renderer instance.
+     */
+    public function __construct(?PlaceholderRenderer $placeholderRenderer = null)
+    {
+        $this->placeholderRenderer = $placeholderRenderer ?? new PlaceholderRenderer();
+    }
+
     /**
      * Initialize WordPress hooks for Markdown output.
      */
@@ -146,19 +162,15 @@ class MdPagesOutput
         $isManual = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_ENABLED, true);
 
         if ($isManual) {
-            $manualContent = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
-            echo $manualContent;
-            exit;
+            $template = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
+        } else {
+            $templates = (array) get_option(TemplatesSettingsPage::OPTION_KEY, []);
+            $template = isset($templates[$post->post_type]) && $templates[$post->post_type] !== ''
+                ? (string) $templates[$post->post_type]
+                : TemplatesSettingsPage::DEFAULT_TEMPLATE;
         }
 
-        $title = (string) get_the_title($post);
-        $htmlContent = (string) apply_filters('the_content', $post->post_content);
-
-        $converter = new HtmlToMarkdownConverter();
-        $mdContent = $converter->convert($htmlContent);
-
-        echo '# ' . esc_html($title) . "\n\n";
-        echo $mdContent;
+        echo $this->placeholderRenderer->render($template, $post);
         exit;
     }
 }

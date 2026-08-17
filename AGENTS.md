@@ -29,6 +29,8 @@ iz-md-pages/
 │       │   └── HtmlToMarkdownConverter.php # HTML to Markdown converter
 │       ├── MdPages/
 │       │   └── MdPagesOutput.php           # Endpoint routing & MD output
+│       ├── Placeholder/
+│       │   └── PlaceholderRenderer.php     # Template placeholder renderer
 │       └── Template/
 │           └── TemplateRenderer.php        # Template rendering engine
 └── templates/
