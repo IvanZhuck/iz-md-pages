@@ -13,7 +13,7 @@
 
 declare(strict_types=1);
 
-use IZMDPages\Admin\Assets\AdminAssets;
+use IZMDPages\Admin\Assets\SettingsAssets;
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Admin\Settings\TemplatesSettingsPage;
@@ -42,7 +42,7 @@ spl_autoload_register(function (string $class): void {
 /**
  * Plugin initialization.
  */
-$adminAssets = new AdminAssets();
+$adminAssets = new SettingsAssets();
 $adminAssets->init();
 
 $settingsPage = new SettingsPage();

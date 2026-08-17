@@ -20,7 +20,8 @@ iz-md-pages/
 ├── src/
 │   ├── Admin/
 │   │   ├── Assets/
-│   │   │   └── AdminAssets.php            # Administration assets controller
+│   │   │   ├── Assets.php                 # Base administration assets controller
+│   │   │   └── SettingsAssets.php         # Settings assets controller
 │   │   ├── MetaBoxes/
 │   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller
 │   │   └── Settings/
