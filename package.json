@@ -5,7 +5,7 @@
   "license": "GPLv3",
   "scripts": {
     "build-scripts": "webpack --mode production",
-    "build-styles": "sass --no-source-map --style=compressed assets/src/scss:assets/build/scss",
+    "build-styles": "sass --no-source-map --style=compressed assets/src/scss:assets/build/css",
     "eslint": "./node_modules/.bin/eslint",
     "eslint-fix": "./node_modules/.bin/eslint --fix",
     "stylelint": "node_modules/stylelint/bin/stylelint.mjs assets/src/scss/**/*.scss",

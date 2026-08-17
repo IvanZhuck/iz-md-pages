@@ -32,10 +32,10 @@ class AdminAssets
         }
 
         $pluginFile = dirname(__DIR__, 3) . '/iz-md-pages.php';
-        $cssPath = dirname(__DIR__, 3) . '/assets/build/scss/settings.css';
+        $cssPath = dirname(__DIR__, 3) . '/assets/build/css/settings.css';
         $jsPath = dirname(__DIR__, 3) . '/assets/build/js/settings.bundle.js';
 
-        $cssUrl = plugins_url('assets/build/scss/settings.css', $pluginFile);
+        $cssUrl = plugins_url('assets/build/css/settings.css', $pluginFile);
         $jsUrl = plugins_url('assets/build/js/settings.bundle.js', $pluginFile);
 
         $cssVersion = file_exists($cssPath) ? (string) filemtime($cssPath) : '';
