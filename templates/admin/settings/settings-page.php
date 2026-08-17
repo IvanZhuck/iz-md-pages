@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 ?>
-<div class="wrap">
+<div class="wrap iz-md-settings-wrap">
     <h1><?php echo esc_html__('IZ MD Settings', 'iz-md-pages'); ?></h1>
 
     <?php $this->render('admin/nav/main-menu.php', ['currentTab' => $currentTab ?? 'general']); ?>

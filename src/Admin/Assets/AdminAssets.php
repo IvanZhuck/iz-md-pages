@@ -38,8 +38,8 @@ class AdminAssets
         $cssUrl = plugins_url('assets/build/scss/settings.css', $pluginFile);
         $jsUrl = plugins_url('assets/build/js/settings.bundle.js', $pluginFile);
 
-        $cssVersion = file_exists($cssPath) ? (string) filemtime($cssPath) : '1.0.0';
-        $jsVersion = file_exists($jsPath) ? (string) filemtime($jsPath) : '1.0.0';
+        $cssVersion = file_exists($cssPath) ? (string) filemtime($cssPath) : '';
+        $jsVersion = file_exists($jsPath) ? (string) filemtime($jsPath) : '';
 
         wp_enqueue_style(
             'iz-md-settings',
