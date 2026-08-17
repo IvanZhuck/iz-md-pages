@@ -1,0 +1,79 @@
+@use '../vars' as *;
+
+.iz-md-placeholders-reference {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 12px 18px;
+    background: $color-bg-white;
+    border: 1px solid $color-border;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px $color-shadow;
+
+    .iz-md-placeholders-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+
+        h3 {
+            margin: 0;
+            color: $color-text-main;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .iz-md-placeholders-toggle {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 6px;
+            color: $color-text-muted;
+            font-size: 13px;
+            line-height: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+
+            .iz-md-placeholders-toggle-text {
+                color: $color-primary;
+                font-weight: 500;
+                font-size: 12px;
+            }
+
+            .dashicons {
+                width: 16px;
+                height: 16px;
+                color: $color-text-muted;
+                font-size: 16px;
+                transition: transform 0.2s ease;
+            }
+
+            &:hover,
+            &:focus {
+                outline: none;
+
+                .iz-md-placeholders-toggle-text,
+                .dashicons {
+                    color: $color-primary-hover;
+                }
+            }
+        }
+    }
+
+    .iz-md-placeholders-body {
+        margin-top: 8px;
+    }
+
+    &.is-collapsed {
+        .iz-md-placeholders-toggle .dashicons {
+            transform: rotate(180deg);
+        }
+
+        .iz-md-placeholders-body {
+            display: none;
+        }
+    }
+}

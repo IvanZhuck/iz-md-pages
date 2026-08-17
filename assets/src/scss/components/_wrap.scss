@@ -1,0 +1,32 @@
+/* stylelint-disable selector-class-pattern */
+
+@use '../vars' as *;
+
+.toplevel_page_iz-md-settings,
+.iz-md-pages_page_iz-md-templates,
+.iz-md-settings_page_iz-md-templates {
+    .wrap {
+        max-width: 1400px;
+    }
+}
+
+.iz-md-settings-wrap {
+    max-width: 1400px;
+}
+
+.iz-md-pages_page_iz-md-templates,
+.iz-md-templates-wrap {
+    .form-table {
+        td {
+            padding-right: 0;
+        }
+
+        textarea {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+        }
+    }
+}
