@@ -146,9 +146,13 @@ class HtmlToMarkdownConverter
 
                 case 'a':
                     if ($child instanceof \DOMElement) {
-                        $href = $child->getAttribute('href');
-                        if (!empty($href)) {
-                            $output .= '[' . trim($innerText) . '](' . esc_url($href) . ')';
+                        $href = $this->resolveUrl($child->getAttribute('href'));
+                        $linkText = trim($innerText);
+
+                        if (!empty($href) && ($linkText === '' || $linkText === $href)) {
+                            $output .= '<' . esc_url($href) . '>';
+                        } elseif (!empty($href)) {
+                            $output .= '[' . $linkText . '](' . esc_url($href) . ')';
                         } else {
                             $output .= $innerText;
                         }
@@ -159,7 +163,7 @@ class HtmlToMarkdownConverter
 
                 case 'img':
                     if ($child instanceof \DOMElement) {
-                        $src = $child->getAttribute('src');
+                        $src = $this->resolveUrl($child->getAttribute('src'));
                         $alt = $child->getAttribute('alt');
                         if (!empty($src)) {
                             $output .= '![' . $alt . '](' . esc_url($src) . ')';
@@ -243,6 +247,51 @@ class HtmlToMarkdownConverter
         }
 
         return implode("\n", $cleaned);
+    }
+
+    /**
+     * Resolve a relative URL to an absolute one using the site's home URL.
+     *
+     * Leaves absolute URLs, protocol-relative URLs (//), fragment-only
+     * links (#), and non-HTTP schemes (mailto:, tel:, etc.) untouched.
+     *
+     * @param string $url URL to resolve.
+     * @return string Absolute URL.
+     */
+    private function resolveUrl(string $url): string
+    {
+        $url = trim($url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        // Already absolute, protocol-relative, or non-HTTP scheme
+        if (preg_match('#^(https?://|//|[a-z][a-z0-9+\-.]*:)#i', $url)) {
+            return $url;
+        }
+
+        $baseUrl = home_url();
+
+        // Fragment-only link — prepend base URL
+        if (strncmp($url, '#', 1) === 0) {
+            return rtrim($baseUrl, '/') . '/' . $url;
+        }
+
+        // Absolute path — prepend origin only
+        if (strncmp($url, '/', 1) === 0) {
+            $parsed = wp_parse_url($baseUrl);
+            $origin = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '');
+
+            if (!empty($parsed['port'])) {
+                $origin .= ':' . $parsed['port'];
+            }
+
+            return $origin . $url;
+        }
+
+        // Relative path — append to home URL
+        return rtrim($baseUrl, '/') . '/' . $url;
     }
 
     /**
