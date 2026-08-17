@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Plugin Name: IZ MD Pages
  * Description: WordPress plugin for generating and serving Markdown pages.
@@ -12,6 +10,8 @@ declare(strict_types=1);
  * License URI: https://www.gnu.org/licenses/gpl-3.0.txt
  * Text Domain: iz-md-pages
  */
+
+declare(strict_types=1);
 
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;

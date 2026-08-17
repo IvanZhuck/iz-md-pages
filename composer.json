@@ -1,0 +1,25 @@
+{
+    "name": "ivan_zhuck/iz-md-pages",
+    "description": "WordPress plugin for generating and serving Markdown pages",
+    "type": "wordpress-plugin",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Ivan Zhuck",
+            "email": "i.a.zhuck@gmail.com",
+            "homepage": "https://izhuck.ru/",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "scripts": {
+        "phpcs": "./vendor/bin/phpcs",
+        "phpcbf": "./vendor/bin/phpcbf"
+    }
+}
