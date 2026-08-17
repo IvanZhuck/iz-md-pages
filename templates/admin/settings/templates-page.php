@@ -47,6 +47,23 @@ if (!defined('ABSPATH')) {
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e0e0e0; font-size: 13px; color: #444;">
+                <p style="margin: 0 0 6px 0;"><strong><?php esc_html_e('Taxonomy Custom Separators:', 'iz-md-pages'); ?></strong></p>
+                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
+                    <li style="margin-bottom: 4px;">
+                        <?php esc_html_e('By default, taxonomy terms are separated by a comma and space (e.g. ', 'iz-md-pages'); ?><code>{%categories%}</code> &rarr; <em>Term 1, Term 2</em>).
+                    </li>
+                    <li style="margin-bottom: 4px;">
+                        <?php esc_html_e('You can specify a custom separator after a colon, for example: ', 'iz-md-pages'); ?>
+                        <code>{%categories: | %}</code>, <code>{%tags: / %}</code>, <code>{%taxonomy:product_cat: &bull; %}</code>.
+                    </li>
+                    <li style="margin-bottom: 2px;">
+                        <?php esc_html_e('Control characters like newline (', 'iz-md-pages'); ?><code>\\n</code><?php esc_html_e(') and tab (', 'iz-md-pages'); ?><code>\\t</code><?php esc_html_e(') are supported for Markdown lists or multiline output, for example: ', 'iz-md-pages'); ?>
+                        <code>{%categories:\\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\\n\\t%}</code>.
+                    </li>
+                </ul>
+            </div>
         <?php endif; ?>
     </div>
 

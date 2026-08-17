@@ -88,12 +88,34 @@ class PlaceholderRenderer
 
         $result = strtr($template, $placeholders);
 
-        // Dynamic taxonomy replacement: {%taxonomy:<tax_name>%}, {%tax_<tax_name>%}, {%taxonomy_<tax_name>%}
+        // Dynamic categories replacement with optional custom separator: {%categories%}, {%categories:<separator>%}
+        $result = (string) preg_replace_callback(
+            '/\{%(?:categories|category)(?::([^%]*))?%\}/',
+            function (array $matches) use ($post): string {
+                $separator = isset($matches[1]) && $matches[1] !== '' ? $matches[1] : ', ';
+                return $this->renderTaxonomyTerms($post, 'category', $separator);
+            },
+            $result
+        );
+
+        // Dynamic tags replacement with optional custom separator: {%tags%}, {%tags:<separator>%}
+        $result = (string) preg_replace_callback(
+            '/\{%(?:tags|tag|post_tags|post_tag)(?::([^%]*))?%\}/',
+            function (array $matches) use ($post): string {
+                $separator = isset($matches[1]) && $matches[1] !== '' ? $matches[1] : ', ';
+                return $this->renderTaxonomyTerms($post, 'post_tag', $separator);
+            },
+            $result
+        );
+
+        // Dynamic taxonomy replacement with optional custom separator:
+        // {%taxonomy:<tax_name>%}, {%taxonomy:<tax_name>:<separator>%}, {%tax_<tax_name>%}, etc.
         return (string) preg_replace_callback(
-            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)%\}/',
+            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
-                return $this->renderTaxonomyTerms($post, $taxonomy);
+                $separator = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : ', ';
+                return $this->renderTaxonomyTerms($post, $taxonomy, $separator);
             },
             $result
         );
@@ -265,9 +287,9 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_AUTHOR_LAST_NAME => __('Author last name', 'iz-md-pages'),
             ],
             'Taxonomies' => [
-                self::PLACEHOLDER_CATEGORIES => __('Post categories (comma-separated)', 'iz-md-pages'),
-                self::PLACEHOLDER_TAGS => __('Post tags (comma-separated)', 'iz-md-pages'),
-                self::PLACEHOLDER_TAXONOMY => __('Terms of any taxonomy (comma-separated), e.g. {%taxonomy:product_cat%}', 'iz-md-pages'),
+                self::PLACEHOLDER_CATEGORIES => __('Post categories (comma-separated or {%categories:separator%})', 'iz-md-pages'),
+                self::PLACEHOLDER_TAGS => __('Post tags (comma-separated or {%tags:separator%})', 'iz-md-pages'),
+                self::PLACEHOLDER_TAXONOMY => __('Terms of any taxonomy (comma-separated or {%taxonomy:name:separator%}), e.g. {%taxonomy:product_cat%}', 'iz-md-pages'),
             ],
         ];
     }
@@ -344,13 +366,14 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render comma-separated terms for a given taxonomy and post.
+     * Render separated terms for a given taxonomy and post.
      *
      * @param \WP_Post $post         Current post object.
      * @param string   $taxonomyName Taxonomy slug.
-     * @return string Comma-separated list of term names.
+     * @param string   $separator    Separator string (defaults to ', ').
+     * @return string Separated list of term names.
      */
-    public function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName): string
+    public function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', '): string
     {
         if (!taxonomy_exists($taxonomyName)) {
             return '';
@@ -363,6 +386,7 @@ class PlaceholderRenderer
         }
 
         $termNames = wp_list_pluck($terms, 'name');
+        $separator = $this->parseSeparator($separator);
 
         /**
          * Filter rendered terms list for a taxonomy placeholder.
@@ -370,9 +394,27 @@ class PlaceholderRenderer
          * @param array<int, string> $termNames    Array of term names.
          * @param \WP_Post           $post         Current post object.
          * @param string             $taxonomyName Taxonomy slug.
+         * @param string             $separator    Separator string.
          */
-        $termNames = apply_filters('iz_md_placeholder_taxonomy_terms', $termNames, $post, $taxonomyName);
+        $termNames = apply_filters('iz_md_placeholder_taxonomy_terms', $termNames, $post, $taxonomyName, $separator);
 
-        return implode(', ', $termNames);
+        return implode($separator, $termNames);
+    }
+
+    /**
+     * Decode control character escape sequences in a separator string (e.g. '\n', '\t', '\r').
+     *
+     * @param string $separator Raw separator string.
+     * @return string Decoded separator string with control characters.
+     */
+    protected function parseSeparator(string $separator): string
+    {
+        return strtr($separator, [
+            '\\n' => "\n",
+            '\\r' => "\r",
+            '\\t' => "\t",
+            '\\v' => "\v",
+            '\\f' => "\f",
+        ]);
     }
 }
