@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
+use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 use IZMDPages\Core\MdPages\MdPagesOutput;
 
 /**
@@ -42,6 +43,9 @@ spl_autoload_register(function (string $class): void {
  */
 $settingsPage = new SettingsPage();
 $settingsPage->init();
+
+$templatesSettingsPage = new TemplatesSettingsPage();
+$templatesSettingsPage->init();
 
 $mdPagesOutput = new MdPagesOutput();
 $mdPagesOutput->init();

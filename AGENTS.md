@@ -19,21 +19,27 @@ iz-md-pages/
 ├── AGENTS.md                      # Developer guidelines (this file)
 ├── src/
 │   ├── Admin/
+│   │   ├── MetaBoxes/
+│   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller
 │   │   └── Settings/
-│   │       └── SettingsPage.php   # Admin settings controller
+│   │       ├── SettingsPage.php           # General settings controller
+│   │       └── TemplatesSettingsPage.php  # Templates settings controller
 │   └── Core/
 │       ├── Converter/
-│       │   └── HtmlToMarkdownConverter.php  # HTML to Markdown converter
+│       │   └── HtmlToMarkdownConverter.php # HTML to Markdown converter
 │       ├── MdPages/
-│       │   └── MdPagesOutput.php            # Endpoint routing & MD output
+│       │   └── MdPagesOutput.php           # Endpoint routing & MD output
 │       └── Template/
-│           └── TemplateRenderer.php         # Template rendering engine
+│           └── TemplateRenderer.php        # Template rendering engine
 └── templates/
     └── admin/
         ├── meta-boxes/
-        │   └── md-page-meta-box.php # Meta box HTML view
+        │   └── md-page-meta-box.php       # Meta box HTML view
+        ├── nav/
+        │   └── main-menu.php              # Shared admin tabs navigation
         └── settings/
-            └── settings-page.php    # Admin settings HTML view
+            ├── settings-page.php          # General settings HTML view
+            └── templates-page.php         # Templates settings HTML view
 ```
 
 ---

@@ -22,6 +22,11 @@ class SettingsPage
     public const OPTION_SUFFIX_KEY = 'iz_md_url_suffix_type';
 
     /**
+     * Page slug for the general settings page.
+     */
+    public const PAGE_SLUG = 'iz-md-settings';
+
+    /**
      * Settings group name for WordPress Settings API.
      */
     public const SETTINGS_GROUP = 'iz_md_settings_group';
@@ -138,15 +143,25 @@ class SettingsPage
     }
 
     /**
-     * Add sub-menu item under WordPress "Settings" menu.
+     * Add top-level menu page and sub-menu item in WordPress admin menu.
      */
     public function addSettingsPage(): void
     {
-        add_options_page(
+        add_menu_page(
             __('IZ MD Settings', 'iz-md-pages'),
-            __('IZ MD Settings', 'iz-md-pages'),
+            __('IZ MD Pages', 'iz-md-pages'),
             'manage_options',
-            'iz-md-settings',
+            self::PAGE_SLUG,
+            [$this, 'renderSettingsPage'],
+            'dashicons-media-document'
+        );
+
+        add_submenu_page(
+            self::PAGE_SLUG,
+            __('IZ MD Settings', 'iz-md-pages'),
+            __('General', 'iz-md-pages'),
+            'manage_options',
+            self::PAGE_SLUG,
             [$this, 'renderSettingsPage']
         );
     }
@@ -161,6 +176,7 @@ class SettingsPage
         }
 
         $data = [
+            'currentTab' => 'general',
             'postTypes' => $this->getTargetPostTypes(),
             'enabledTypes' => (array) get_option(self::OPTION_KEY, ['post', 'page']),
             'suffixType' => (string) get_option(self::OPTION_SUFFIX_KEY, 'endpoint'),

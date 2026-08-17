@@ -20,6 +20,9 @@ if (!defined('ABSPATH')) {
 ?>
 <div class="wrap">
     <h1><?php echo esc_html__('IZ MD Settings', 'iz-md-pages'); ?></h1>
+
+    <?php $this->render('admin/nav/main-menu.php', ['currentTab' => $currentTab ?? 'general']); ?>
+
     <?php settings_errors(); ?>
 
     <form method="post" action="options.php">
