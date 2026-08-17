@@ -20,6 +20,7 @@ class MdPagesOutput
         add_action('init', [$this, 'addRewriteEndpoints']);
         add_filter('query_vars', [$this, 'addQueryVars']);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
+        add_action('wp_head', [$this, 'renderAlternateLink']);
     }
 
     /**
@@ -96,6 +97,40 @@ class MdPagesOutput
         }
 
         $this->renderMdPage($post);
+    }
+
+    /**
+     * Output a <link rel="alternate"> tag pointing to the Markdown
+     * version of the current page when available.
+     */
+    public function renderAlternateLink(): void
+    {
+        if (!is_singular()) {
+            return;
+        }
+
+        $post = get_queried_object();
+
+        if (!$post instanceof \WP_Post) {
+            return;
+        }
+
+        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
+
+        if (!in_array($post->post_type, $enabledTypes, true)) {
+            return;
+        }
+
+        $permalink = (string) get_permalink($post->ID);
+        $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
+
+        if ($suffixType === 'query_var') {
+            $mdUrl = add_query_arg('md', '', $permalink);
+        } else {
+            $mdUrl = user_trailingslashit(rtrim($permalink, '/') . '/md');
+        }
+
+        echo '<link rel="alternate" type="text/markdown" href="' . esc_url($mdUrl) . '" />' . "\n";
     }
 
     /**
