@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IZMDPages\Core\MdPages;
 
+use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Core\Converter\HtmlToMarkdownConverter;
 
@@ -141,6 +142,14 @@ class MdPagesOutput
     public function renderMdPage(\WP_Post $post): void
     {
         header('Content-Type: text/markdown; charset=utf-8');
+
+        $isManual = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_ENABLED, true);
+
+        if ($isManual) {
+            $manualContent = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
+            echo $manualContent;
+            exit;
+        }
 
         $title = (string) get_the_title($post);
         $htmlContent = (string) apply_filters('the_content', $post->post_content);

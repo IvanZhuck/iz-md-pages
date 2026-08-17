@@ -28,6 +28,26 @@ class MdPageMetaBox
     public const NONCE_NAME = 'iz_md_meta_box_nonce';
 
     /**
+     * Post meta key for enabling manual Markdown content.
+     */
+    public const META_KEY_MANUAL_ENABLED = '_iz_md_manual_enabled';
+
+    /**
+     * Post meta key for manual Markdown content.
+     */
+    public const META_KEY_MANUAL_CONTENT = '_iz_md_manual_content';
+
+    /**
+     * Form field name for manual mode checkbox.
+     */
+    public const FIELD_MANUAL_ENABLED = 'iz_md_manual_enabled';
+
+    /**
+     * Form field name for manual content textarea.
+     */
+    public const FIELD_MANUAL_CONTENT = 'iz_md_manual_content';
+
+    /**
      * Template renderer instance.
      */
     private TemplateRenderer $templateRenderer;
@@ -82,10 +102,17 @@ class MdPageMetaBox
      */
     public function renderMetaBox(\WP_Post $post, array $args = []): void
     {
+        $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
+        $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
+
         $data = [
             'post' => $post,
             'nonceAction' => self::NONCE_ACTION,
             'nonceName' => self::NONCE_NAME,
+            'fieldManualEnabled' => self::FIELD_MANUAL_ENABLED,
+            'fieldManualContent' => self::FIELD_MANUAL_CONTENT,
+            'isManual' => $isManual,
+            'manualContent' => $manualContent,
         ];
 
         $this->templateRenderer->render('admin/meta-boxes/md-page-meta-box.php', $data);
@@ -111,10 +138,22 @@ class MdPageMetaBox
             return;
         }
 
+        if (wp_is_post_revision($postId)) {
+            return;
+        }
+
         if (!current_user_can('edit_post', $postId)) {
             return;
         }
 
-        // Logic for saving custom meta fields will be placed here.
+        if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
+            update_post_meta($postId, self::META_KEY_MANUAL_ENABLED, '1');
+        } else {
+            delete_post_meta($postId, self::META_KEY_MANUAL_ENABLED);
+        }
+
+        if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
+            update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
+        }
     }
 }

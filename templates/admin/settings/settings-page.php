@@ -12,6 +12,11 @@ declare(strict_types=1);
  * @var string                       $optionKey
  * @var string                       $optionSuffixKey
  */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 ?>
 <div class="wrap">
     <h1><?php echo esc_html__('IZ MD Settings', 'iz-md-pages'); ?></h1>
