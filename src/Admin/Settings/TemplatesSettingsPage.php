@@ -151,6 +151,7 @@ class TemplatesSettingsPage
             'templates' => (array) get_option(self::OPTION_KEY, []),
             'defaultTemplate' => self::DEFAULT_TEMPLATE,
             'supportedPlaceholders' => PlaceholderRenderer::getSupportedPlaceholders(),
+            'groupedPlaceholders' => PlaceholderRenderer::getGroupedPlaceholders(),
         ];
 
         $this->templateRenderer->render('admin/settings/templates-page.php', $data);
