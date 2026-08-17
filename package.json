@@ -1,0 +1,36 @@
+{
+  "name": "iz-md-pages",
+  "version": "1.0.0",
+  "author": "Ivan Zhuck",
+  "license": "GPLv3",
+  "scripts": {
+    "build-scripts": "webpack --mode production",
+    "build-styles": "sass --no-source-map --style=compressed assets/src/scss:assets/build/scss",
+    "eslint": "./node_modules/.bin/eslint",
+    "eslint-fix": "./node_modules/.bin/eslint --fix",
+    "stylelint": "node_modules/stylelint/bin/stylelint.mjs assets/src/scss/**/*.scss",
+    "stylelint-fix": "node_modules/stylelint/bin/stylelint.mjs assets/src/scss/**/*.scss --fix"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@eslint/js": "^10.0.1",
+    "babel-loader": "^10.1.1",
+    "eslint": "^10.8.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^18.3.0",
+    "eslint-plugin-promise": "^7.3.0",
+    "globals": "^17.11.0",
+    "install": "^0.13.0",
+    "postcss": "^8.5.26",
+    "sass": "^1.102.0",
+    "stylelint": "^17.14.1",
+    "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-config-standard-scss": "^17.0.0",
+    "stylelint-order": "^8.1.1",
+    "stylelint-scss": "^7.2.0",
+    "webpack": "^5.109.2",
+    "webpack-cli": "^7.2.2"
+  }
+}

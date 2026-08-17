@@ -19,6 +19,8 @@ iz-md-pages/
 ├── AGENTS.md                      # Developer guidelines (this file)
 ├── src/
 │   ├── Admin/
+│   │   ├── Assets/
+│   │   │   └── AdminAssets.php            # Administration assets controller
 │   │   ├── MetaBoxes/
 │   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller
 │   │   └── Settings/
