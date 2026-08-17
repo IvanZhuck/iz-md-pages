@@ -38,9 +38,16 @@ class HtmlToMarkdownConverter
 
         $markdown = $this->convertNode($wrapper);
 
+        $result = trim($markdown);
+
         // Normalize multiple consecutive blank lines
-        $result = preg_replace("/\n{3,}/", "\n\n", trim($markdown));
-        return is_string($result) ? $result : trim($markdown);
+        $result = (string) preg_replace("/\n{3,}/", "\n\n", $result);
+
+        // Collapse multiple consecutive spaces within each line
+        // while preserving Markdown line-break (two trailing spaces before \n)
+        $result = (string) preg_replace('/(?<=\S) {2,}(?=\S)/', ' ', $result);
+
+        return $this->stripLeadingWhitespace($result);
     }
 
     /**
@@ -123,18 +130,18 @@ class HtmlToMarkdownConverter
 
                 case 'strong':
                 case 'b':
-                    $output .= ' **' . trim($innerText) . '** ';
+                    $output .= '**' . trim($innerText) . '**';
                     break;
 
                 case 'em':
                 case 'i':
-                    $output .= ' *' . trim($innerText) . '* ';
+                    $output .= '*' . trim($innerText) . '*';
                     break;
 
                 case 'del':
                 case 's':
                 case 'strike':
-                    $output .= ' ~~' . trim($innerText) . '~~ ';
+                    $output .= '~~' . trim($innerText) . '~~';
                     break;
 
                 case 'a':
@@ -187,7 +194,7 @@ class HtmlToMarkdownConverter
                     if ($child->parentNode && strtolower($child->parentNode->nodeName) === 'pre') {
                         $output .= $innerText;
                     } else {
-                        $output .= ' `' . trim($innerText) . '` ';
+                        $output .= '`' . trim($innerText) . '`';
                     }
                     break;
 
@@ -210,6 +217,32 @@ class HtmlToMarkdownConverter
         }
 
         return $output;
+    }
+
+    /**
+     * Strip leading whitespace from each line while preserving
+     * indentation inside fenced code blocks (``` ... ```).
+     *
+     * @param string $text Markdown text to process.
+     * @return string Text with leading whitespace removed.
+     */
+    private function stripLeadingWhitespace(string $text): string
+    {
+        $lines = explode("\n", $text);
+        $inCodeBlock = false;
+        $cleaned = [];
+
+        foreach ($lines as $line) {
+            if (preg_match('/^```/', ltrim($line))) {
+                $inCodeBlock = !$inCodeBlock;
+                $cleaned[] = ltrim($line);
+                continue;
+            }
+
+            $cleaned[] = $inCodeBlock ? $line : ltrim($line);
+        }
+
+        return implode("\n", $cleaned);
     }
 
     /**
