@@ -13,6 +13,7 @@ declare(strict_types=1);
  * Text Domain: iz-md-pages
  */
 
+use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Core\MdPages\MdPagesOutput;
 
@@ -44,6 +45,9 @@ $settingsPage->init();
 
 $mdPagesOutput = new MdPagesOutput();
 $mdPagesOutput->init();
+
+$mdPageMetaBox = new MdPageMetaBox();
+$mdPageMetaBox->init();
 
 /**
  * Plugin activation hook: register rewrite endpoints and flush rewrite rules.

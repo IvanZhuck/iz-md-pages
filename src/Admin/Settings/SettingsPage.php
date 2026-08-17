@@ -169,6 +169,6 @@ class SettingsPage
             'optionSuffixKey' => self::OPTION_SUFFIX_KEY,
         ];
 
-        $this->templateRenderer->render('admin/settings-page.php', $data);
+        $this->templateRenderer->render('admin/settings/settings-page.php', $data);
     }
 }

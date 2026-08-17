@@ -30,7 +30,10 @@ iz-md-pages/
 │           └── TemplateRenderer.php         # Template rendering engine
 └── templates/
     └── admin/
-        └── settings-page.php      # Admin settings HTML view
+        ├── meta-boxes/
+        │   └── md-page-meta-box.php # Meta box HTML view
+        └── settings/
+            └── settings-page.php    # Admin settings HTML view
 ```
 
 ---
@@ -97,7 +100,7 @@ All code MUST strictly adhere to the **PSR-12 Extended Coding Style**:
    - Templates MUST be rendered exclusively using `IZMDPages\Core\Template\TemplateRenderer`.
    - Example usage:
      ```php
-     $this->templateRenderer->render('admin/settings-page.php', $data);
+     $this->templateRenderer->render('admin/settings/settings-page.php', $data);
      ```
 
 ---
