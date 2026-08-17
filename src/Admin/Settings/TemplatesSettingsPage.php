@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace IZMDPages\Admin\Settings;
 
 use IZMDPages\Core\Placeholder\PlaceholderRenderer;
-use IZMDPages\Core\Template\TemplateRenderer;
 
 /**
  * Handles administration templates settings page for IZ MD Pages.
  */
-class TemplatesSettingsPage
+class TemplatesSettingsPage extends Settings
 {
     /**
      * Option key for post type templates in wp_options table.
@@ -31,30 +30,6 @@ class TemplatesSettingsPage
      * Default template string used when no specific template is defined.
      */
     public const DEFAULT_TEMPLATE = "# {%post_title%}\n\n{%post_content%}";
-
-    /**
-     * Template renderer instance.
-     */
-    private TemplateRenderer $templateRenderer;
-
-    /**
-     * TemplatesSettingsPage constructor.
-     *
-     * @param TemplateRenderer|null $templateRenderer Template renderer instance.
-     */
-    public function __construct(?TemplateRenderer $templateRenderer = null)
-    {
-        $this->templateRenderer = $templateRenderer ?? new TemplateRenderer();
-    }
-
-    /**
-     * Register WordPress hooks.
-     */
-    public function init(): void
-    {
-        add_action('admin_menu', [$this, 'addSettingsPage']);
-        add_action('admin_init', [$this, 'registerSettings']);
-    }
 
     /**
      * Register settings via WordPress Settings API.
@@ -100,32 +75,12 @@ class TemplatesSettingsPage
     }
 
     /**
-     * Retrieve all target public post types (standard and custom).
-     *
-     * @return array<string, \WP_Post_Type> Map of post type names to post type objects.
-     */
-    public function getTargetPostTypes(): array
-    {
-        $postTypes = get_post_types(
-            [
-                'public' => true,
-            ],
-            'objects'
-        );
-
-        // Exclude media attachments
-        unset($postTypes['attachment']);
-
-        return $postTypes;
-    }
-
-    /**
      * Add sub-menu item under IZ MD Pages menu.
      */
     public function addSettingsPage(): void
     {
         add_submenu_page(
-            SettingsPage::PAGE_SLUG,
+            self::PARENT_SLUG,
             __('IZ MD Templates', 'iz-md-pages'),
             __('Templates', 'iz-md-pages'),
             'manage_options',

@@ -25,6 +25,7 @@ iz-md-pages/
 │   │   ├── MetaBoxes/
 │   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller
 │   │   └── Settings/
+│   │       ├── Settings.php               # Base settings controller
 │   │       ├── SettingsPage.php           # General settings controller
 │   │       └── TemplatesSettingsPage.php  # Templates settings controller
 │   └── Core/

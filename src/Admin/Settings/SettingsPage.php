@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Settings;
 
-use IZMDPages\Core\Template\TemplateRenderer;
-
 /**
  * Handles administration settings page for IZ MD Pages.
  */
-class SettingsPage
+class SettingsPage extends Settings
 {
     /**
      * Option key for enabled post types in wp_options table.
@@ -32,27 +30,11 @@ class SettingsPage
     public const SETTINGS_GROUP = 'iz_md_settings_group';
 
     /**
-     * Template renderer instance.
-     */
-    private TemplateRenderer $templateRenderer;
-
-    /**
-     * SettingsPage constructor.
-     *
-     * @param TemplateRenderer|null $templateRenderer Template renderer instance.
-     */
-    public function __construct()
-    {
-        $this->templateRenderer = new TemplateRenderer();
-    }
-
-    /**
      * Register WordPress hooks.
      */
     public function init(): void
     {
-        add_action('admin_menu', [$this, 'addSettingsPage']);
-        add_action('admin_init', [$this, 'registerSettings']);
+        parent::init();
         add_action('update_option_' . self::OPTION_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_SUFFIX_KEY, 'flush_rewrite_rules');
     }
@@ -123,26 +105,6 @@ class SettingsPage
     }
 
     /**
-     * Retrieve all target public post types (standard and custom).
-     *
-     * @return array<string, \WP_Post_Type> Map of post type names to post type objects.
-     */
-    public function getTargetPostTypes(): array
-    {
-        $postTypes = get_post_types(
-            [
-                'public' => true,
-            ],
-            'objects'
-        );
-
-        // Exclude media attachments
-        unset($postTypes['attachment']);
-
-        return $postTypes;
-    }
-
-    /**
      * Add top-level menu page and sub-menu item in WordPress admin menu.
      */
     public function addSettingsPage(): void
@@ -153,7 +115,7 @@ class SettingsPage
             'manage_options',
             self::PAGE_SLUG,
             [$this, 'renderSettingsPage'],
-            'dashicons-media-document'
+            self::MENU_ICON
         );
 
         add_submenu_page(
