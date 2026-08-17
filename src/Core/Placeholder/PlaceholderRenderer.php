@@ -177,85 +177,6 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render a post field value and pass it through an extensible filter hook.
-     *
-     * @param string   $fieldName Post field name (e.g. 'post_title', 'post_name', 'ID', 'permalink').
-     * @param \WP_Post $post      Current post object.
-     * @return string Rendered post field value.
-     */
-    public function renderPostField(string $fieldName, \WP_Post $post): string
-    {
-        switch ($fieldName) {
-            case 'post_title':
-                $value = trim((string) get_the_title($post));
-                break;
-
-            case 'post_date':
-                $value = (string) get_the_date('', $post);
-                break;
-
-            case 'post_time':
-                $value = (string) get_the_time('', $post);
-                break;
-
-            case 'post_modified':
-                $value = (string) get_the_modified_date('', $post);
-                break;
-
-            case 'permalink':
-                $value = (string) get_permalink($post->ID);
-                break;
-
-            case 'thumbnail_url':
-                $url = get_the_post_thumbnail_url($post, 'full');
-                $value = is_string($url) ? $url : '';
-                break;
-
-            default:
-                $value = isset($post->{$fieldName}) && is_scalar($post->{$fieldName})
-                    ? (string) $post->{$fieldName}
-                    : '';
-                break;
-        }
-
-        /**
-         * Filter to override a rendered post field value.
-         *
-         * @param string   $value     Rendered field value.
-         * @param string   $fieldName Post field identifier.
-         * @param \WP_Post $post      Current post object.
-         */
-        return (string) apply_filters('iz_md_render_post_field', $value, $fieldName, $post);
-    }
-
-    /**
-     * Render an author field value and pass it through an extensible filter hook.
-     *
-     * @param string   $fieldName Author field name (e.g. 'display_name', 'user_email', 'author_url').
-     * @param \WP_Post $post      Current post object.
-     * @return string Rendered author field value.
-     */
-    public function renderAuthorField(string $fieldName, \WP_Post $post): string
-    {
-        $authorId = (int) $post->post_author;
-
-        if ($fieldName === 'author_url') {
-            $value = (string) get_author_posts_url($authorId);
-        } else {
-            $value = (string) get_the_author_meta($fieldName, $authorId);
-        }
-
-        /**
-         * Filter to override a rendered author field value.
-         *
-         * @param string   $value     Rendered author field value.
-         * @param string   $fieldName Author field identifier.
-         * @param \WP_Post $post      Current post object.
-         */
-        return (string) apply_filters('iz_md_render_author_field', $value, $fieldName, $post);
-    }
-
-    /**
      * Retrieve list of supported placeholder tags grouped by category.
      *
      * @return array<string, array<string, string>> Grouped map of placeholder tags and descriptions.
@@ -311,12 +232,91 @@ class PlaceholderRenderer
     }
 
     /**
+     * Render a post field value and pass it through an extensible filter hook.
+     *
+     * @param string   $fieldName Post field name (e.g. 'post_title', 'post_name', 'ID', 'permalink').
+     * @param \WP_Post $post      Current post object.
+     * @return string Rendered post field value.
+     */
+    private function renderPostField(string $fieldName, \WP_Post $post): string
+    {
+        switch ($fieldName) {
+            case 'post_title':
+                $value = trim((string) get_the_title($post));
+                break;
+
+            case 'post_date':
+                $value = (string) get_the_date('', $post);
+                break;
+
+            case 'post_time':
+                $value = (string) get_the_time('', $post);
+                break;
+
+            case 'post_modified':
+                $value = (string) get_the_modified_date('', $post);
+                break;
+
+            case 'permalink':
+                $value = (string) get_permalink($post->ID);
+                break;
+
+            case 'thumbnail_url':
+                $url = get_the_post_thumbnail_url($post, 'full');
+                $value = is_string($url) ? $url : '';
+                break;
+
+            default:
+                $value = isset($post->{$fieldName}) && is_scalar($post->{$fieldName})
+                    ? (string) $post->{$fieldName}
+                    : '';
+                break;
+        }
+
+        /**
+         * Filter to override a rendered post field value.
+         *
+         * @param string   $value     Rendered field value.
+         * @param string   $fieldName Post field identifier.
+         * @param \WP_Post $post      Current post object.
+         */
+        return (string) apply_filters('iz_md_render_post_field', $value, $fieldName, $post);
+    }
+
+    /**
+     * Render an author field value and pass it through an extensible filter hook.
+     *
+     * @param string   $fieldName Author field name (e.g. 'display_name', 'user_email', 'author_url').
+     * @param \WP_Post $post      Current post object.
+     * @return string Rendered author field value.
+     */
+    private function renderAuthorField(string $fieldName, \WP_Post $post): string
+    {
+        $authorId = (int) $post->post_author;
+
+        if ($fieldName === 'author_url') {
+            $value = (string) get_author_posts_url($authorId);
+        } else {
+            $value = (string) get_the_author_meta($fieldName, $authorId);
+        }
+
+        /**
+         * Filter to override a rendered author field value.
+         *
+         * @param string   $value     Rendered author field value.
+         * @param string   $fieldName Author field identifier.
+         * @param \WP_Post $post      Current post object.
+         */
+        return (string) apply_filters('iz_md_render_author_field', $value, $fieldName, $post);
+    }
+
+    /**
      * Render post content placeholder value as Markdown.
      *
      * @param \WP_Post $post Current post object.
      * @return string Post content converted to Markdown.
      */
-    protected function renderPostContent(\WP_Post $post): string
+    private function renderPostContent(\WP_Post $post): string
     {
         $htmlContent = (string) apply_filters('the_content', $post->post_content);
         $htmlContent = (string) apply_filters('iz_md_placeholder_render_post_content', $htmlContent, $post);
@@ -329,7 +329,7 @@ class PlaceholderRenderer
      * @param \WP_Post $post Current post object.
      * @return string Post excerpt converted to Markdown.
      */
-    protected function renderPostExcerpt(\WP_Post $post): string
+    private function renderPostExcerpt(\WP_Post $post): string
     {
         $excerpt = (string) get_the_excerpt($post);
         $excerpt = (string) apply_filters('iz_md_placeholder_render_post_excerpt', $excerpt, $post);
@@ -348,7 +348,7 @@ class PlaceholderRenderer
      * @param string|null $url  Optional featured image URL.
      * @return string Markdown image snippet or empty string.
      */
-    protected function renderFeaturedImageMarkdown(\WP_Post $post, ?string $url = null): string
+    private function renderFeaturedImageMarkdown(\WP_Post $post, ?string $url = null): string
     {
         $imageUrl = $url ?? $this->renderPostField('thumbnail_url', $post);
 
@@ -373,7 +373,7 @@ class PlaceholderRenderer
      * @param string   $separator    Separator string (defaults to ', ').
      * @return string Separated list of term names.
      */
-    public function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', '): string
+    private function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', '): string
     {
         if (!taxonomy_exists($taxonomyName)) {
             return '';
@@ -407,7 +407,7 @@ class PlaceholderRenderer
      * @param string $separator Raw separator string.
      * @return string Decoded separator string with control characters.
      */
-    protected function parseSeparator(string $separator): string
+    private function parseSeparator(string $separator): string
     {
         return strtr($separator, [
             '\\n' => "\n",

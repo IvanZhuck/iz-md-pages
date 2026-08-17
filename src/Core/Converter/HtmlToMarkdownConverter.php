@@ -63,7 +63,7 @@ class HtmlToMarkdownConverter
      * @param \DOMNode $node DOM node to process.
      * @return string Converted Markdown snippet.
      */
-    protected function convertNode(\DOMNode $node): string
+    private function convertNode(\DOMNode $node): string
     {
         $output = '';
 

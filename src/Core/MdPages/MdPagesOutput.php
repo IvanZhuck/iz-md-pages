@@ -89,6 +89,17 @@ class MdPagesOutput
             return;
         }
 
+        $this->maybeRedirect($post);
+        $this->renderMdPage($post);
+    }
+
+    /**
+     * Redirect to the configured canonical Markdown URL format if needed.
+     *
+     * @param \WP_Post $post Post object.
+     */
+    private function maybeRedirect(\WP_Post $post): void
+    {
         $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
 
         if (!in_array($post->post_type, $enabledTypes, true)) {
@@ -112,8 +123,6 @@ class MdPagesOutput
             wp_safe_redirect($targetUrl, 301);
             exit;
         }
-
-        $this->renderMdPage($post);
     }
 
     /**
@@ -155,7 +164,7 @@ class MdPagesOutput
      *
      * @param \WP_Post $post Post object to render.
      */
-    public function renderMdPage(\WP_Post $post): void
+    private function renderMdPage(\WP_Post $post): void
     {
         header('Content-Type: text/markdown; charset=utf-8');
 
