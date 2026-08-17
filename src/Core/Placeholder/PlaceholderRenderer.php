@@ -99,6 +99,7 @@ class PlaceholderRenderer
     protected function renderPostTitle(\WP_Post $post): string
     {
         $title = get_the_title($post);
+        $title = (string) apply_filters('iz_md_placeholder_render_post_title', $title);
         return trim((string) $title);
     }
 
@@ -111,6 +112,7 @@ class PlaceholderRenderer
     protected function renderPostContent(\WP_Post $post): string
     {
         $htmlContent = (string) apply_filters('the_content', $post->post_content);
+        $htmlContent = (string) apply_filters('iz_md_placeholder_render_post_content', $htmlContent);
         return $this->converter->convert($htmlContent);
     }
 }
