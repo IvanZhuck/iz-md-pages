@@ -37,7 +37,7 @@ iz-md-pages/
 
 ## 2. PHP Compatibility Requirements
 
-- **PHP Version Target:** **PHP >= 8.0**
+- **PHP Version Target:** **PHP >= 7.4**
 - **Strict Types:** EVERY PHP file MUST declare strict types as the very first statement:
   ```php
   <?php
