@@ -11,6 +11,7 @@
   <!-- Ignore files and directories -->
   <exclude-pattern>vendor/*</exclude-pattern>
   <exclude-pattern>node_modules/*</exclude-pattern>
+  <exclude-pattern>tests/*</exclude-pattern>
 
   <!-- Show colors in console -->
   <arg value="-colors"/>
