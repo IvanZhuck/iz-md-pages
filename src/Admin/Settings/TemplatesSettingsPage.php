@@ -32,6 +32,20 @@ class TemplatesSettingsPage extends Settings
     public const DEFAULT_TEMPLATE = "# {%post_title%}\n\n{%post_content%}";
 
     /**
+     * Get the template string configured for a specific post type or default template.
+     *
+     * @param string $postType Post type slug.
+     * @return string Markdown template string.
+     */
+    public static function getTemplateForPostType(string $postType): string
+    {
+        $templates = (array) get_option(self::OPTION_KEY, []);
+        return isset($templates[$postType]) && is_string($templates[$postType]) && $templates[$postType] !== ''
+            ? $templates[$postType]
+            : self::DEFAULT_TEMPLATE;
+    }
+
+    /**
      * Register settings via WordPress Settings API.
      */
     public function registerSettings(): void

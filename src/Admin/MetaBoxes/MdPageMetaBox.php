@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IZMDPages\Admin\MetaBoxes;
 
 use IZMDPages\Admin\Settings\SettingsPage;
+use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 use IZMDPages\Core\Template\TemplateRenderer;
 
 /**
@@ -116,6 +117,10 @@ class MdPageMetaBox
         $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
         $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
 
+        if (!$isManual) {
+            $manualContent = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
+        }
+
         $data = [
             'post' => $post,
             'nonceAction' => self::NONCE_ACTION,
@@ -167,12 +172,12 @@ class MdPageMetaBox
 
         if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
             update_post_meta($postId, self::META_KEY_MANUAL_ENABLED, '1');
+            if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
+                update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
+            }
         } else {
             delete_post_meta($postId, self::META_KEY_MANUAL_ENABLED);
-        }
-
-        if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
-            update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
+            delete_post_meta($postId, self::META_KEY_MANUAL_CONTENT);
         }
     }
 }

@@ -179,10 +179,7 @@ class MdPagesOutput
         if ($isManual) {
             $template = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
         } else {
-            $templates = (array) get_option(TemplatesSettingsPage::OPTION_KEY, []);
-            $template = isset($templates[$post->post_type]) && $templates[$post->post_type] !== ''
-                ? (string) $templates[$post->post_type]
-                : TemplatesSettingsPage::DEFAULT_TEMPLATE;
+            $template = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
         }
 
         echo $this->placeholderRenderer->render($template, $post);
