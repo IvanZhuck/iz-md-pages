@@ -21,6 +21,7 @@ iz-md-pages/
 │   ├── Admin/
 │   │   ├── Assets/
 │   │   │   ├── Assets.php                 # Base administration assets controller
+│   │   │   ├── MdPageMetaboxAssets.php    # Meta box assets controller
 │   │   │   └── SettingsAssets.php         # Settings assets controller
 │   │   ├── MetaBoxes/
 │   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller

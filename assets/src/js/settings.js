@@ -6,18 +6,13 @@ import InfoBlockToggle from './components/iz-md-info-block.js';
 class SettingsApp {
   /**
    * Initialize all settings page modules.
-   *
-   * @return {InfoBlockToggle[]}
    */
   static init () {
     const infoBlockElements = document.querySelectorAll('.iz-md-info-block');
-    const instances = [];
 
     infoBlockElements.forEach((element) => {
-      instances.push(new InfoBlockToggle(element));
+      new InfoBlockToggle(element);
     });
-
-    return instances;
   }
 }
 

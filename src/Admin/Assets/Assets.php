@@ -101,4 +101,26 @@ abstract class Assets
             || strpos($screenId, SettingsPage::PAGE_SLUG) !== false
             || strpos($screenId, TemplatesSettingsPage::PAGE_SLUG) !== false;
     }
+
+    /**
+     * Determine if current admin screen displays the Markdown Page meta box.
+     *
+     * @param string $hook Current admin page hook suffix.
+     * @return bool True if current screen has the meta box enabled, false otherwise.
+     */
+    protected function isMetaBoxScreen(string $hook): bool
+    {
+        if (!in_array($hook, ['post.php', 'post-new.php'], true)) {
+            return false;
+        }
+
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        if ($screen === null || empty($screen->post_type)) {
+            return false;
+        }
+
+        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
+
+        return in_array($screen->post_type, $enabledTypes, true);
+    }
 }

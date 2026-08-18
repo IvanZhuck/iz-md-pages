@@ -13,6 +13,7 @@
 
 declare(strict_types=1);
 
+use IZMDPages\Admin\Assets\MdPageMetaboxAssets;
 use IZMDPages\Admin\Assets\SettingsAssets;
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
 use IZMDPages\Admin\Settings\SettingsPage;
@@ -44,6 +45,9 @@ spl_autoload_register(function (string $class): void {
  */
 $adminAssets = new SettingsAssets();
 $adminAssets->init();
+
+$metaBoxAssets = new MdPageMetaboxAssets();
+$metaBoxAssets->init();
 
 $settingsPage = new SettingsPage();
 $settingsPage->init();
