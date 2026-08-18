@@ -1,6 +1,6 @@
 @use '../vars' as *;
 
-.iz-md-placeholders-reference {
+.iz-md-info-block {
     margin-top: 15px;
     margin-bottom: 20px;
     padding: 12px 18px;
@@ -9,7 +9,7 @@
     border-radius: 4px;
     box-shadow: 0 1px 1px $color-shadow;
 
-    .iz-md-placeholders-header {
+    .iz-md-info-block-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -24,7 +24,7 @@
             line-height: 1.4;
         }
 
-        .iz-md-placeholders-toggle {
+        .iz-md-info-block-toggle {
             display: inline-flex;
             gap: 4px;
             align-items: center;
@@ -37,7 +37,7 @@
             border: none;
             cursor: pointer;
 
-            .iz-md-placeholders-toggle-text {
+            .iz-md-info-block-toggle-text {
                 color: $color-primary;
                 font-weight: 500;
                 font-size: 12px;
@@ -55,7 +55,7 @@
             &:focus {
                 outline: none;
 
-                .iz-md-placeholders-toggle-text,
+                .iz-md-info-block-toggle-text,
                 .dashicons {
                     color: $color-primary-hover;
                 }
@@ -63,16 +63,16 @@
         }
     }
 
-    .iz-md-placeholders-body {
+    .iz-md-info-block-body {
         margin-top: 8px;
     }
 
     &.is-collapsed {
-        .iz-md-placeholders-toggle .dashicons {
+        .iz-md-info-block-toggle .dashicons {
             transform: rotate(180deg);
         }
 
-        .iz-md-placeholders-body {
+        .iz-md-info-block-body {
             display: none;
         }
     }

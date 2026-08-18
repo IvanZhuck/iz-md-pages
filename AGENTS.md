@@ -39,6 +39,8 @@ iz-md-pages/
 │           └── TemplateRenderer.php        # Template rendering engine
 └── templates/
     └── admin/
+        ├── info/ 
+        │   └──placeholders-reference.php  # Placeholders reference HTML view
         ├── meta-boxes/
         │   └── md-page-meta-box.php       # Meta box HTML view
         ├── nav/
