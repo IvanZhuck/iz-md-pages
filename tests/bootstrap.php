@@ -102,10 +102,12 @@ if (!class_exists('WP_Screen')) {
     class WP_Screen
     {
         public string $id = '';
+        public string $post_type = '';
 
-        public function __construct(string $id = '')
+        public function __construct(string $id = '', string $post_type = '')
         {
             $this->id = $id;
+            $this->post_type = $post_type;
         }
     }
 }

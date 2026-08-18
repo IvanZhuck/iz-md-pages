@@ -38,6 +38,11 @@ class TestableAssets extends Assets
     {
         return $this->isPluginPage($hook);
     }
+
+    public function testIsMetaBoxScreen(string $hook): bool
+    {
+        return $this->isMetaBoxScreen($hook);
+    }
 }
 
 /**
@@ -52,10 +57,11 @@ class AssetsTest extends TestCase
         parent::setUp();
         $this->assets = new TestableAssets();
 
-        global $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
+        global $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen, $wp_options;
         $wp_enqueued_styles = [];
         $wp_enqueued_scripts = [];
         $wp_current_screen = null;
+        $wp_options = [];
         unset($_GET['page']);
     }
 
@@ -125,5 +131,66 @@ class AssetsTest extends TestCase
         $this->assertTrue($this->assets->testIsPluginPage('toplevel_page_' . SettingsPage::PAGE_SLUG));
         $this->assertTrue($this->assets->testIsPluginPage('iz-md-pages_page_' . TemplatesSettingsPage::PAGE_SLUG));
         $this->assertFalse($this->assets->testIsPluginPage('index.php'));
+    }
+
+    public function testIsMetaBoxScreenReturnsFalseForNonPostHooks(): void
+    {
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('index.php'));
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('edit.php'));
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('options-general.php'));
+    }
+
+    public function testIsMetaBoxScreenReturnsFalseWhenCurrentScreenIsNull(): void
+    {
+        global $wp_current_screen;
+        $wp_current_screen = null;
+
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post-new.php'));
+    }
+
+    public function testIsMetaBoxScreenReturnsFalseWhenScreenPostTypeIsEmpty(): void
+    {
+        global $wp_current_screen;
+        $wp_current_screen = new \WP_Screen('post', '');
+
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post-new.php'));
+    }
+
+    public function testIsMetaBoxScreenReturnsTrueForDefaultEnabledPostTypes(): void
+    {
+        global $wp_current_screen;
+
+        $wp_current_screen = new \WP_Screen('post', 'post');
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post-new.php'));
+
+        $wp_current_screen = new \WP_Screen('page', 'page');
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post-new.php'));
+    }
+
+    public function testIsMetaBoxScreenReturnsFalseForDisabledPostTypes(): void
+    {
+        global $wp_current_screen;
+
+        $wp_current_screen = new \WP_Screen('custom_type', 'custom_type');
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post-new.php'));
+    }
+
+    public function testIsMetaBoxScreenRespectsCustomEnabledPostTypesOption(): void
+    {
+        global $wp_current_screen;
+
+        update_option(SettingsPage::OPTION_KEY, ['custom_type']);
+
+        $wp_current_screen = new \WP_Screen('custom_type', 'custom_type');
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post.php'));
+        $this->assertTrue($this->assets->testIsMetaBoxScreen('post-new.php'));
+
+        $wp_current_screen = new \WP_Screen('post', 'post');
+        $this->assertFalse($this->assets->testIsMetaBoxScreen('post.php'));
     }
 }
