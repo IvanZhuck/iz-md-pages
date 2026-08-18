@@ -72,11 +72,14 @@ class MdPagesOutput
         }
 
         $post = null;
+        $queried = get_queried_object();
 
-        if (is_singular()) {
-            $queried = get_queried_object();
-            if ($queried instanceof \WP_Post) {
-                $post = $queried;
+        if (is_singular() && $queried instanceof \WP_Post) {
+            $post = $queried;
+        } elseif ($queried instanceof \WP_Post) {
+            $blogHomePageId = (int) get_option('page_for_posts');
+            if ($queried->ID === $blogHomePageId){
+                $post = get_post($blogHomePageId);
             }
         } elseif (get_option('show_on_front') === 'page') {
             $frontPageId = (int) get_option('page_on_front');
