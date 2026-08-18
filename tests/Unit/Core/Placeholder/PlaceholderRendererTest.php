@@ -381,11 +381,12 @@ class PlaceholderRendererTest extends TestCase
             'bullets' => ['Item 1', 'Item 2', 'Item 3'],
         ];
 
-        $template = "List Before:\n{%meta:bullets:\\n* :before%}\n\nList Leading:\n{%meta:bullets:\\n- :leading%}";
+        $template = "List Before:\n{%meta:bullets:\\n* :before%}\n\nList Leading:\n{%meta:bullets:\\n- :leading%}\n\nList Prefix:\n{%meta:bullets:\\n> :prefix%}";
         $result = $this->renderer->render($template, $post);
 
         $this->assertStringContainsString("List Before:\n\n* Item 1\n* Item 2\n* Item 3", $result);
         $this->assertStringContainsString("List Leading:\n\n- Item 1\n- Item 2\n- Item 3", $result);
+        $this->assertStringContainsString("List Prefix:\n\n> Item 1\n> Item 2\n> Item 3", $result);
     }
 
     public function testRenderCategoriesAndTagsWithLeadingSeparator(): void
@@ -402,11 +403,12 @@ class PlaceholderRendererTest extends TestCase
             (object) ['name' => 'v2'],
         ];
 
-        $template = "Categories List:\n{%categories:\\n* :before%}\n\nTags Hash:\n{%tags: #:before%}";
+        $template = "Categories List:\n{%categories:\\n* :before%}\n\nTags Hash:\n{%tags: #:leading%}\n\nTags Hash:\n{%tags: -:prefix%}";
         $result = $this->renderer->render($template, $post);
 
         $this->assertStringContainsString("Categories List:\n\n* News\n* Updates", $result);
         $this->assertStringContainsString("Tags Hash:\n #release #v2", $result);
+        $this->assertStringContainsString("Tags Hash:\n -release -v2", $result);
     }
 
     public function testRenderHandlesNonExistentOrEmptyPostMeta(): void

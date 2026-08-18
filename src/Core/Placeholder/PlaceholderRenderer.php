@@ -134,7 +134,7 @@ class PlaceholderRenderer
     private function replaceCategoryPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
+            '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
             function (array $matches) use ($post): string {
                 [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
                 return $this->renderTaxonomyTerms($post, 'category', $separator, $leading);
@@ -153,7 +153,7 @@ class PlaceholderRenderer
     private function replaceTagPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
+            '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
             function (array $matches) use ($post): string {
                 [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
                 return $this->renderTaxonomyTerms($post, 'post_tag', $separator, $leading);
@@ -172,7 +172,7 @@ class PlaceholderRenderer
     private function replaceTaxonomyPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
+            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
                 [$separator, $leading] = $this->parseSeparatorAndLeading($matches[2] ?? '', $matches[3] ?? '');
@@ -192,7 +192,7 @@ class PlaceholderRenderer
     private function replacePostMetaPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
+            '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
             function (array $matches) use ($post): string {
                 $metaKey = $matches[1];
                 [$separator, $leading] = $this->parseSeparatorAndLeading($matches[2] ?? '', $matches[3] ?? '');
@@ -778,6 +778,6 @@ class PlaceholderRenderer
     private function isLeadingFlag(string $flag): bool
     {
         $normalized = strtolower(trim($flag));
-        return in_array($normalized, ['1', 'true', 'before', 'leading', 'prefix', '+', 'yes'], true);
+        return in_array($normalized, ['before', 'leading', 'prefix'], true);
     }
 }

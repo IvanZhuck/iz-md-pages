@@ -64,8 +64,8 @@ if (!defined('ABSPATH')) {
                 <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
                     <li style="margin-bottom: 2px;">
                         <?php esc_html_e('To show the separator before the first element (e.g. for complete Markdown lists), append ', 'iz-md-pages'); ?>
-                        <code>:before</code> (<?php esc_html_e('or', 'iz-md-pages'); ?> <code>:leading</code> / <code>:1</code>):<br>
-                        <code>{%categories:\\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\\n- :leading%}</code>, <code>{%meta:features:\\n* :before%}</code>.
+                        <code>:before</code> (<?php esc_html_e('or', 'iz-md-pages'); ?> <code>:leading</code> / <code>:prefix</code>):<br>
+                        <code>{%categories:\\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\\n- :leading%}</code>, <code>{%meta:features:\\n* :prefix%}</code>.
                     </li>
                 </ul>
 
