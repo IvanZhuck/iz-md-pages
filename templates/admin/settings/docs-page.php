@@ -19,6 +19,7 @@ if (!defined('ABSPATH')) {
 
     <?php $this->render('admin/nav/main-menu.php', ['currentTab' => $currentTab ?? 'docs']); ?>
 
+    <?php $this->render('admin/info/overview.php'); ?>
     <?php $this->render('admin/info/placeholders-reference.php', ['groupedPlaceholders' => $groupedPlaceholders]); ?>
     <?php $this->render('admin/info/markdown-reference.php'); ?>
     <?php $this->render('admin/info/hooks-reference.php'); ?>

@@ -45,6 +45,7 @@ iz-md-pages/
         ├── info/ 
         │   ├── hooks-reference.php        # Developer hooks & filters reference HTML view
         │   ├── markdown-reference.php     # Markdown syntax guide HTML view
+        │   ├── overview.php               # Plugin overview & features HTML view
         │   └── placeholders-reference.php  # Placeholders reference HTML view
         ├── meta-boxes/
         │   └── md-page-meta-box.php       # Meta box HTML view

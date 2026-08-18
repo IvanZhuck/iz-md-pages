@@ -1,6 +1,6 @@
 @use '../vars' as *;
 
-.iz-md-info-block {
+.iz-md-info-block, .iz-md-info-block-static {
     margin-top: 15px;
     margin-bottom: 20px;
     padding: 12px 18px;
@@ -89,5 +89,11 @@
         .iz-md-info-block-body {
             display: none;
         }
+    }
+}
+
+.iz-md-info-block-static{
+    .iz-md-info-block-header {
+        cursor: default;
     }
 }
