@@ -60,6 +60,8 @@ if (!class_exists('WP_Post')) {
         public string $post_time = '12:00:00';
         public string $post_modified = '2026-01-02 12:00:00';
         public string $post_modified_gmt = '2026-01-02 12:00:00';
+        public string $thumbnail_url = '';
+        public int $thumbnail_id = 0;
 
         public function __construct(array $data = [])
         {
@@ -82,8 +84,22 @@ if (!class_exists('WP_Query')) {
     }
 }
 
+if (!class_exists('WP_Error')) {
+    class WP_Error
+    {
+        public string $code;
+        public string $message;
+
+        public function __construct(string $code = '', string $message = '')
+        {
+            $this->code = $code;
+            $this->message = $message;
+        }
+    }
+}
+
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_query;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_query;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -94,6 +110,8 @@ $wp_redirect_calls = [];
 $wp_is_singular = true;
 $wp_queried_object = null;
 $wp_posts_storage = [];
+$wp_terms_storage = [];
+$wp_taxonomies_storage = [];
 $wp_query = new WP_Query();
 
 // WordPress Mock Functions
@@ -141,6 +159,14 @@ if (!function_exists('apply_filters')) {
             }
         }
         return $value;
+    }
+}
+
+if (!function_exists('remove_all_filters')) {
+    function remove_all_filters(string $tag): void
+    {
+        global $wp_filter;
+        unset($wp_filter[$tag]);
     }
 }
 
@@ -197,6 +223,169 @@ if (!function_exists('get_permalink')) {
     {
         $id = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
         return 'https://example.com/?p=' . $id;
+    }
+}
+
+if (!function_exists('get_the_title')) {
+    /**
+     * @param mixed $post
+     * @return string
+     */
+    function get_the_title($post = 0): string
+    {
+        if ($post instanceof \WP_Post) {
+            return $post->post_title;
+        }
+        $p = get_post($post);
+        return $p ? $p->post_title : '';
+    }
+}
+
+if (!function_exists('get_the_excerpt')) {
+    /**
+     * @param mixed $post
+     * @return string
+     */
+    function get_the_excerpt($post = null): string
+    {
+        if ($post instanceof \WP_Post) {
+            return $post->post_excerpt;
+        }
+        $p = get_post($post);
+        return $p ? $p->post_excerpt : '';
+    }
+}
+
+if (!function_exists('get_the_date')) {
+    function get_the_date(string $format = '', $post = null): string
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p ? $p->post_date : '';
+    }
+}
+
+if (!function_exists('get_the_time')) {
+    function get_the_time(string $format = '', $post = null): string
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p ? $p->post_time : '';
+    }
+}
+
+if (!function_exists('get_the_modified_date')) {
+    function get_the_modified_date(string $format = '', $post = null): string
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p ? $p->post_modified : '';
+    }
+}
+
+if (!function_exists('get_the_post_thumbnail_url')) {
+    /**
+     * @param mixed $post
+     * @param string $size
+     * @return string|false
+     */
+    function get_the_post_thumbnail_url($post = null, string $size = 'post-thumbnail')
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p && !empty($p->thumbnail_url) ? (string) $p->thumbnail_url : false;
+    }
+}
+
+if (!function_exists('get_post_thumbnail_id')) {
+    /**
+     * @param mixed $post
+     * @return int
+     */
+    function get_post_thumbnail_id($post = null): int
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p && isset($p->thumbnail_id) ? (int) $p->thumbnail_id : 0;
+    }
+}
+
+if (!function_exists('get_author_posts_url')) {
+    function get_author_posts_url(int $author_id, string $author_nicename = ''): string
+    {
+        return 'https://example.com/author/' . $author_id;
+    }
+}
+
+if (!function_exists('get_the_author_meta')) {
+    /**
+     * @param string $field
+     * @param int|false $user_id
+     * @return string
+     */
+    function get_the_author_meta(string $field = '', $user_id = false): string
+    {
+        $defaults = [
+            'display_name' => 'John Doe',
+            'user_email' => 'author@example.com',
+            'description' => 'Author biography',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'nickname' => 'johndoe',
+        ];
+        return $defaults[$field] ?? '';
+    }
+}
+
+if (!function_exists('get_object_taxonomies')) {
+    /**
+     * @param mixed $object
+     * @param string $output
+     * @return array
+     */
+    function get_object_taxonomies($object, string $output = 'names'): array
+    {
+        global $wp_taxonomies_storage;
+        $postType = is_object($object) ? ($object->post_type ?? 'post') : (string) $object;
+        return $wp_taxonomies_storage[$postType] ?? ['category', 'post_tag'];
+    }
+}
+
+if (!function_exists('taxonomy_exists')) {
+    function taxonomy_exists(string $taxonomy): bool
+    {
+        return in_array($taxonomy, ['category', 'post_tag', 'genre', 'topic'], true);
+    }
+}
+
+if (!function_exists('get_the_terms')) {
+    /**
+     * @param mixed $post
+     * @param string $taxonomy
+     * @return array|\WP_Error|false
+     */
+    function get_the_terms($post, string $taxonomy)
+    {
+        global $wp_terms_storage;
+        $id = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
+        return $wp_terms_storage[$id][$taxonomy] ?? false;
+    }
+}
+
+if (!function_exists('wp_list_pluck')) {
+    function wp_list_pluck(array $list, string $field): array
+    {
+        $result = [];
+        foreach ($list as $key => $value) {
+            if (is_object($value) && isset($value->{$field})) {
+                $result[$key] = $value->{$field};
+            } elseif (is_array($value) && isset($value[$field])) {
+                $result[$key] = $value[$field];
+            }
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('is_wp_error')) {
+    function is_wp_error($thing): bool
+    {
+        return $thing instanceof \WP_Error;
     }
 }
 
@@ -305,5 +494,12 @@ if (!function_exists('wp_parse_url')) {
     function wp_parse_url(string $url, int $component = -1)
     {
         return parse_url($url, $component);
+    }
+}
+
+if (!function_exists('__')) {
+    function __(string $text, string $domain = 'default'): string
+    {
+        return $text;
     }
 }
