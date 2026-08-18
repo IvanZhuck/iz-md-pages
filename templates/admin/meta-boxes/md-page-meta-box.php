@@ -11,12 +11,13 @@ declare(strict_types=1);
  * @var string   $fieldDisabled       Disable checkbox field name.
  * @var string   $fieldManualEnabled  Checkbox field name.
  * @var string   $fieldManualContent  Textarea field name.
- * @var bool     $isDisabled          Whether MD version is disabled for this page.
- * @var bool     $isManual            Whether manual Markdown mode is active.
- * @var string   $manualContent       Custom Markdown content.
- * @var string   $defaultTemplate     Default template for current post type.
- * @var bool     $isPublished         Whether the current post is published.
- * @var string   $mdUrl               Markdown URL for the current post.
+ * @var bool     $isDisabled           Whether MD version is disabled for this page.
+ * @var bool     $isManual             Whether manual Markdown mode is active.
+ * @var bool     $isTemplateOverridden Whether the template is overridden via filter hook.
+ * @var string   $manualContent        Custom Markdown content.
+ * @var string   $defaultTemplate      Default template for current post type.
+ * @var bool     $isPublished          Whether the current post is published.
+ * @var string   $mdUrl                Markdown URL for the current post.
  */
 
 if (!defined('ABSPATH')) {
@@ -47,6 +48,7 @@ wp_nonce_field($nonceAction, $nonceName);
                 id="<?php echo esc_attr($fieldManualEnabled); ?>"
                 value="1"
                 <?php checked($isManual); ?>
+                <?php disabled($isTemplateOverridden, true); ?>
             />
             <?php echo esc_html__('Set MD page text manually', 'iz-md-pages'); ?>
         </label>
@@ -67,20 +69,27 @@ wp_nonce_field($nonceAction, $nonceName);
                 rows="10"
                 style="width: 100%; font-family: monospace; resize: vertical;"
                 placeholder="<?php echo esc_attr__('# Enter markdown here...', 'iz-md-pages'); ?>"
+                <?php disabled($isTemplateOverridden, true); ?>
             ><?php echo esc_textarea($manualContent); ?></textarea>
         </p>
-        <p class="iz-md-manual-content-actions">
-            <button
-                type="button"
-                class="button button-secondary iz-md-reset-default-btn"
-                id="iz-md-reset-default-btn"
-                data-default-template="<?php echo esc_attr($defaultTemplate); ?>"
-                data-confirm-message="<?php echo esc_attr__('Are you sure you want to reset the content to the default template for this post type?', 'iz-md-pages'); ?>"
-            >
-                <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>
-                <?php echo esc_html__('Reset to default template', 'iz-md-pages'); ?>
-            </button>
-        </p>
+        <?php if ($isTemplateOverridden) : ?>
+            <p class="description" style="color: #d63638; margin-top: 6px;">
+                <?php esc_html_e('This template is overridden via filter hook and cannot be edited manually.', 'iz-md-pages'); ?>
+            </p>
+        <?php else : ?>
+            <p class="iz-md-manual-content-actions">
+                <button
+                    type="button"
+                    class="button button-secondary iz-md-reset-default-btn"
+                    id="iz-md-reset-default-btn"
+                    data-default-template="<?php echo esc_attr($defaultTemplate); ?>"
+                    data-confirm-message="<?php echo esc_attr__('Are you sure you want to reset the content to the default template for this post type?', 'iz-md-pages'); ?>"
+                >
+                    <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>
+                    <?php echo esc_html__('Reset to default template', 'iz-md-pages'); ?>
+                </button>
+            </p>
+        <?php endif; ?>
         <p class="description">
             <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>
         </p>

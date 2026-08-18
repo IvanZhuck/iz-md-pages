@@ -107,6 +107,17 @@ class MdPageMetaBox
     }
 
     /**
+     * Check if a template for a specific post is overridden via filter hook.
+     *
+     * @param int $postId Post ID.
+     * @return bool True if overridden via hook, false otherwise.
+     */
+    public static function isPostTemplateOverridden(int $postId): bool
+    {
+        return has_filter("iz_md_post_template_{$postId}") !== false;
+    }
+
+    /**
      * Render the meta box content via template renderer.
      *
      * @param \WP_Post $post Current post object.
@@ -115,13 +126,19 @@ class MdPageMetaBox
     public function renderMetaBox(\WP_Post $post, array $args = []): void
     {
         $isDisabled = (bool) get_post_meta($post->ID, self::META_KEY_DISABLED, true);
-        $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
-        $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
-
+        $isTemplateOverridden = self::isPostTemplateOverridden($post->ID);
         $defaultTemplate = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
 
-        if (!$isManual) {
-            $manualContent = $defaultTemplate;
+        if ($isTemplateOverridden) {
+            $isManual = true;
+            $manualContent = (string) apply_filters("iz_md_post_template_{$post->ID}", $defaultTemplate, $post);
+        } else {
+            $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
+            $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
+
+            if (!$isManual) {
+                $manualContent = $defaultTemplate;
+            }
         }
 
         $isPublished = $post->post_status === 'publish';
@@ -136,6 +153,7 @@ class MdPageMetaBox
             'fieldManualContent' => self::FIELD_MANUAL_CONTENT,
             'isDisabled' => $isDisabled,
             'isManual' => $isManual,
+            'isTemplateOverridden' => $isTemplateOverridden,
             'manualContent' => $manualContent,
             'defaultTemplate' => $defaultTemplate,
             'isPublished' => $isPublished,
@@ -179,14 +197,16 @@ class MdPageMetaBox
             delete_post_meta($postId, self::META_KEY_DISABLED);
         }
 
-        if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
-            update_post_meta($postId, self::META_KEY_MANUAL_ENABLED, '1');
-            if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
-                update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
+        if (!self::isPostTemplateOverridden($postId)) {
+            if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
+                update_post_meta($postId, self::META_KEY_MANUAL_ENABLED, '1');
+                if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
+                    update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
+                }
+            } else {
+                delete_post_meta($postId, self::META_KEY_MANUAL_ENABLED);
+                delete_post_meta($postId, self::META_KEY_MANUAL_CONTENT);
             }
-        } else {
-            delete_post_meta($postId, self::META_KEY_MANUAL_ENABLED);
-            delete_post_meta($postId, self::META_KEY_MANUAL_CONTENT);
         }
     }
 }

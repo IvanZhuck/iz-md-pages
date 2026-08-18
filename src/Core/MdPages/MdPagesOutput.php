@@ -203,7 +203,7 @@ class MdPagesOutput
 
         $isManual = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_ENABLED, true);
 
-        if ($isManual) {
+        if ($isManual && !MdPageMetaBox::isPostTemplateOverridden($post->ID)) {
             $template = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
         } else {
             $template = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
