@@ -20,7 +20,7 @@ class MdPagesOutputTest extends TestCase
         parent::setUp();
         $this->output = new MdPagesOutput();
 
-        global $wp_actions, $wp_filter, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_options, $wp_queried_object, $wp_is_singular, $wp_query;
+        global $wp_actions, $wp_filter, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_options, $wp_queried_object, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_query;
         $wp_actions = [];
         $wp_filter = [];
         $wp_rewrite_endpoints = [];
@@ -28,6 +28,8 @@ class MdPagesOutputTest extends TestCase
         $wp_options = [];
         $wp_queried_object = null;
         $wp_is_singular = true;
+        $wp_is_front_page = false;
+        $wp_is_home = false;
         $wp_query = new \WP_Query();
     }
 
@@ -154,14 +156,36 @@ class MdPagesOutputTest extends TestCase
 
     public function testHandleTemplateRedirectBailsOutWhenNoPostCanBeResolved(): void
     {
-        global $wp_query, $wp_queried_object, $wp_is_singular, $wp_redirect_calls;
+        global $wp_query, $wp_queried_object, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_redirect_calls;
 
         $wp_query = new \WP_Query(['md' => '']);
         $wp_is_singular = false;
+        $wp_is_front_page = false;
+        $wp_is_home = false;
         $wp_queried_object = null;
 
         $this->output->handleTemplateRedirect();
 
         $this->assertEmpty($wp_redirect_calls);
+    }
+
+    public function testRenderAlternateLinkDoesNotRenderWhenFrontPageIsDisabled(): void
+    {
+        global $wp_options, $wp_queried_object, $wp_is_singular, $wp_is_front_page;
+
+        $post = new \WP_Post(['ID' => 15, 'post_type' => 'page']);
+        $wp_queried_object = $post;
+        $wp_is_singular = true;
+        $wp_is_front_page = true;
+        $wp_options['show_on_front'] = 'page';
+        $wp_options['page_on_front'] = 15;
+        $wp_options[SettingsPage::OPTION_KEY] = ['page'];
+        $wp_options[SettingsPage::OPTION_FRONT_PAGE_KEY] = 0;
+
+        ob_start();
+        $this->output->renderAlternateLink();
+        $output = ob_get_clean();
+
+        $this->assertSame('', $output);
     }
 }

@@ -134,7 +134,7 @@ if (!class_exists('WP_Comment')) {
 }
 
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -143,6 +143,8 @@ $wp_post_meta = [];
 $wp_rewrite_endpoints = [];
 $wp_redirect_calls = [];
 $wp_is_singular = true;
+$wp_is_front_page = false;
+$wp_is_home = false;
 $wp_queried_object = null;
 $wp_posts_storage = [];
 $wp_terms_storage = [];
@@ -498,6 +500,22 @@ if (!function_exists('is_singular')) {
     {
         global $wp_is_singular;
         return $wp_is_singular ?? true;
+    }
+}
+
+if (!function_exists('is_front_page')) {
+    function is_front_page(): bool
+    {
+        global $wp_is_front_page;
+        return $wp_is_front_page ?? false;
+    }
+}
+
+if (!function_exists('is_home')) {
+    function is_home(): bool
+    {
+        global $wp_is_home;
+        return $wp_is_home ?? false;
     }
 }
 

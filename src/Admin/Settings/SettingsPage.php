@@ -20,6 +20,11 @@ class SettingsPage extends Settings
     public const OPTION_SUFFIX_KEY = 'iz_md_url_suffix_type';
 
     /**
+     * Option key for enabling/disabling Markdown version on the front page.
+     */
+    public const OPTION_FRONT_PAGE_KEY = 'iz_md_enable_front_page';
+
+    /**
      * Page slug for the general settings page.
      */
     public const PAGE_SLUG = 'iz-md-settings';
@@ -37,6 +42,7 @@ class SettingsPage extends Settings
         parent::init();
         add_action('update_option_' . self::OPTION_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_SUFFIX_KEY, 'flush_rewrite_rules');
+        add_action('update_option_' . self::OPTION_FRONT_PAGE_KEY, 'flush_rewrite_rules');
     }
 
     /**
@@ -63,6 +69,27 @@ class SettingsPage extends Settings
                 'default' => 'endpoint',
             ]
         );
+
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::OPTION_FRONT_PAGE_KEY,
+            [
+                'type' => 'boolean',
+                'sanitize_callback' => [$this, 'sanitizeFrontPageOption'],
+                'default' => 1,
+            ]
+        );
+    }
+
+    /**
+     * Sanitize front page enable option.
+     *
+     * @param mixed $input Value submitted from settings form.
+     * @return int 1 if enabled, 0 otherwise.
+     */
+    public function sanitizeFrontPageOption(mixed $input): int
+    {
+        return !empty($input) ? 1 : 0;
     }
 
     /**
@@ -137,14 +164,22 @@ class SettingsPage extends Settings
             return;
         }
 
+        $showOnFront = (string) get_option('show_on_front', 'posts');
+        $frontPageId = (int) get_option('page_on_front', 0);
+        $isStaticFrontPage = ($showOnFront === 'page' && $frontPageId > 0);
+
         $data = [
             'currentTab' => 'general',
             'postTypes' => $this->getTargetPostTypes(),
             'enabledTypes' => (array) get_option(self::OPTION_KEY, ['post', 'page']),
             'suffixType' => (string) get_option(self::OPTION_SUFFIX_KEY, 'endpoint'),
+            'frontPageEnabled' => (bool) get_option(self::OPTION_FRONT_PAGE_KEY, 1),
+            'isStaticFrontPage' => $isStaticFrontPage,
+            'readingSettingsUrl' => admin_url('options-reading.php'),
             'settingsGroup' => self::SETTINGS_GROUP,
             'optionKey' => self::OPTION_KEY,
             'optionSuffixKey' => self::OPTION_SUFFIX_KEY,
+            'optionFrontPageKey' => self::OPTION_FRONT_PAGE_KEY,
         ];
 
         $this->templateRenderer->render('admin/settings/settings-page.php', $data);

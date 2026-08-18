@@ -86,6 +86,10 @@ class MdPagesOutput
         }
 
         if (!$post instanceof \WP_Post) {
+            if (is_front_page() || is_home()) {
+                wp_safe_redirect(home_url('/'), 301);
+                exit;
+            }
             return;
         }
 
@@ -103,8 +107,10 @@ class MdPagesOutput
         $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
         $permalink = (string) get_permalink($post->ID);
         $isDisabled = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_DISABLED, true);
+        $isFrontPage = ($post->ID === (int) get_option('page_on_front') && get_option('show_on_front') === 'page');
+        $isFrontPageEnabled = (bool) get_option(SettingsPage::OPTION_FRONT_PAGE_KEY, true);
 
-        if (!in_array($post->post_type, $enabledTypes, true) || $isDisabled) {
+        if (($isFrontPage && !$isFrontPageEnabled) || !in_array($post->post_type, $enabledTypes, true) || $isDisabled) {
             wp_safe_redirect($permalink, 301);
             exit;
         }
@@ -156,6 +162,13 @@ class MdPagesOutput
         $post = get_queried_object();
 
         if (!$post instanceof \WP_Post) {
+            return;
+        }
+
+        $isFrontPage = ($post->ID === (int) get_option('page_on_front') && get_option('show_on_front') === 'page');
+        $isFrontPageEnabled = (bool) get_option(SettingsPage::OPTION_FRONT_PAGE_KEY, true);
+
+        if ($isFrontPage && !$isFrontPageEnabled) {
             return;
         }
 
