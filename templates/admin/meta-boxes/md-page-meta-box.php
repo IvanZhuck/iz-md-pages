@@ -15,6 +15,8 @@ declare(strict_types=1);
  * @var bool     $isManual            Whether manual Markdown mode is active.
  * @var string   $manualContent       Custom Markdown content.
  * @var string   $defaultTemplate     Default template for current post type.
+ * @var bool     $isPublished         Whether the current post is published.
+ * @var string   $mdUrl               Markdown URL for the current post.
  */
 
 if (!defined('ABSPATH')) {
@@ -83,4 +85,20 @@ wp_nonce_field($nonceAction, $nonceName);
             <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>
         </p>
     </div>
+
+    <?php if ($isPublished && !empty($mdUrl)) : ?>
+        <div class="iz-md-meta-box-footer">
+            <a
+                href="<?php echo esc_url($mdUrl); ?>"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="iz-md-view-link"
+            >
+                <span class="dashicons dashicons-external" aria-hidden="true"></span>
+                <span class="iz-md-view-link-text">
+                    <?php echo esc_html__('View Markdown version', 'iz-md-pages'); ?>
+                </span>
+            </a>
+        </div>
+    <?php endif; ?>
 </div>

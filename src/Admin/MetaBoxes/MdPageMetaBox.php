@@ -6,6 +6,7 @@ namespace IZMDPages\Admin\MetaBoxes;
 
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Admin\Settings\TemplatesSettingsPage;
+use IZMDPages\Core\MdPages\MdPagesOutput;
 use IZMDPages\Core\Template\TemplateRenderer;
 
 /**
@@ -123,6 +124,9 @@ class MdPageMetaBox
             $manualContent = $defaultTemplate;
         }
 
+        $isPublished = $post->post_status === 'publish';
+        $mdUrl = $isPublished ? MdPagesOutput::getMdUrl($post) : '';
+
         $data = [
             'post' => $post,
             'nonceAction' => self::NONCE_ACTION,
@@ -134,6 +138,8 @@ class MdPageMetaBox
             'isManual' => $isManual,
             'manualContent' => $manualContent,
             'defaultTemplate' => $defaultTemplate,
+            'isPublished' => $isPublished,
+            'mdUrl' => $mdUrl,
         ];
 
         $this->templateRenderer->render('admin/meta-boxes/md-page-meta-box.php', $data);

@@ -74,6 +74,38 @@
                 color: $color-text-muted;
             }
         }
+
+        .iz-md-meta-box-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid $color-border-light;
+
+            .iz-md-view-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                color: $color-primary;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+
+                .dashicons {
+                    width: 16px;
+                    height: 16px;
+                    font-size: 16px;
+                    line-height: 1;
+                }
+
+                &:hover,
+                &:focus {
+                    color: $color-primary-hover;
+
+                    .iz-md-view-link-text{
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
     }
 }
 

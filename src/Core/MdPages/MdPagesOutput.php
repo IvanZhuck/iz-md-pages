@@ -126,6 +126,24 @@ class MdPagesOutput
     }
 
     /**
+     * Get the Markdown URL for a specific post.
+     *
+     * @param \WP_Post $post Post object.
+     * @return string Markdown URL.
+     */
+    public static function getMdUrl(\WP_Post $post): string
+    {
+        $permalink = (string) get_permalink($post->ID);
+        $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
+
+        if ($suffixType === 'query_var') {
+            return add_query_arg('md', '', $permalink);
+        }
+
+        return user_trailingslashit(rtrim($permalink, '/') . '/md');
+    }
+
+    /**
      * Output a <link rel="alternate"> tag pointing to the Markdown
      * version of the current page when available.
      */
@@ -153,14 +171,7 @@ class MdPagesOutput
             return;
         }
 
-        $permalink = (string) get_permalink($post->ID);
-        $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
-
-        if ($suffixType === 'query_var') {
-            $mdUrl = add_query_arg('md', '', $permalink);
-        } else {
-            $mdUrl = user_trailingslashit(rtrim($permalink, '/') . '/md');
-        }
+        $mdUrl = self::getMdUrl($post);
 
         echo '<link rel="alternate" type="text/markdown" href="' . esc_url($mdUrl) . '" />' . "\n";
     }
