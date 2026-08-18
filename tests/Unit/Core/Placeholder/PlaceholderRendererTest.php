@@ -34,6 +34,10 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
             remove_all_filters('iz_md_placeholder_comments');
             remove_all_filters('iz_md_render_post_meta');
+            remove_all_filters('iz_md_render_custom_placeholder');
+            remove_all_filters('iz_md_render_custom_placeholder_reading_time');
+            remove_all_filters('iz_md_render_custom_placeholder_badge');
+            remove_all_filters('iz_md_grouped_placeholders');
             remove_all_filters('the_content');
         }
     }
@@ -49,6 +53,10 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
             remove_all_filters('iz_md_placeholder_comments');
             remove_all_filters('iz_md_render_post_meta');
+            remove_all_filters('iz_md_render_custom_placeholder');
+            remove_all_filters('iz_md_render_custom_placeholder_reading_time');
+            remove_all_filters('iz_md_render_custom_placeholder_badge');
+            remove_all_filters('iz_md_grouped_placeholders');
             remove_all_filters('the_content');
         }
         parent::tearDown();
@@ -466,5 +474,77 @@ class PlaceholderRendererTest extends TestCase
         $this->assertStringContainsString('Overridden Title by Overridden Author', $result);
         $this->assertStringContainsString('Overridden HTML Content', $result);
         $this->assertStringContainsString('Category: WORDPRESS', $result);
+    }
+
+    public function testRenderEvaluatesGeneralCustomPlaceholderHook(): void
+    {
+        add_filter('iz_md_render_custom_placeholder', function ($replacement, string $tag, array $args, \WP_Post $post, string $template) {
+            if ($tag === 'site_domain') {
+                return 'example.org';
+            }
+            if ($tag === 'qr_code') {
+                $size = $args[0] ?? '150x150';
+                return "![QR Code](https://api.qrserver.com/v1/?size={$size}&data=" . urlencode($post->post_title) . ")";
+            }
+            return $replacement;
+        }, 10, 5);
+
+        $post = new \WP_Post(['ID' => 401, 'post_title' => 'Custom Hook Article']);
+
+        $template = "Domain: {%site_domain%}\nQR: {%qr_code:300x300%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Domain: example.org', $result);
+        $this->assertStringContainsString('QR: ![QR Code](https://api.qrserver.com/v1/?size=300x300&data=Custom+Hook+Article)', $result);
+    }
+
+    public function testRenderEvaluatesTagSpecificCustomPlaceholderHook(): void
+    {
+        add_filter('iz_md_render_custom_placeholder_reading_time', function ($replacement, array $args, \WP_Post $post) {
+            $speed = isset($args[0]) ? (int) $args[0] : 200;
+            return "5 min read (at {$speed} wpm)";
+        }, 10, 3);
+
+        add_filter('iz_md_render_custom_placeholder_badge', function ($replacement, array $args) {
+            $type = $args[0] ?? 'info';
+            $label = $args[1] ?? 'Notice';
+            return "[!badge type={$type} label=\"{$label}\"]";
+        }, 10, 2);
+
+        $post = new \WP_Post(['ID' => 402, 'post_title' => 'Tag Hook Article']);
+
+        $template = "Time: {%reading_time:250%}\nBadge: {%badge:warning:Deprecated%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Time: 5 min read (at 250 wpm)', $result);
+        $this->assertStringContainsString('Badge: [!badge type=warning label="Deprecated"]', $result);
+    }
+
+    public function testRenderPreservesUnhandledCustomPlaceholders(): void
+    {
+        $post = new \WP_Post(['ID' => 403, 'post_title' => 'Unhandled Post']);
+
+        $template = "Unknown: {%unknown_placeholder%}\nUnknown with args: {%another_tag:arg1:arg2%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Unknown: {%unknown_placeholder%}', $result);
+        $this->assertStringContainsString('Unknown with args: {%another_tag:arg1:arg2%}', $result);
+    }
+
+    public function testFilterAllowsModifyingGroupedPlaceholders(): void
+    {
+        add_filter('iz_md_grouped_placeholders', function (array $groups): array {
+            $groups['Custom Addon'] = [
+                '{%custom_addon_tag%}' => 'Custom addon description',
+            ];
+            return $groups;
+        });
+
+        $grouped = PlaceholderRenderer::getGroupedPlaceholders();
+        $this->assertArrayHasKey('Custom Addon', $grouped);
+        $this->assertArrayHasKey('{%custom_addon_tag%}', $grouped['Custom Addon']);
+
+        $supported = PlaceholderRenderer::getSupportedPlaceholders();
+        $this->assertContains('{%custom_addon_tag%}', $supported);
     }
 }
