@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IZMDPages\Core\Placeholder;
 
 use IZMDPages\Core\Converter\HtmlToMarkdownConverter;
+use IZMDPages\Core\MdPages\BlockRenderer;
 
 /**
  * Handles rendering of template placeholders for Markdown pages.
@@ -60,13 +61,22 @@ class PlaceholderRenderer
     private HtmlToMarkdownConverter $converter;
 
     /**
+     * Block renderer instance.
+     */
+    private BlockRenderer $blockRenderer;
+
+    /**
      * PlaceholderRenderer constructor.
      *
-     * @param HtmlToMarkdownConverter|null $converter HTML to Markdown converter.
+     * @param HtmlToMarkdownConverter|null $converter     HTML to Markdown converter.
+     * @param BlockRenderer|null           $blockRenderer Block renderer instance.
      */
-    public function __construct(?HtmlToMarkdownConverter $converter = null)
-    {
+    public function __construct(
+        ?HtmlToMarkdownConverter $converter = null,
+        ?BlockRenderer $blockRenderer = null
+    ) {
         $this->converter = $converter ?? new HtmlToMarkdownConverter();
+        $this->blockRenderer = $blockRenderer ?? new BlockRenderer($this->converter);
     }
 
     /**
@@ -474,9 +484,7 @@ class PlaceholderRenderer
      */
     private function renderPostContent(\WP_Post $post): string
     {
-        $htmlContent = (string) apply_filters('the_content', $post->post_content);
-        $htmlContent = (string) apply_filters('iz_md_placeholder_render_post_content', $htmlContent, $post);
-        return $this->converter->convert($htmlContent);
+        return $this->blockRenderer->render($post);
     }
 
     /**

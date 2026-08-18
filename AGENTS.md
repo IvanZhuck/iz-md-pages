@@ -33,6 +33,7 @@ iz-md-pages/
 │       ├── Converter/
 │       │   └── HtmlToMarkdownConverter.php # HTML to Markdown converter
 │       ├── MdPages/
+│       │   ├── BlockRenderer.php           # Gutenberg block renderer & overrides
 │       │   └── MdPagesOutput.php           # Endpoint routing & MD output
 │       ├── Placeholder/
 │       │   └── PlaceholderRenderer.php     # Template placeholder renderer
