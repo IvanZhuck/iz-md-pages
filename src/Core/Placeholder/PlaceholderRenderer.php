@@ -47,6 +47,10 @@ class PlaceholderRenderer
     public const PLACEHOLDER_TAGS = '{%tags%}';
     public const PLACEHOLDER_TAXONOMY = '{%taxonomy:<taxonomy_name>%}';
 
+    // Comments placeholders
+    public const PLACEHOLDER_COMMENTS = '{%comments%}';
+    public const PLACEHOLDER_COMMENTS_COUNT = '{%comments_count%}';
+
     /**
      * HTML to Markdown converter instance.
      */
@@ -164,6 +168,10 @@ class PlaceholderRenderer
             // Standard taxonomy shortcuts
             self::PLACEHOLDER_CATEGORIES => $this->renderTaxonomyTerms($post, 'category'),
             self::PLACEHOLDER_TAGS => $this->renderTaxonomyTerms($post, 'post_tag'),
+
+            // Comments
+            self::PLACEHOLDER_COMMENTS => $this->renderComments($post),
+            self::PLACEHOLDER_COMMENTS_COUNT => $this->renderCommentsCount($post),
         ];
 
         // Add placeholders for all taxonomies attached to this post's post type
@@ -211,6 +219,10 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_CATEGORIES => __('Post categories (comma-separated or {%categories:separator%})', 'iz-md-pages'),
                 self::PLACEHOLDER_TAGS => __('Post tags (comma-separated or {%tags:separator%})', 'iz-md-pages'),
                 self::PLACEHOLDER_TAXONOMY => __('Terms of any taxonomy (comma-separated or {%taxonomy:name:separator%}), e.g. {%taxonomy:product_cat%}', 'iz-md-pages'),
+            ],
+            'Comments' => [
+                self::PLACEHOLDER_COMMENTS => __('Approved post comments converted to Markdown', 'iz-md-pages'),
+                self::PLACEHOLDER_COMMENTS_COUNT => __('Number of approved comments', 'iz-md-pages'),
             ],
         ];
     }
@@ -416,5 +428,72 @@ class PlaceholderRenderer
             '\\v' => "\v",
             '\\f' => "\f",
         ]);
+    }
+
+    /**
+     * Render approved post comments as Markdown.
+     *
+     * @param \WP_Post $post Current post object.
+     * @return string Formatted comments in Markdown or empty string if no comments.
+     */
+    private function renderComments(\WP_Post $post): string
+    {
+        if (!function_exists('get_comments')) {
+            return '';
+        }
+
+        $comments = get_comments([
+            'post_id' => $post->ID,
+            'status' => 'approve',
+            'order' => 'ASC',
+        ]);
+
+        if (empty($comments) || !is_array($comments)) {
+            return '';
+        }
+
+        $items = [];
+        foreach ($comments as $comment) {
+            $author = function_exists('get_comment_author') ? (string) get_comment_author($comment) : ($comment->comment_author ?? '');
+            $date = function_exists('get_comment_date') ? (string) get_comment_date('', $comment) : ($comment->comment_date ?? '');
+            $rawContent = function_exists('get_comment_text') ? (string) get_comment_text($comment) : ($comment->comment_content ?? '');
+            $content = $this->converter->convert($rawContent);
+
+            $authorName = $author !== '' ? $author : __('Anonymous', 'iz-md-pages');
+            $header = '**' . $authorName . '**';
+            if ($date !== '') {
+                $header .= ' *(' . $date . ')*';
+            }
+
+            $items[] = '### ' . $header . "\n\n" . trim($content);
+        }
+
+        $result = implode("\n\n---\n\n", $items);
+
+        /**
+         * Filter to customize rendered comments Markdown.
+         *
+         * @param string $result   Rendered Markdown comments.
+         * @param array  $comments List of comments.
+         * @param \WP_Post $post   Current post object.
+         */
+        return (string) apply_filters('iz_md_placeholder_comments', $result, $comments, $post);
+    }
+
+    /**
+     * Render total count of approved comments.
+     *
+     * @param \WP_Post $post Current post object.
+     * @return string Total approved comments count.
+     */
+    private function renderCommentsCount(\WP_Post $post): string
+    {
+        if (function_exists('get_comments_number')) {
+            $count = (int) get_comments_number($post->ID);
+        } else {
+            $count = isset($post->comment_count) ? (int) $post->comment_count : 0;
+        }
+
+        return (string) $count;
     }
 }
