@@ -42,7 +42,8 @@ iz-md-pages/
 └── templates/
     └── admin/
         ├── info/ 
-        │   └──placeholders-reference.php  # Placeholders reference HTML view
+        │   ├── markdown-reference.php     # Markdown syntax guide HTML view
+        │   └── placeholders-reference.php  # Placeholders reference HTML view
         ├── meta-boxes/
         │   └── md-page-meta-box.php       # Meta box HTML view
         ├── nav/

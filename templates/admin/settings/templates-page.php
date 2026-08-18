@@ -27,6 +27,7 @@ if (!defined('ABSPATH')) {
     <?php settings_errors(); ?>
 
     <?php $this->render('admin/info/placeholders-reference.php', ['groupedPlaceholders' => $groupedPlaceholders]); ?>
+    <?php $this->render('admin/info/markdown-reference.php'); ?>
 
     <form method="post" action="options.php">
         <?php settings_fields($settingsGroup); ?>
