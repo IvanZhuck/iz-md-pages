@@ -24,5 +24,27 @@ export default class MdMetaBox {
 
     manualCheckbox.addEventListener('change', toggleManualContent);
     toggleManualContent();
+
+    const resetBtn = document.getElementById('iz-md-reset-default-btn');
+    const manualTextarea = document.getElementById('iz_md_manual_content');
+
+    if (resetBtn && manualTextarea) {
+      resetBtn.addEventListener('click', () => {
+        const defaultTemplate = resetBtn.getAttribute('data-default-template') || '';
+        const confirmMessage = resetBtn.getAttribute('data-confirm-message') ||
+            'Are you sure you want to reset the content to the default template?';
+
+        if (manualTextarea.value.trim() !== '' && manualTextarea.value !== defaultTemplate) {
+          if (!window.confirm(confirmMessage)) {
+            return;
+          }
+        }
+
+        manualTextarea.value = defaultTemplate;
+        manualTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        manualTextarea.dispatchEvent(new Event('change', { bubbles: true }));
+        manualTextarea.focus();
+      });
+    }
   }
 }

@@ -14,6 +14,7 @@ declare(strict_types=1);
  * @var bool     $isDisabled          Whether MD version is disabled for this page.
  * @var bool     $isManual            Whether manual Markdown mode is active.
  * @var string   $manualContent       Custom Markdown content.
+ * @var string   $defaultTemplate     Default template for current post type.
  */
 
 if (!defined('ABSPATH')) {
@@ -65,6 +66,18 @@ wp_nonce_field($nonceAction, $nonceName);
                 style="width: 100%; font-family: monospace; resize: vertical;"
                 placeholder="<?php echo esc_attr__('# Enter markdown here...', 'iz-md-pages'); ?>"
             ><?php echo esc_textarea($manualContent); ?></textarea>
+        </p>
+        <p class="iz-md-manual-content-actions">
+            <button
+                type="button"
+                class="button button-secondary iz-md-reset-default-btn"
+                id="iz-md-reset-default-btn"
+                data-default-template="<?php echo esc_attr($defaultTemplate); ?>"
+                data-confirm-message="<?php echo esc_attr__('Are you sure you want to reset the content to the default template for this post type?', 'iz-md-pages'); ?>"
+            >
+                <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>
+                <?php echo esc_html__('Reset to default template', 'iz-md-pages'); ?>
+            </button>
         </p>
         <p class="description">
             <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>

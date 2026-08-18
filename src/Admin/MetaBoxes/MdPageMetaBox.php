@@ -117,8 +117,10 @@ class MdPageMetaBox
         $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
         $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
 
+        $defaultTemplate = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
+
         if (!$isManual) {
-            $manualContent = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
+            $manualContent = $defaultTemplate;
         }
 
         $data = [
@@ -131,6 +133,7 @@ class MdPageMetaBox
             'isDisabled' => $isDisabled,
             'isManual' => $isManual,
             'manualContent' => $manualContent,
+            'defaultTemplate' => $defaultTemplate,
         ];
 
         $this->templateRenderer->render('admin/meta-boxes/md-page-meta-box.php', $data);

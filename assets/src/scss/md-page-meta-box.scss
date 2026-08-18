@@ -16,6 +16,24 @@
             resize: vertical;
         }
 
+        .iz-md-manual-content-actions {
+            margin-top: 8px;
+            margin-bottom: 8px;
+
+            .button {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+
+                .dashicons {
+                    width: 14px;
+                    height: 14px;
+                    font-size: 14px;
+                    line-height: 1;
+                }
+            }
+        }
+
         .description {
             color: $color-text-muted;
         }
