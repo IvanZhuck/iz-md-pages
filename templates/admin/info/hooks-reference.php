@@ -144,8 +144,15 @@ if (!defined('ABSPATH')) {
             </div>
 
             <div>
-                <strong><?php esc_html_e('4. Post Type Templates Hooks', 'iz-md-pages'); ?></strong>
+                <strong><?php esc_html_e('4. Post & Post Type Templates Hooks', 'iz-md-pages'); ?></strong>
                 <ul>
+                    <li>
+                        <code>iz_md_post_template_{$postId}</code>
+                        <div class="iz-md-docs-hook-desc">
+                            <?php esc_html_e('Override Markdown template for a specific post by its ID.', 'iz-md-pages'); ?>
+                            <br><code>apply_filters("iz_md_post_template_{$postId}", $template, $post)</code>
+                        </div>
+                    </li>
                     <li>
                         <code>iz_md_post_type_template_{$postType}</code>
                         <div class="iz-md-docs-hook-desc">
@@ -159,6 +166,13 @@ if (!defined('ABSPATH')) {
             <div>
                 <strong><?php esc_html_e('5. Rendered Page Output Filters', 'iz-md-pages'); ?></strong>
                 <ul>
+                    <li>
+                        <code>iz_md_page_content_{$postId}</code>
+                        <div class="iz-md-docs-hook-desc">
+                            <?php esc_html_e('Filter final assembled Markdown content for a specific post by its ID.', 'iz-md-pages'); ?>
+                            <br><code>apply_filters("iz_md_page_content_{$postId}", $content, $post)</code>
+                        </div>
+                    </li>
                     <li>
                         <code>iz_md_page_content_{$postType}</code>
                         <div class="iz-md-docs-hook-desc">

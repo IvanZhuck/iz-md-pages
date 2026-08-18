@@ -209,7 +209,23 @@ class MdPagesOutput
             $template = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
         }
 
+        /**
+         * Filter Markdown template for a specific post by its ID.
+         *
+         * @param string   $template Markdown template string.
+         * @param \WP_Post $post     Post object.
+         */
+        $template = (string) apply_filters("iz_md_post_template_{$post->ID}", $template, $post);
+
         $content = $this->placeholderRenderer->render($template, $post);
+
+        /**
+         * Filter assembled Markdown page content for a specific post by its ID.
+         *
+         * @param string   $content Rendered Markdown page content.
+         * @param \WP_Post $post    Post object.
+         */
+        $content = (string) apply_filters("iz_md_page_content_{$post->ID}", $content, $post);
 
         /**
          * Filter assembled Markdown page content for a specific post type.
