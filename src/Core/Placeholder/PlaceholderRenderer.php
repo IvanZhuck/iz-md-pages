@@ -51,6 +51,9 @@ class PlaceholderRenderer
     public const PLACEHOLDER_COMMENTS = '{%comments%}';
     public const PLACEHOLDER_COMMENTS_COUNT = '{%comments_count%}';
 
+    // Custom fields (meta) placeholders
+    public const PLACEHOLDER_META = '{%meta:<meta_key>%}';
+
     /**
      * HTML to Markdown converter instance.
      */
@@ -114,12 +117,24 @@ class PlaceholderRenderer
 
         // Dynamic taxonomy replacement with optional custom separator:
         // {%taxonomy:<tax_name>%}, {%taxonomy:<tax_name>:<separator>%}, {%tax_<tax_name>%}, etc.
-        return (string) preg_replace_callback(
+        $result = (string) preg_replace_callback(
             '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
                 $separator = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : ', ';
                 return $this->renderTaxonomyTerms($post, $taxonomy, $separator);
+            },
+            $result
+        );
+
+        // Dynamic post meta replacement with optional custom separator:
+        // {%meta:<key>%}, {%meta:<key>:<separator>%}, {%post_meta:<key>%}, {%custom_field:<key>%}
+        return (string) preg_replace_callback(
+            '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
+            function (array $matches) use ($post): string {
+                $metaKey = $matches[1];
+                $separator = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : ', ';
+                return $this->renderPostMeta($post, $metaKey, $separator);
             },
             $result
         );
@@ -223,6 +238,9 @@ class PlaceholderRenderer
             'Comments' => [
                 self::PLACEHOLDER_COMMENTS => __('Approved post comments converted to Markdown', 'iz-md-pages'),
                 self::PLACEHOLDER_COMMENTS_COUNT => __('Number of approved comments', 'iz-md-pages'),
+            ],
+            'Custom Fields' => [
+                self::PLACEHOLDER_META => __('Post custom field / meta value (e.g. {%meta:price%}, {%meta:_sku%}, or {%meta:items:\\\\n* %})', 'iz-md-pages'),
             ],
         ];
     }
@@ -495,5 +513,48 @@ class PlaceholderRenderer
         }
 
         return (string) $count;
+    }
+
+    /**
+     * Render post meta field value as string.
+     *
+     * @param \WP_Post $post      Current post object.
+     * @param string   $metaKey   Post meta key identifier.
+     * @param string   $separator Separator string for array values (defaults to ', ').
+     * @return string Rendered post meta value.
+     */
+    private function renderPostMeta(\WP_Post $post, string $metaKey, string $separator = ', '): string
+    {
+        if (!function_exists('get_post_meta')) {
+            return '';
+        }
+
+        $metaValue = get_post_meta($post->ID, $metaKey, true);
+
+        if ($metaValue === '' || $metaValue === false || $metaValue === null) {
+            $value = '';
+        } elseif (is_scalar($metaValue)) {
+            $value = (string) $metaValue;
+        } elseif (is_array($metaValue)) {
+            $separator = $this->parseSeparator($separator);
+            $flat = [];
+            foreach ($metaValue as $item) {
+                if (is_scalar($item)) {
+                    $flat[] = (string) $item;
+                }
+            }
+            $value = !empty($flat) ? implode($separator, $flat) : '';
+        } else {
+            $value = '';
+        }
+
+        /**
+         * Filter to customize rendered post meta field value.
+         *
+         * @param string   $value   Rendered meta field value.
+         * @param string   $metaKey Post meta key.
+         * @param \WP_Post $post    Current post object.
+         */
+        return (string) apply_filters('iz_md_render_post_meta', $value, $metaKey, $post);
     }
 }

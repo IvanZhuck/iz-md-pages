@@ -59,6 +59,18 @@ if (!defined('ABSPATH')) {
                         <code>{%categories:\\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\\n\\t%}</code>.
                     </li>
                 </ul>
+
+                <p style="margin: 10px 0 6px 0;"><strong><?php esc_html_e('Custom Fields (Post Meta):', 'iz-md-pages'); ?></strong></p>
+                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
+                    <li style="margin-bottom: 4px;">
+                        <?php esc_html_e('You can output any custom post field using ', 'iz-md-pages'); ?>
+                        <code>{%meta:meta_key%}</code> (<?php esc_html_e('aliases:', 'iz-md-pages'); ?> <code>{%post_meta:key%}</code>, <code>{%custom_field:key%}</code>).
+                    </li>
+                    <li style="margin-bottom: 2px;">
+                        <?php esc_html_e('If the meta value is an array, you can provide an optional separator, for example: ', 'iz-md-pages'); ?>
+                        <code>{%meta:my_list_key:, %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%meta:my_list_key:\\n* %}</code>.
+                    </li>
+                </ul>
             </div>
         <?php endif; ?>
     </div>
