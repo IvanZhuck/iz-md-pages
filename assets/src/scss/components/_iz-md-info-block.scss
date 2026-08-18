@@ -17,11 +17,21 @@
         user-select: none;
 
         h3 {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
             margin: 0;
             color: $color-text-main;
             font-weight: 600;
             font-size: 14px;
             line-height: 1.4;
+
+            .dashicons {
+                width: 18px;
+                height: 18px;
+                color: $color-text-muted;
+                font-size: 18px;
+            }
         }
 
         .iz-md-info-block-toggle {
