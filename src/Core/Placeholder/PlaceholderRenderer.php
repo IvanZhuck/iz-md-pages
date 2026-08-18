@@ -161,7 +161,7 @@ class PlaceholderRenderer
 
         // Dynamic post meta replacement with optional custom separator and leading flag:
         // {%meta:<key>%}, {%meta:<key>:<separator>%}, {%meta:<key>:<separator>:<leading>%}
-        return (string) preg_replace_callback(
+        $result = (string) preg_replace_callback(
             '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
                 $metaKey = $matches[1];
@@ -177,6 +177,44 @@ class PlaceholderRenderer
                 }
 
                 return $this->renderPostMeta($post, $metaKey, $separator, $leading);
+            },
+            $result
+        );
+
+        // Dynamic custom placeholder hook: {%custom_tag%}, {%custom_tag:arg1%}, {%custom_tag:arg1:arg2%}, etc.
+        return (string) preg_replace_callback(
+            '/\{%([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
+            function (array $matches) use ($post, $template): string {
+                $tag = $matches[1];
+                $argsString = $matches[2] ?? '';
+                $args = $argsString !== '' ? explode(':', $argsString) : [];
+
+                /**
+                 * Filter to dynamically evaluate a custom placeholder.
+                 *
+                 * @param string|null        $replacement Replacement value or null if not handled.
+                 * @param string             $tag         Placeholder name/tag (without braces and %).
+                 * @param array<int, string> $args        Optional colon-separated arguments.
+                 * @param \WP_Post           $post        Current post object.
+                 * @param string             $template    Original template content.
+                 */
+                $replacement = apply_filters('iz_md_render_custom_placeholder', null, $tag, $args, $post, $template);
+
+                /**
+                 * Filter to evaluate a specific custom placeholder by its tag name.
+                 *
+                 * @param string|null        $replacement Replacement value or null if not handled.
+                 * @param array<int, string> $args        Optional colon-separated arguments.
+                 * @param \WP_Post           $post        Current post object.
+                 * @param string             $template    Original template content.
+                 */
+                $replacement = apply_filters("iz_md_render_custom_placeholder_{$tag}", $replacement, $args, $post, $template);
+
+                if ($replacement !== null) {
+                    return (string) $replacement;
+                }
+
+                return $matches[0];
             },
             $result
         );
@@ -248,7 +286,7 @@ class PlaceholderRenderer
      */
     public static function getGroupedPlaceholders(): array
     {
-        return [
+        $groups = [
             'Post' => [
                 self::PLACEHOLDER_POST_TITLE => __('Post title', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_CONTENT => __('Post content converted to Markdown', 'iz-md-pages'),
@@ -282,9 +320,16 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_COMMENTS_COUNT => __('Number of approved comments', 'iz-md-pages'),
             ],
             'Custom Fields' => [
-                self::PLACEHOLDER_META => __('Post custom field / meta value (e.g. {%meta:price%}, {%meta:_sku%}, or {%meta:items:\\\\n* %})', 'iz-md-pages'),
+                self::PLACEHOLDER_META => __('Post custom field / meta value (e.g. {%meta:price%}, {%meta:_sku%}, or {%meta:items:\\n* %})', 'iz-md-pages'),
             ],
         ];
+
+        /**
+         * Filter to register or modify grouped placeholder definitions displayed in admin reference.
+         *
+         * @param array<string, array<string, string>> $groups Grouped placeholder definitions.
+         */
+        return (array) apply_filters('iz_md_grouped_placeholders', $groups);
     }
 
     /**
