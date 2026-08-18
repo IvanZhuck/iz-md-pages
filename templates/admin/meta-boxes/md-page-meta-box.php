@@ -49,19 +49,25 @@ wp_nonce_field($nonceAction, $nonceName);
         </label>
     </p>
 
-    <p>
-        <label for="<?php echo esc_attr($fieldManualContent); ?>" class="screen-reader-text">
-            <?php echo esc_html__('Markdown content', 'iz-md-pages'); ?>
-        </label>
-        <textarea
-            name="<?php echo esc_attr($fieldManualContent); ?>"
-            id="<?php echo esc_attr($fieldManualContent); ?>"
-            rows="10"
-            style="width: 100%; font-family: monospace; resize: vertical;"
-            placeholder="<?php echo esc_attr__('# Enter markdown here...', 'iz-md-pages'); ?>"
-        ><?php echo esc_textarea($manualContent); ?></textarea>
-    </p>
-    <p class="description">
-        <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>
-    </p>
+    <div
+        class="iz-md-manual-content-wrapper<?php echo $isManual ? '' : ' is-hidden'; ?>"
+        id="iz-md-manual-content-wrapper"
+        <?php echo $isManual ? '' : 'style="display: none;"'; ?>
+    >
+        <p>
+            <label for="<?php echo esc_attr($fieldManualContent); ?>" class="screen-reader-text">
+                <?php echo esc_html__('Markdown content', 'iz-md-pages'); ?>
+            </label>
+            <textarea
+                name="<?php echo esc_attr($fieldManualContent); ?>"
+                id="<?php echo esc_attr($fieldManualContent); ?>"
+                rows="10"
+                style="width: 100%; font-family: monospace; resize: vertical;"
+                placeholder="<?php echo esc_attr__('# Enter markdown here...', 'iz-md-pages'); ?>"
+            ><?php echo esc_textarea($manualContent); ?></textarea>
+        </p>
+        <p class="description">
+            <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>
+        </p>
+    </div>
 </div>

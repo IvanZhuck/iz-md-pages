@@ -1,15 +1,12 @@
+import MdMetaBox from './components/md-meta-box';
+
 /**
  * Controller for the MD page meta box.
  */
-class MdMetaBox {
-  /**
-   * Initialize all meta box modules.
-   */
-  static init () {
-
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    MdMetaBox.init();
+  });
+} else {
   MdMetaBox.init();
-});
+}

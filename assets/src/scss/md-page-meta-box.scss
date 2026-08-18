@@ -1,1 +1,19 @@
 @use 'vars' as *;
+
+.iz-md-meta-box-content {
+    .iz-md-manual-content-wrapper {
+        &.is-hidden {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .description {
+            color: $color-text-muted;
+        }
+    }
+}
