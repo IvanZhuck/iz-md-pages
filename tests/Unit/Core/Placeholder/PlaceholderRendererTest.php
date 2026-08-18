@@ -19,10 +19,11 @@ class PlaceholderRendererTest extends TestCase
         parent::setUp();
         $this->renderer = new PlaceholderRenderer();
 
-        global $wp_terms_storage, $wp_taxonomies_storage, $wp_post_meta;
+        global $wp_terms_storage, $wp_taxonomies_storage, $wp_post_meta, $wp_comments_storage;
         $wp_terms_storage = [];
         $wp_taxonomies_storage = [];
         $wp_post_meta = [];
+        $wp_comments_storage = [];
 
         if (function_exists('remove_all_filters')) {
             remove_all_filters('iz_md_pages_placeholders');
@@ -31,6 +32,7 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_render_post_content');
             remove_all_filters('iz_md_placeholder_render_post_excerpt');
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
+            remove_all_filters('iz_md_placeholder_comments');
             remove_all_filters('the_content');
         }
     }
@@ -44,6 +46,7 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_render_post_content');
             remove_all_filters('iz_md_placeholder_render_post_excerpt');
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
+            remove_all_filters('iz_md_placeholder_comments');
             remove_all_filters('the_content');
         }
         parent::tearDown();
@@ -199,6 +202,95 @@ class PlaceholderRendererTest extends TestCase
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_POST_PERMALINK, $supported);
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_AUTHOR_EMAIL, $supported);
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_TAGS, $supported);
+        $this->assertContains(PlaceholderRenderer::PLACEHOLDER_COMMENTS, $supported);
+        $this->assertContains(PlaceholderRenderer::PLACEHOLDER_COMMENTS_COUNT, $supported);
+    }
+
+    public function testRenderReplacesCommentsAndCommentsCountWhenCommentsExist(): void
+    {
+        global $wp_comments_storage;
+
+        $post = new \WP_Post(['ID' => 200, 'post_title' => 'Article with Comments']);
+
+        $wp_comments_storage[200] = [
+            new \WP_Comment([
+                'comment_ID' => 1,
+                'comment_post_ID' => 200,
+                'comment_author' => 'Alice',
+                'comment_date' => '2026-06-01 10:00:00',
+                'comment_content' => '<p>First comment with <strong>bold</strong> text.</p>',
+            ]),
+            new \WP_Comment([
+                'comment_ID' => 2,
+                'comment_post_ID' => 200,
+                'comment_author' => 'Bob',
+                'comment_date' => '2026-06-02 11:30:00',
+                'comment_content' => '<p>Second comment with a <a href="https://example.com">link</a>.</p>',
+            ]),
+        ];
+
+        $template = "# Comments ({%comments_count%})\n\n{%comments%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('# Comments (2)', $result);
+        $this->assertStringContainsString('### **Alice** *(2026-06-01 10:00:00)*', $result);
+        $this->assertStringContainsString('First comment with **bold** text.', $result);
+        $this->assertStringContainsString('---', $result);
+        $this->assertStringContainsString('### **Bob** *(2026-06-02 11:30:00)*', $result);
+        $this->assertStringContainsString('Second comment with a [link](https://example.com).', $result);
+    }
+
+    public function testRenderHandlesNoCommentsGracefully(): void
+    {
+        $post = new \WP_Post(['ID' => 201, 'post_title' => 'Article without Comments']);
+
+        $template = "Count: [{%comments_count%}]\nComments: [{%comments%}]";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Count: [0]', $result);
+        $this->assertStringContainsString('Comments: []', $result);
+    }
+
+    public function testRenderHandlesAnonymousCommentAuthor(): void
+    {
+        global $wp_comments_storage;
+
+        $post = new \WP_Post(['ID' => 202, 'post_title' => 'Article with Anonymous Comment']);
+
+        $wp_comments_storage[202] = [
+            new \WP_Comment([
+                'comment_ID' => 3,
+                'comment_post_ID' => 202,
+                'comment_author' => '',
+                'comment_date' => '2026-06-03 14:00:00',
+                'comment_content' => '<p>Anonymous feedback.</p>',
+            ]),
+        ];
+
+        $template = "{%comments%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('### **Anonymous** *(2026-06-03 14:00:00)*', $result);
+        $this->assertStringContainsString('Anonymous feedback.', $result);
+    }
+
+    public function testFilterAllowsOverridingCommentsOutput(): void
+    {
+        global $wp_comments_storage;
+
+        add_filter('iz_md_placeholder_comments', function (string $result, array $comments, \WP_Post $post): string {
+            return 'Custom Comments for ' . $post->post_title . ' (count: ' . count($comments) . ')';
+        }, 10, 3);
+
+        $post = new \WP_Post(['ID' => 203, 'post_title' => 'Overridden Comments Post']);
+        $wp_comments_storage[203] = [
+            new \WP_Comment(['comment_ID' => 4, 'comment_author' => 'Charlie']),
+        ];
+
+        $template = "{%comments%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertSame('Custom Comments for Overridden Comments Post (count: 1)', $result);
     }
 
     public function testFiltersAllowOverridingValues(): void

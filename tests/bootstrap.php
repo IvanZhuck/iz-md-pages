@@ -112,8 +112,29 @@ if (!class_exists('WP_Screen')) {
     }
 }
 
+if (!class_exists('WP_Comment')) {
+    class WP_Comment
+    {
+        public int $comment_ID = 0;
+        public int $comment_post_ID = 0;
+        public string $comment_author = '';
+        public string $comment_author_email = '';
+        public string $comment_date = '';
+        public string $comment_content = '';
+        public string $comment_approved = '1';
+        public int $comment_parent = 0;
+
+        public function __construct(array $data = [])
+        {
+            foreach ($data as $key => $value) {
+                $this->{$key} = $value;
+            }
+        }
+    }
+}
+
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -126,6 +147,7 @@ $wp_queried_object = null;
 $wp_posts_storage = [];
 $wp_terms_storage = [];
 $wp_taxonomies_storage = [];
+$wp_comments_storage = [];
 $wp_query = new WP_Query();
 $wp_enqueued_styles = [];
 $wp_enqueued_scripts = [];
@@ -566,5 +588,77 @@ if (!function_exists('get_current_screen')) {
     {
         global $wp_current_screen;
         return $wp_current_screen;
+    }
+}
+
+if (!function_exists('get_comments')) {
+    /**
+     * @param array<string, mixed> $args
+     * @return array<int, \WP_Comment>
+     */
+    function get_comments(array $args = []): array
+    {
+        global $wp_comments_storage;
+        $postId = isset($args['post_id']) ? (int) $args['post_id'] : 0;
+        return $wp_comments_storage[$postId] ?? [];
+    }
+}
+
+if (!function_exists('get_comment_author')) {
+    /**
+     * @param mixed $comment
+     * @return string
+     */
+    function get_comment_author($comment = null): string
+    {
+        if ($comment instanceof \WP_Comment) {
+            return $comment->comment_author;
+        }
+        return '';
+    }
+}
+
+if (!function_exists('get_comment_date')) {
+    /**
+     * @param string $format
+     * @param mixed $comment
+     * @return string
+     */
+    function get_comment_date(string $format = '', $comment = null): string
+    {
+        if ($comment instanceof \WP_Comment) {
+            return $comment->comment_date;
+        }
+        return '';
+    }
+}
+
+if (!function_exists('get_comment_text')) {
+    /**
+     * @param mixed $comment
+     * @return string
+     */
+    function get_comment_text($comment = null): string
+    {
+        if ($comment instanceof \WP_Comment) {
+            return $comment->comment_content;
+        }
+        return '';
+    }
+}
+
+if (!function_exists('get_comments_number')) {
+    /**
+     * @param int|\WP_Post $post
+     * @return int
+     */
+    function get_comments_number($post = 0): int
+    {
+        global $wp_comments_storage;
+        $postId = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
+        if (isset($wp_comments_storage[$postId])) {
+            return count($wp_comments_storage[$postId]);
+        }
+        return 0;
     }
 }
