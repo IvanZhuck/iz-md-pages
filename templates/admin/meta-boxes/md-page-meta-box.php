@@ -24,7 +24,7 @@ wp_nonce_field($nonceAction, $nonceName);
 ?>
 <div class="iz-md-meta-box-content">
     <p>
-        <label for="<?php echo esc_attr($fieldDisabled); ?>">
+        <label for="<?php echo esc_attr($fieldDisabled); ?>" class="checkbox-label">
             <input
                 type="checkbox"
                 name="<?php echo esc_attr($fieldDisabled); ?>"
@@ -37,7 +37,7 @@ wp_nonce_field($nonceAction, $nonceName);
     </p>
 
     <p>
-        <label for="<?php echo esc_attr($fieldManualEnabled); ?>">
+        <label for="<?php echo esc_attr($fieldManualEnabled); ?>" class="checkbox-label">
             <input
                 type="checkbox"
                 name="<?php echo esc_attr($fieldManualEnabled); ?>"

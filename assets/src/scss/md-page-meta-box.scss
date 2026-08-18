@@ -1,6 +1,10 @@
 @use 'vars' as *;
 
 .iz-md-meta-box-content {
+    .checkbox-label{
+        cursor: pointer;
+    }
+
     .iz-md-manual-content-wrapper {
         &.is-hidden {
             display: none;
