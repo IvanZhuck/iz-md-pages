@@ -33,18 +33,44 @@ export default class InfoBlockToggle {
   }
 
   /**
-   * Restore collapsed state from localStorage.
+   * Determine default collapsed state from data-default-state attribute or class.
+   * Defaults to false (open/expanded) if not specified.
+   *
+   * @return {boolean}
+   */
+  getDefaultCollapsed () {
+    const defaultState = this.container.getAttribute('data-default-state');
+
+    if (defaultState) {
+      return defaultState === 'collapsed' || defaultState === 'closed';
+    }
+
+    if (this.container.classList.contains('is-collapsed')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Restore collapsed state from localStorage or apply HTML default state.
    */
   restoreState () {
+    let isCollapsed = this.getDefaultCollapsed();
+
     try {
-      const isCollapsed = localStorage.getItem(this.storageKey) === 'true';
-      if (isCollapsed) {
-        this.collapse();
-      } else {
-        this.expand();
+      const storedValue = localStorage.getItem(this.storageKey);
+      if (storedValue !== null) {
+        isCollapsed = storedValue === 'true';
       }
     } catch {
       // localStorage access may be restricted
+    }
+
+    if (isCollapsed) {
+      this.collapse();
+    } else {
+      this.expand();
     }
   }
 

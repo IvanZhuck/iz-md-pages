@@ -12,14 +12,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 ?>
-<div class="iz-md-info-block" id="iz-md-placeholders-reference">
-    <div class="iz-md-info-block-header" role="button" tabindex="0" aria-expanded="true">
+<div class="iz-md-info-block is-collapsed" id="iz-md-placeholders-reference" data-default-state="collapsed">
+    <div class="iz-md-info-block-header" role="button" tabindex="0" aria-expanded="false">
         <h3>
             <span class="dashicons dashicons-editor-help" aria-hidden="true"></span>
             <?php esc_html_e('Available Template Placeholders', 'iz-md-pages'); ?>
         </h3>
         <button type="button" class="iz-md-info-block-toggle" aria-label="<?php esc_attr_e('Toggle placeholders reference', 'iz-md-pages'); ?>">
-            <span class="iz-md-info-block-toggle-text" data-text-expand="<?php esc_attr_e('Expand', 'iz-md-pages'); ?>" data-text-collapse="<?php esc_attr_e('Collapse', 'iz-md-pages'); ?>"><?php esc_html_e('Collapse', 'iz-md-pages'); ?></span>
+            <span class="iz-md-info-block-toggle-text" data-text-expand="<?php esc_attr_e('Expand', 'iz-md-pages'); ?>" data-text-collapse="<?php esc_attr_e('Collapse', 'iz-md-pages'); ?>"><?php esc_html_e('Expand', 'iz-md-pages'); ?></span>
             <span class="dashicons dashicons-arrow-up" aria-hidden="true"></span>
         </button>
     </div>
