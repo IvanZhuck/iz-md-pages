@@ -98,8 +98,20 @@ if (!class_exists('WP_Error')) {
     }
 }
 
+if (!class_exists('WP_Screen')) {
+    class WP_Screen
+    {
+        public string $id = '';
+
+        public function __construct(string $id = '')
+        {
+            $this->id = $id;
+        }
+    }
+}
+
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_query;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -113,6 +125,9 @@ $wp_posts_storage = [];
 $wp_terms_storage = [];
 $wp_taxonomies_storage = [];
 $wp_query = new WP_Query();
+$wp_enqueued_styles = [];
+$wp_enqueued_scripts = [];
+$wp_current_screen = null;
 
 // WordPress Mock Functions
 if (!function_exists('add_action')) {
@@ -501,5 +516,53 @@ if (!function_exists('__')) {
     function __(string $text, string $domain = 'default'): string
     {
         return $text;
+    }
+}
+
+if (!function_exists('sanitize_key')) {
+    function sanitize_key(string $key): string
+    {
+        return preg_replace('/[^a-z0-9_\-]/', '', strtolower($key)) ?: '';
+    }
+}
+
+if (!function_exists('plugins_url')) {
+    function plugins_url(string $path = '', string $plugin = ''): string
+    {
+        return 'https://example.com/wp-content/plugins/iz-md-pages/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('wp_enqueue_style')) {
+    function wp_enqueue_style(string $handle, string $src = '', array $deps = [], $ver = false, string $media = 'all'): void
+    {
+        global $wp_enqueued_styles;
+        $wp_enqueued_styles[$handle] = [
+            'src' => $src,
+            'deps' => $deps,
+            'ver' => $ver,
+            'media' => $media,
+        ];
+    }
+}
+
+if (!function_exists('wp_enqueue_script')) {
+    function wp_enqueue_script(string $handle, string $src = '', array $deps = [], $ver = false, bool $in_footer = false): void
+    {
+        global $wp_enqueued_scripts;
+        $wp_enqueued_scripts[$handle] = [
+            'src' => $src,
+            'deps' => $deps,
+            'ver' => $ver,
+            'in_footer' => $in_footer,
+        ];
+    }
+}
+
+if (!function_exists('get_current_screen')) {
+    function get_current_screen(): ?\WP_Screen
+    {
+        global $wp_current_screen;
+        return $wp_current_screen;
     }
 }
