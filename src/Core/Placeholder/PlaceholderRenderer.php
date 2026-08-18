@@ -82,6 +82,24 @@ class PlaceholderRenderer
             return '';
         }
 
+        $result = $this->replacePredefinedPlaceholders($template, $post);
+        $result = $this->replaceCategoryPlaceholders($result, $post);
+        $result = $this->replaceTagPlaceholders($result, $post);
+        $result = $this->replaceTaxonomyPlaceholders($result, $post);
+        $result = $this->replacePostMetaPlaceholders($result, $post);
+
+        return $this->replaceCustomPlaceholders($result, $post, $template);
+    }
+
+    /**
+     * Replace predefined static placeholders using dictionary lookup.
+     *
+     * @param string   $template Template content.
+     * @param \WP_Post $post     Current post object.
+     * @return string Content with replaced predefined placeholders.
+     */
+    private function replacePredefinedPlaceholders(string $template, \WP_Post $post): string
+    {
         $placeholders = $this->getPlaceholderReplacements($post);
 
         /**
@@ -93,95 +111,97 @@ class PlaceholderRenderer
          */
         $placeholders = apply_filters('iz_md_pages_placeholders', $placeholders, $post, $template);
 
-        $result = strtr($template, $placeholders);
+        return strtr($template, $placeholders);
+    }
 
-        // Dynamic categories replacement with optional custom separator and leading flag:
-        // {%categories%}, {%categories:<separator>%}, {%categories:<separator>:<leading>%}, {%categories:before%}
-        $result = (string) preg_replace_callback(
+    /**
+     * Replace dynamic category placeholders.
+     *
+     * @param string   $content Content with category placeholders.
+     * @param \WP_Post $post    Current post object.
+     * @return string Content with replaced category terms.
+     */
+    private function replaceCategoryPlaceholders(string $content, \WP_Post $post): string
+    {
+        return (string) preg_replace_callback(
             '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
-                $rawSep = $matches[1] ?? '';
-                $rawLead = $matches[2] ?? '';
-
-                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
-                    $separator = ', ';
-                    $leading = true;
-                } else {
-                    $separator = $rawSep !== '' ? $rawSep : ', ';
-                    $leading = $this->isLeadingFlag($rawLead);
-                }
-
+                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
                 return $this->renderTaxonomyTerms($post, 'category', $separator, $leading);
             },
-            $result
+            $content
         );
+    }
 
-        // Dynamic tags replacement with optional custom separator and leading flag:
-        // {%tags%}, {%tags:<separator>%}, {%tags:<separator>:<leading>%}, {%tags:before%}
-        $result = (string) preg_replace_callback(
+    /**
+     * Replace dynamic tag placeholders.
+     *
+     * @param string   $content Content with tag placeholders.
+     * @param \WP_Post $post    Current post object.
+     * @return string Content with replaced post tags.
+     */
+    private function replaceTagPlaceholders(string $content, \WP_Post $post): string
+    {
+        return (string) preg_replace_callback(
             '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
-                $rawSep = $matches[1] ?? '';
-                $rawLead = $matches[2] ?? '';
-
-                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
-                    $separator = ', ';
-                    $leading = true;
-                } else {
-                    $separator = $rawSep !== '' ? $rawSep : ', ';
-                    $leading = $this->isLeadingFlag($rawLead);
-                }
-
+                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
                 return $this->renderTaxonomyTerms($post, 'post_tag', $separator, $leading);
             },
-            $result
+            $content
         );
+    }
 
-        // Dynamic taxonomy replacement with optional custom separator and leading flag:
-        // {%taxonomy:<tax_name>%}, {%taxonomy:<tax_name>:<separator>%}, {%taxonomy:<tax_name>:<separator>:<leading>%}
-        $result = (string) preg_replace_callback(
+    /**
+     * Replace dynamic custom taxonomy placeholders.
+     *
+     * @param string   $content Content with taxonomy placeholders.
+     * @param \WP_Post $post    Current post object.
+     * @return string Content with replaced taxonomy terms.
+     */
+    private function replaceTaxonomyPlaceholders(string $content, \WP_Post $post): string
+    {
+        return (string) preg_replace_callback(
             '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
-                $rawSep = $matches[2] ?? '';
-                $rawLead = $matches[3] ?? '';
-
-                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
-                    $separator = ', ';
-                    $leading = true;
-                } else {
-                    $separator = $rawSep !== '' ? $rawSep : ', ';
-                    $leading = $this->isLeadingFlag($rawLead);
-                }
-
+                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[2] ?? '', $matches[3] ?? '');
                 return $this->renderTaxonomyTerms($post, $taxonomy, $separator, $leading);
             },
-            $result
+            $content
         );
+    }
 
-        // Dynamic post meta replacement with optional custom separator and leading flag:
-        // {%meta:<key>%}, {%meta:<key>:<separator>%}, {%meta:<key>:<separator>:<leading>%}
-        $result = (string) preg_replace_callback(
+    /**
+     * Replace dynamic post meta placeholders.
+     *
+     * @param string   $content Content with post meta placeholders.
+     * @param \WP_Post $post    Current post object.
+     * @return string Content with replaced post meta values.
+     */
+    private function replacePostMetaPlaceholders(string $content, \WP_Post $post): string
+    {
+        return (string) preg_replace_callback(
             '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
                 $metaKey = $matches[1];
-                $rawSep = $matches[2] ?? '';
-                $rawLead = $matches[3] ?? '';
-
-                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
-                    $separator = ', ';
-                    $leading = true;
-                } else {
-                    $separator = $rawSep !== '' ? $rawSep : ', ';
-                    $leading = $this->isLeadingFlag($rawLead);
-                }
-
+                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[2] ?? '', $matches[3] ?? '');
                 return $this->renderPostMeta($post, $metaKey, $separator, $leading);
             },
-            $result
+            $content
         );
+    }
 
-        // Dynamic custom placeholder hook: {%custom_tag%}, {%custom_tag:arg1%}, {%custom_tag:arg1:arg2%}, etc.
+    /**
+     * Replace dynamic custom placeholders via extensible filter hooks.
+     *
+     * @param string   $content  Content with unhandled placeholders.
+     * @param \WP_Post $post     Current post object.
+     * @param string   $template Original template string.
+     * @return string Content with replaced custom placeholders.
+     */
+    private function replaceCustomPlaceholders(string $content, \WP_Post $post, string $template): string
+    {
         return (string) preg_replace_callback(
             '/\{%([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
             function (array $matches) use ($post, $template): string {
@@ -216,8 +236,27 @@ class PlaceholderRenderer
 
                 return $matches[0];
             },
-            $result
+            $content
         );
+    }
+
+    /**
+     * Parse separator string and leading flag from matched regex segments.
+     *
+     * @param string $rawSep  Raw separator string.
+     * @param string $rawLead Raw leading flag string.
+     * @return array{0: string, 1: bool} Tuple of [separator, isLeading].
+     */
+    private function parseSeparatorAndLeading(string $rawSep, string $rawLead): array
+    {
+        if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
+            return [', ', true];
+        }
+
+        $separator = $rawSep !== '' ? $rawSep : ', ';
+        $leading = $this->isLeadingFlag($rawLead);
+
+        return [$separator, $leading];
     }
 
     /**
