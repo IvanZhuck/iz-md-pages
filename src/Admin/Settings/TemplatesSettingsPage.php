@@ -33,6 +33,7 @@ class TemplatesSettingsPage extends Settings
 
     /**
      * Get the template string configured for a specific post type or default template.
+     * Applies filter hooks allowing developers to override the template dynamically.
      *
      * @param string $postType Post type slug.
      * @return string Markdown template string.
@@ -40,9 +41,28 @@ class TemplatesSettingsPage extends Settings
     public static function getTemplateForPostType(string $postType): string
     {
         $templates = (array) get_option(self::OPTION_KEY, []);
-        return isset($templates[$postType]) && is_string($templates[$postType]) && $templates[$postType] !== ''
+        $template = isset($templates[$postType]) && is_string($templates[$postType]) && $templates[$postType] !== ''
             ? $templates[$postType]
             : self::DEFAULT_TEMPLATE;
+
+        /**
+         * Filter the Markdown template for a specific post type.
+         *
+         * @param string $template Markdown template string.
+         * @param string $postType Post type slug.
+         */
+        return (string) apply_filters("iz_md_post_type_template_{$postType}", $template, $postType);
+    }
+
+    /**
+     * Check if a template for a specific post type is overridden via filter hook.
+     *
+     * @param string $postType Post type slug.
+     * @return bool True if overridden via hook, false otherwise.
+     */
+    public static function isTemplateOverridden(string $postType): bool
+    {
+        return has_filter("iz_md_post_type_template_{$postType}") !== false;
     }
 
     /**
@@ -74,14 +94,19 @@ class TemplatesSettingsPage extends Settings
         }
 
         $validPostTypes = array_keys($this->getTargetPostTypes());
+        $existingTemplates = (array) get_option(self::OPTION_KEY, []);
         $sanitized = [];
 
-        foreach ($input as $postType => $template) {
-            if (is_string($postType) && is_string($template)) {
-                $slug = sanitize_key($postType);
-                if (in_array($slug, $validPostTypes, true)) {
-                    $sanitized[$slug] = wp_unslash($template);
+        foreach ($validPostTypes as $postType) {
+            if (self::isTemplateOverridden($postType)) {
+                if (isset($existingTemplates[$postType]) && is_string($existingTemplates[$postType])) {
+                    $sanitized[$postType] = $existingTemplates[$postType];
                 }
+                continue;
+            }
+
+            if (isset($input[$postType]) && is_string($input[$postType])) {
+                $sanitized[$postType] = wp_unslash($input[$postType]);
             }
         }
 

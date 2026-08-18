@@ -142,6 +142,19 @@ if (!defined('ABSPATH')) {
                     </li>
                 </ul>
             </div>
+
+            <div>
+                <strong><?php esc_html_e('4. Post Type Templates Hooks', 'iz-md-pages'); ?></strong>
+                <ul>
+                    <li>
+                        <code>iz_md_post_type_template_{$postType}</code>
+                        <div class="iz-md-docs-hook-desc">
+                            <?php esc_html_e('Override Markdown template for a specific post type (e.g. post, page).', 'iz-md-pages'); ?>
+                            <br><code>apply_filters("iz_md_post_type_template_{$postType}", $template, $postType)</code>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

@@ -15,6 +15,8 @@ declare(strict_types=1);
  * @var array<string, array<string, string>>           $groupedPlaceholders   Grouped placeholder definitions.
  */
 
+use IZMDPages\Admin\Settings\TemplatesSettingsPage;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -36,9 +38,10 @@ if (!defined('ABSPATH')) {
             <tbody>
                 <?php foreach ($postTypes as $postType) : ?>
                     <?php
-                    $templateValue = array_key_exists($postType->name, $templates)
-                        ? $templates[$postType->name]
-                        : $defaultTemplate;
+                    $isOverridden = TemplatesSettingsPage::isTemplateOverridden($postType->name);
+                    $templateValue = $isOverridden
+                        ? TemplatesSettingsPage::getTemplateForPostType($postType->name)
+                        : (array_key_exists($postType->name, $templates) ? $templates[$postType->name] : $defaultTemplate);
                     ?>
                     <tr>
                         <th scope="row">
@@ -55,7 +58,13 @@ if (!defined('ABSPATH')) {
                                 rows="8"
                                 class="large-text code"
                                 placeholder="<?php echo esc_attr($defaultTemplate); ?>"
+                                <?php disabled($isOverridden, true); ?>
                             ><?php echo esc_textarea($templateValue); ?></textarea>
+                            <?php if ($isOverridden) : ?>
+                                <p class="description" style="color: #d63638; margin-top: 6px;">
+                                    <?php esc_html_e('This template is overridden via filter hook and cannot be edited here.', 'iz-md-pages'); ?>
+                                </p>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
