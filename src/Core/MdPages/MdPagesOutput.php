@@ -37,7 +37,7 @@ class MdPagesOutput
         add_action('init', [$this, 'addRewriteEndpoints']);
         add_filter('query_vars', [$this, 'addQueryVars']);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
-        add_action('wp_head', [$this, 'renderAlternateLink']);
+        add_action('wp_head', [$this, 'renderAlternateLink'], 2);
     }
 
     /**
