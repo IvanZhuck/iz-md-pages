@@ -516,7 +516,7 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render post meta field value as string.
+     * Render post meta field value as string with recursive array support.
      *
      * @param \WP_Post $post      Current post object.
      * @param string   $metaKey   Post meta key identifier.
@@ -530,31 +530,74 @@ class PlaceholderRenderer
         }
 
         $metaValue = get_post_meta($post->ID, $metaKey, true);
-
-        if ($metaValue === '' || $metaValue === false || $metaValue === null) {
-            $value = '';
-        } elseif (is_scalar($metaValue)) {
-            $value = (string) $metaValue;
-        } elseif (is_array($metaValue)) {
-            $separator = $this->parseSeparator($separator);
-            $flat = [];
-            foreach ($metaValue as $item) {
-                if (is_scalar($item)) {
-                    $flat[] = (string) $item;
-                }
-            }
-            $value = !empty($flat) ? implode($separator, $flat) : '';
-        } else {
-            $value = '';
-        }
+        $parsedSeparator = $this->parseSeparator($separator);
+        $value = $this->formatMetaValue($metaValue, $parsedSeparator);
 
         /**
          * Filter to customize rendered post meta field value.
          *
-         * @param string   $value   Rendered meta field value.
-         * @param string   $metaKey Post meta key.
-         * @param \WP_Post $post    Current post object.
+         * @param string   $value     Rendered meta field value.
+         * @param string   $metaKey   Post meta key.
+         * @param \WP_Post $post      Current post object.
+         * @param mixed    $metaValue Original raw meta value.
          */
-        return (string) apply_filters('iz_md_render_post_meta', $value, $metaKey, $post);
+        return (string) apply_filters('iz_md_render_post_meta', $value, $metaKey, $post, $metaValue);
+    }
+
+    /**
+     * Recursively format post meta values (scalars, nested arrays, and objects) into a string.
+     *
+     * @param mixed  $metaValue Meta field value.
+     * @param string $separator Separator for array elements.
+     * @param int    $depth     Current recursion depth.
+     * @return string Formatted string value.
+     */
+    private function formatMetaValue($metaValue, string $separator, int $depth = 0): string
+    {
+        if ($depth > 10) {
+            return '';
+        }
+
+        if ($metaValue === '' || $metaValue === false || $metaValue === null) {
+            return '';
+        }
+
+        if (is_scalar($metaValue)) {
+            return (string) $metaValue;
+        }
+
+        if (is_object($metaValue)) {
+            $metaValue = get_object_vars($metaValue);
+        }
+
+        if (!is_array($metaValue) || empty($metaValue)) {
+            return '';
+        }
+
+        $isAssoc = array_keys($metaValue) !== range(0, count($metaValue) - 1);
+        $elements = [];
+
+        foreach ($metaValue as $key => $item) {
+            if (is_array($item) || is_object($item)) {
+                $formattedItem = $this->formatMetaValue($item, $separator, $depth + 1);
+                if ($formattedItem === '') {
+                    continue;
+                }
+                if ($isAssoc) {
+                    $elements[] = (string) $key . ': ' . $formattedItem;
+                } else {
+                    $elements[] = $formattedItem;
+                }
+            } elseif (is_scalar($item)) {
+                $itemStr = (string) $item;
+                if ($isAssoc) {
+                    $elements[] = (string) $key . ': ' . $itemStr;
+                } else {
+                    $elements[] = $itemStr;
+                }
+            }
+        }
+
+        return implode($separator, $elements);
     }
 }
