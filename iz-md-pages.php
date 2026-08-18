@@ -16,6 +16,7 @@ declare(strict_types=1);
 use IZMDPages\Admin\Assets\MdPageMetaboxAssets;
 use IZMDPages\Admin\Assets\SettingsAssets;
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
+use IZMDPages\Admin\Settings\DocumentationSettingsPage;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 use IZMDPages\Core\MdPages\MdPagesOutput;
@@ -54,6 +55,9 @@ $settingsPage->init();
 
 $templatesSettingsPage = new TemplatesSettingsPage();
 $templatesSettingsPage->init();
+
+$documentationSettingsPage = new DocumentationSettingsPage();
+$documentationSettingsPage->init();
 
 $mdPagesOutput = new MdPagesOutput();
 $mdPagesOutput->init();

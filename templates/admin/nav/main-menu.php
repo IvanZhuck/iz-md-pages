@@ -21,4 +21,7 @@ $currentTab = $currentTab ?? 'general';
     <a href="<?php echo esc_url(admin_url('admin.php?page=iz-md-templates')); ?>" class="nav-tab <?php echo $currentTab === 'templates' ? 'nav-tab-active' : ''; ?>">
         <?php esc_html_e('Templates', 'iz-md-pages'); ?>
     </a>
+    <a href="<?php echo esc_url(admin_url('admin.php?page=iz-md-docs')); ?>" class="nav-tab <?php echo $currentTab === 'docs' ? 'nav-tab-active' : ''; ?>">
+        <?php esc_html_e('Documentation', 'iz-md-pages'); ?>
+    </a>
 </nav>

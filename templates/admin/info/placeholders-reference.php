@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 <div class="iz-md-info-block is-collapsed" id="iz-md-placeholders-reference" data-default-state="collapsed">
     <div class="iz-md-info-block-header" role="button" tabindex="0" aria-expanded="false">
         <h3>
-            <span class="dashicons dashicons-editor-help" aria-hidden="true"></span>
+            <span class="dashicons dashicons-shortcode" aria-hidden="true"></span>
             <?php esc_html_e('Available Template Placeholders', 'iz-md-pages'); ?>
         </h3>
         <button type="button" class="iz-md-info-block-toggle" aria-label="<?php esc_attr_e('Toggle placeholders reference', 'iz-md-pages'); ?>">
@@ -23,20 +23,20 @@ if (!defined('ABSPATH')) {
             <span class="dashicons dashicons-arrow-up" aria-hidden="true"></span>
         </button>
     </div>
-    <div class="iz-md-info-block-body">
+    <div class="iz-md-info-block-body iz-md-docs">
         <p class="description">
             <?php esc_html_e('You can use the following placeholders inside your Markdown templates. They will be automatically replaced with the corresponding post data when rendering.', 'iz-md-pages'); ?>
         </p>
 
         <?php if (!empty($groupedPlaceholders)) : ?>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 10px;">
+            <div class="iz-md-docs-grid">
                 <?php foreach ($groupedPlaceholders as $groupTitle => $placeholders) : ?>
                     <div>
                         <strong><?php echo esc_html($groupTitle); ?></strong>
-                        <ul style="margin: 5px 0; padding-left: 18px; list-style-type: disc;">
+                        <ul>
                             <?php foreach ($placeholders as $tag => $description) : ?>
-                                <li style="margin-bottom: 4px;">
-                                    <code><?php echo esc_html($tag); ?></code> &mdash; <span style="color: #666;"><?php echo esc_html($description); ?></span>
+                                <li>
+                                    <code><?php echo esc_html($tag); ?></code> &mdash; <span class="iz-md-docs-desc"><?php echo esc_html($description); ?></span>
                                 </li>
                             <?php endforeach; ?>
                         </ul>
@@ -44,40 +44,40 @@ if (!defined('ABSPATH')) {
                 <?php endforeach; ?>
             </div>
 
-            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e0e0e0; font-size: 13px; color: #444;">
-                <p style="margin: 0 0 6px 0;"><strong><?php esc_html_e('Taxonomy Custom Separators:', 'iz-md-pages'); ?></strong></p>
-                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
-                    <li style="margin-bottom: 4px;">
+            <div class="iz-md-docs-notes">
+                <p><strong><?php esc_html_e('Taxonomy Custom Separators:', 'iz-md-pages'); ?></strong></p>
+                <ul>
+                    <li>
                         <?php esc_html_e('By default, taxonomy terms are separated by a comma and space (e.g. ', 'iz-md-pages'); ?><code>{%categories%}</code> &rarr; <em>Term 1, Term 2</em>).
                     </li>
-                    <li style="margin-bottom: 4px;">
+                    <li>
                         <?php esc_html_e('You can specify a custom separator after a colon, for example: ', 'iz-md-pages'); ?>
                         <code>{%categories: | %}</code>, <code>{%tags: / %}</code>, <code>{%taxonomy:product_cat: &bull; %}</code>.
                     </li>
-                    <li style="margin-bottom: 2px;">
-                        <?php esc_html_e('Control characters like newline (', 'iz-md-pages'); ?><code>\\n</code><?php esc_html_e(') and tab (', 'iz-md-pages'); ?><code>\\t</code><?php esc_html_e(') are supported for Markdown lists or multiline output, for example: ', 'iz-md-pages'); ?>
-                        <code>{%categories:\\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\\n\\t%}</code>.
+                    <li>
+                        <?php esc_html_e('Control characters like newline (', 'iz-md-pages'); ?><code>\n</code><?php esc_html_e(') and tab (', 'iz-md-pages'); ?><code>\t</code><?php esc_html_e(') are supported for Markdown lists or multiline output, for example: ', 'iz-md-pages'); ?>
+                        <code>{%categories:\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\n\t%}</code>.
                     </li>
                 </ul>
 
-                <p style="margin: 10px 0 6px 0;"><strong><?php esc_html_e('Leading Separator (Prefix Before First Item):', 'iz-md-pages'); ?></strong></p>
-                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
-                    <li style="margin-bottom: 2px;">
+                <p><strong><?php esc_html_e('Leading Separator (Prefix Before First Item):', 'iz-md-pages'); ?></strong></p>
+                <ul>
+                    <li>
                         <?php esc_html_e('To show the separator before the first element (e.g. for complete Markdown lists), append ', 'iz-md-pages'); ?>
                         <code>:before</code> (<?php esc_html_e('or', 'iz-md-pages'); ?> <code>:leading</code> / <code>:prefix</code>):<br>
-                        <code>{%categories:\\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\\n- :leading%}</code>, <code>{%meta:features:\\n* :prefix%}</code>.
+                        <code>{%categories:\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\n- :leading%}</code>, <code>{%meta:features:\n* :prefix%}</code>.
                     </li>
                 </ul>
 
-                <p style="margin: 10px 0 6px 0;"><strong><?php esc_html_e('Custom Fields (Post Meta):', 'iz-md-pages'); ?></strong></p>
-                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
-                    <li style="margin-bottom: 4px;">
+                <p><strong><?php esc_html_e('Custom Fields (Post Meta):', 'iz-md-pages'); ?></strong></p>
+                <ul>
+                    <li>
                         <?php esc_html_e('You can output any custom post field using ', 'iz-md-pages'); ?>
                         <code>{%meta:meta_key%}</code> (<?php esc_html_e('aliases:', 'iz-md-pages'); ?> <code>{%post_meta:key%}</code>, <code>{%custom_field:key%}</code>).
                     </li>
-                    <li style="margin-bottom: 2px;">
+                    <li>
                         <?php esc_html_e('If the meta value is an array or object, it is formatted recursively with an optional separator:', 'iz-md-pages'); ?>
-                        <code>{%meta:my_list_key:, %}</code>, <code>{%meta:specs:\\n- %}</code>, <code>{%meta:specs:\\n- :before%}</code>.
+                        <code>{%meta:my_list_key:, %}</code>, <code>{%meta:specs:\n- %}</code>, <code>{%meta:specs:\n- :before%}</code>.
                     </li>
                 </ul>
             </div>

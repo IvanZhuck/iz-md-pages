@@ -26,6 +26,7 @@ iz-md-pages/
 │   │   ├── MetaBoxes/
 │   │   │   └── MdPageMetaBox.php          # Markdown page meta box controller
 │   │   └── Settings/
+│   │       ├── DocumentationSettingsPage.php # Documentation & reference settings controller
 │   │       ├── Settings.php               # Base settings controller
 │   │       ├── SettingsPage.php           # General settings controller
 │   │       └── TemplatesSettingsPage.php  # Templates settings controller
@@ -42,6 +43,7 @@ iz-md-pages/
 └── templates/
     └── admin/
         ├── info/ 
+        │   ├── hooks-reference.php        # Developer hooks & filters reference HTML view
         │   ├── markdown-reference.php     # Markdown syntax guide HTML view
         │   └── placeholders-reference.php  # Placeholders reference HTML view
         ├── meta-boxes/
@@ -49,6 +51,7 @@ iz-md-pages/
         ├── nav/
         │   └── main-menu.php              # Shared admin tabs navigation
         └── settings/
+            ├── docs-page.php              # Documentation settings HTML view
             ├── settings-page.php          # General settings HTML view
             └── templates-page.php         # Templates settings HTML view
 ```

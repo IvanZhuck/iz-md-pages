@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Assets;
 
+use IZMDPages\Admin\Settings\DocumentationSettingsPage;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 
@@ -92,6 +93,7 @@ abstract class Assets
         $settingsPages = [
             SettingsPage::PAGE_SLUG,
             TemplatesSettingsPage::PAGE_SLUG,
+            DocumentationSettingsPage::PAGE_SLUG,
         ];
 
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
@@ -99,7 +101,8 @@ abstract class Assets
 
         return in_array($currentPage, $settingsPages, true)
             || strpos($screenId, SettingsPage::PAGE_SLUG) !== false
-            || strpos($screenId, TemplatesSettingsPage::PAGE_SLUG) !== false;
+            || strpos($screenId, TemplatesSettingsPage::PAGE_SLUG) !== false
+            || strpos($screenId, DocumentationSettingsPage::PAGE_SLUG) !== false;
     }
 
     /**

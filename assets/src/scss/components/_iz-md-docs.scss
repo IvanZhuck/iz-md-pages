@@ -1,0 +1,96 @@
+@use '../vars' as *;
+
+.iz-md-docs{
+    font-size: 14px;
+    line-height: 1.5;
+
+    p{
+        font-size: 14px;
+    }
+
+    .description{
+        color: $color-text-main;
+        font-size: 14px;
+    }
+
+    code{
+        display: inline-block;
+        margin: 1px;
+        padding: 0 5px;
+        font-size: 12px;
+        font-family: monospace;
+    }
+
+    .iz-md-docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(max(280px, calc((100% - 30px) / 3)), 1fr));
+        gap: 15px;
+        margin-top: 10px;
+
+        @media (width <= 600px) {
+            grid-template-columns: 1fr;
+        }
+
+        ul {
+            margin: 5px 0;
+            padding-left: 18px;
+            list-style-type: disc;
+
+            li {
+                margin-bottom: 4px;
+            }
+        }
+    }
+
+    .iz-md-docs-grid-single {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 12px;
+
+        ul {
+            margin: 6px 0;
+            padding-left: 18px;
+            list-style-type: disc;
+
+            li {
+                margin-bottom: 8px;
+
+                .iz-md-docs-hook-desc {
+                    margin-top: 5px;
+                    margin-bottom: 16px;
+                }
+            }
+        }
+    }
+
+    .iz-md-docs-notes {
+        margin-top: 15px;
+        padding-top: 12px;
+        color: $color-text-main;
+        border-top: 1px solid $color-border-light;
+
+        p {
+            margin: 10px 0 6px;
+
+            &:first-child {
+                margin-top: 0;
+            }
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+            list-style-type: disc;
+
+            li {
+                margin-bottom: 4px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+}
+

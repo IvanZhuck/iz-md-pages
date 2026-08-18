@@ -75,6 +75,10 @@
 
     .iz-md-info-block-body {
         margin-top: 8px;
+
+        p.description {
+            margin-bottom: 10px;
+        }
     }
 
     &.is-collapsed {
