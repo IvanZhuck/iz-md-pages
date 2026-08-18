@@ -11,7 +11,7 @@ class SettingsApp {
     const infoBlockElements = document.querySelectorAll('.iz-md-info-block');
 
     infoBlockElements.forEach((element) => {
-      InfoBlockToggle(element);
+      InfoBlockToggle.init(element);
     });
   }
 }

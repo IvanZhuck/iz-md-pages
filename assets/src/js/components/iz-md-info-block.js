@@ -5,6 +5,13 @@ export default class InfoBlockToggle {
   static DEFAULT_STORAGE_KEY = 'iz_md_info_block_collapsed';
 
   /**
+   * Initialize state and event listeners.
+   */
+  static init (element) {
+    return new InfoBlockToggle(element);
+  }
+
+  /**
    * @param {HTMLElement} element Root container element.
    * @param {string} [storageKey] Optional custom localStorage key.
    */
@@ -21,13 +28,6 @@ export default class InfoBlockToggle {
       this.container.getAttribute('data-storage-key') ||
       (this.container.id ? `iz_md_${this.container.id}_collapsed` : InfoBlockToggle.DEFAULT_STORAGE_KEY);
 
-    this.init();
-  }
-
-  /**
-   * Initialize state and event listeners.
-   */
-  init () {
     this.restoreState();
     this.bindEvents();
   }
