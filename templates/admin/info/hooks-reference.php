@@ -155,6 +155,26 @@ if (!defined('ABSPATH')) {
                     </li>
                 </ul>
             </div>
+
+            <div>
+                <strong><?php esc_html_e('5. Rendered Page Output Filters', 'iz-md-pages'); ?></strong>
+                <ul>
+                    <li>
+                        <code>iz_md_page_content_{$postType}</code>
+                        <div class="iz-md-docs-hook-desc">
+                            <?php esc_html_e('Filter final assembled Markdown content for a specific post type (e.g. post, page).', 'iz-md-pages'); ?>
+                            <br><code>apply_filters("iz_md_page_content_{$postType}", $content, $post)</code>
+                        </div>
+                    </li>
+                    <li>
+                        <code>iz_md_page_content</code>
+                        <div class="iz-md-docs-hook-desc">
+                            <?php esc_html_e('Filter final assembled Markdown content for any post type.', 'iz-md-pages'); ?>
+                            <br><code>apply_filters('iz_md_page_content', $content, $post)</code>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
