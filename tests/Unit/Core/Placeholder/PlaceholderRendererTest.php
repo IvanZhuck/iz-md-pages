@@ -33,6 +33,7 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_render_post_excerpt');
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
             remove_all_filters('iz_md_placeholder_comments');
+            remove_all_filters('iz_md_render_post_meta');
             remove_all_filters('the_content');
         }
     }
@@ -47,6 +48,7 @@ class PlaceholderRendererTest extends TestCase
             remove_all_filters('iz_md_placeholder_render_post_excerpt');
             remove_all_filters('iz_md_placeholder_taxonomy_terms');
             remove_all_filters('iz_md_placeholder_comments');
+            remove_all_filters('iz_md_render_post_meta');
             remove_all_filters('the_content');
         }
         parent::tearDown();
@@ -191,11 +193,15 @@ class PlaceholderRendererTest extends TestCase
         $this->assertArrayHasKey('Post', $grouped);
         $this->assertArrayHasKey('Author', $grouped);
         $this->assertArrayHasKey('Taxonomies', $grouped);
+        $this->assertArrayHasKey('Comments', $grouped);
+        $this->assertArrayHasKey('Custom Fields', $grouped);
 
         $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_POST_TITLE, $grouped['Post']);
         $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_POST_CONTENT, $grouped['Post']);
         $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_AUTHOR_NAME, $grouped['Author']);
         $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_CATEGORIES, $grouped['Taxonomies']);
+        $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_COMMENTS, $grouped['Comments']);
+        $this->assertArrayHasKey(PlaceholderRenderer::PLACEHOLDER_META, $grouped['Custom Fields']);
 
         $supported = PlaceholderRenderer::getSupportedPlaceholders();
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_POST_TITLE, $supported);
@@ -204,6 +210,7 @@ class PlaceholderRendererTest extends TestCase
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_TAGS, $supported);
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_COMMENTS, $supported);
         $this->assertContains(PlaceholderRenderer::PLACEHOLDER_COMMENTS_COUNT, $supported);
+        $this->assertContains(PlaceholderRenderer::PLACEHOLDER_META, $supported);
     }
 
     public function testRenderReplacesCommentsAndCommentsCountWhenCommentsExist(): void
@@ -291,6 +298,138 @@ class PlaceholderRendererTest extends TestCase
         $result = $this->renderer->render($template, $post);
 
         $this->assertSame('Custom Comments for Overridden Comments Post (count: 1)', $result);
+    }
+
+    public function testRenderReplacesScalarPostMeta(): void
+    {
+        global $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 301, 'post_title' => 'Product Post']);
+        $wp_post_meta[301] = [
+            'price' => '$99.99',
+            '_sku' => 'PROD-001',
+            'subtitle' => 'The Best Product Ever',
+            'rating' => 5,
+        ];
+
+        $template = "Price: {%meta:price%}\nSKU: {%post_meta:_sku%}\nSubtitle: {%custom_field:subtitle%}\nRating: {%cf:rating%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Price: $99.99', $result);
+        $this->assertStringContainsString('SKU: PROD-001', $result);
+        $this->assertStringContainsString('Subtitle: The Best Product Ever', $result);
+        $this->assertStringContainsString('Rating: 5', $result);
+    }
+
+    public function testRenderReplacesArrayPostMetaWithDefaultAndCustomSeparators(): void
+    {
+        global $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 302, 'post_title' => 'Product with Features']);
+        $wp_post_meta[302] = [
+            'features' => ['Fast', 'Reliable', 'Secure'],
+        ];
+
+        $template = "Default: {%meta:features%}\nPipes: {%meta:features: | %}\nNewline: {%meta:features:\\n* %}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Default: Fast, Reliable, Secure', $result);
+        $this->assertStringContainsString('Pipes: Fast | Reliable | Secure', $result);
+        $this->assertStringContainsString("Newline: Fast\n* Reliable\n* Secure", $result);
+    }
+
+    public function testRenderReplacesAssociativeAndNestedPostMetaRecursively(): void
+    {
+        global $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 303, 'post_title' => 'Complex Meta Post']);
+        $wp_post_meta[303] = [
+            'dimensions' => [
+                'width' => '100px',
+                'height' => '200px',
+            ],
+            'specs' => [
+                'cpu' => 'M3 Max',
+                'nested' => [
+                    'ram' => '64GB',
+                    'storage' => '1TB',
+                ],
+            ],
+        ];
+
+        $template = "Dimensions: {%meta:dimensions:, %}\nSpecs: {%meta:specs: | %}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Dimensions: width: 100px, height: 200px', $result);
+        $this->assertStringContainsString('Specs: cpu: M3 Max | nested: ram: 64GB | storage: 1TB', $result);
+    }
+
+    public function testRenderPostMetaWithLeadingSeparatorModifier(): void
+    {
+        global $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 304, 'post_title' => 'Post with Lists']);
+        $wp_post_meta[304] = [
+            'bullets' => ['Item 1', 'Item 2', 'Item 3'],
+        ];
+
+        $template = "List Before:\n{%meta:bullets:\\n* :before%}\n\nList Leading:\n{%meta:bullets:\\n- :leading%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString("List Before:\n\n* Item 1\n* Item 2\n* Item 3", $result);
+        $this->assertStringContainsString("List Leading:\n\n- Item 1\n- Item 2\n- Item 3", $result);
+    }
+
+    public function testRenderCategoriesAndTagsWithLeadingSeparator(): void
+    {
+        global $wp_terms_storage;
+
+        $post = new \WP_Post(['ID' => 305, 'post_type' => 'post']);
+        $wp_terms_storage[305]['category'] = [
+            (object) ['name' => 'News'],
+            (object) ['name' => 'Updates'],
+        ];
+        $wp_terms_storage[305]['post_tag'] = [
+            (object) ['name' => 'release'],
+            (object) ['name' => 'v2'],
+        ];
+
+        $template = "Categories List:\n{%categories:\\n* :before%}\n\nTags Hash:\n{%tags: #:before%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString("Categories List:\n\n* News\n* Updates", $result);
+        $this->assertStringContainsString("Tags Hash:\n #release #v2", $result);
+    }
+
+    public function testRenderHandlesNonExistentOrEmptyPostMeta(): void
+    {
+        $post = new \WP_Post(['ID' => 306, 'post_title' => 'Empty Meta Post']);
+
+        $template = "Empty: [{%meta:non_existent%}]\nEmpty Leading: [{%meta:non_existent:\\n* :before%}]";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Empty: []', $result);
+        $this->assertStringContainsString('Empty Leading: []', $result);
+    }
+
+    public function testFilterAllowsOverridingPostMetaOutput(): void
+    {
+        global $wp_post_meta;
+
+        add_filter('iz_md_render_post_meta', function ($value, string $metaKey, \WP_Post $post) {
+            if ($metaKey === 'custom_field') {
+                return 'Overridden Meta (' . $post->post_title . ')';
+            }
+            return $value;
+        }, 10, 3);
+
+        $post = new \WP_Post(['ID' => 307, 'post_title' => 'Filter Meta Post']);
+        $wp_post_meta[307]['custom_field'] = 'Original Value';
+
+        $template = "{%meta:custom_field%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertSame('Overridden Meta (Filter Meta Post)', $result);
     }
 
     public function testFiltersAllowOverridingValues(): void
