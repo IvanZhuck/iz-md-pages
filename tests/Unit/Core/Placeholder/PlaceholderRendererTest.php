@@ -145,7 +145,7 @@ class PlaceholderRendererTest extends TestCase
             (object) ['name' => 'SOLID'],
         ];
 
-        $template = "Cat Default: {%categories%}\nCat Slashes: {%categories: / %}\nTags Default: {%tags%}\nTags Pipes: {%tags: | %}\nTopic Default: {%taxonomy:topic%}\nTopic Newline: {%taxonomy:topic:\n%}";
+        $template = "Cat Default: {%categories%}\nCat Slashes: {%categories: / %}\nTags Default: {%tags%}\nTags Pipes: {%tags: | %}\nTopic Default: {%taxonomy:topic%}\nTopic Newline: {%taxonomy:topic:\\n%}";
 
         $result = $this->renderer->render($template, $post);
 

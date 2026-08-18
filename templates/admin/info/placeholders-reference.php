@@ -60,6 +60,15 @@ if (!defined('ABSPATH')) {
                     </li>
                 </ul>
 
+                <p style="margin: 10px 0 6px 0;"><strong><?php esc_html_e('Leading Separator (Prefix Before First Item):', 'iz-md-pages'); ?></strong></p>
+                <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
+                    <li style="margin-bottom: 2px;">
+                        <?php esc_html_e('To show the separator before the first element (e.g. for complete Markdown lists), append ', 'iz-md-pages'); ?>
+                        <code>:before</code> (<?php esc_html_e('or', 'iz-md-pages'); ?> <code>:leading</code> / <code>:1</code>):<br>
+                        <code>{%categories:\\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\\n- :leading%}</code>, <code>{%meta:features:\\n* :before%}</code>.
+                    </li>
+                </ul>
+
                 <p style="margin: 10px 0 6px 0;"><strong><?php esc_html_e('Custom Fields (Post Meta):', 'iz-md-pages'); ?></strong></p>
                 <ul style="margin: 0; padding-left: 18px; list-style-type: disc; color: #666;">
                     <li style="margin-bottom: 4px;">
@@ -67,8 +76,8 @@ if (!defined('ABSPATH')) {
                         <code>{%meta:meta_key%}</code> (<?php esc_html_e('aliases:', 'iz-md-pages'); ?> <code>{%post_meta:key%}</code>, <code>{%custom_field:key%}</code>).
                     </li>
                     <li style="margin-bottom: 2px;">
-                        <?php esc_html_e('If the meta value is an array, you can provide an optional separator, for example: ', 'iz-md-pages'); ?>
-                        <code>{%meta:my_list_key:, %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%meta:my_list_key:\\n* %}</code>.
+                        <?php esc_html_e('If the meta value is an array or object, it is formatted recursively with an optional separator:', 'iz-md-pages'); ?>
+                        <code>{%meta:my_list_key:, %}</code>, <code>{%meta:specs:\\n- %}</code>, <code>{%meta:specs:\\n- :before%}</code>.
                     </li>
                 </ul>
             </div>

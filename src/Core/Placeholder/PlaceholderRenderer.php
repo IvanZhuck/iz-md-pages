@@ -95,46 +95,88 @@ class PlaceholderRenderer
 
         $result = strtr($template, $placeholders);
 
-        // Dynamic categories replacement with optional custom separator: {%categories%}, {%categories:<separator>%}
+        // Dynamic categories replacement with optional custom separator and leading flag:
+        // {%categories%}, {%categories:<separator>%}, {%categories:<separator>:<leading>%}, {%categories:before%}
         $result = (string) preg_replace_callback(
-            '/\{%(?:categories|category)(?::([^%]*))?%\}/',
+            '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
-                $separator = isset($matches[1]) && $matches[1] !== '' ? $matches[1] : ', ';
-                return $this->renderTaxonomyTerms($post, 'category', $separator);
+                $rawSep = $matches[1] ?? '';
+                $rawLead = $matches[2] ?? '';
+
+                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
+                    $separator = ', ';
+                    $leading = true;
+                } else {
+                    $separator = $rawSep !== '' ? $rawSep : ', ';
+                    $leading = $this->isLeadingFlag($rawLead);
+                }
+
+                return $this->renderTaxonomyTerms($post, 'category', $separator, $leading);
             },
             $result
         );
 
-        // Dynamic tags replacement with optional custom separator: {%tags%}, {%tags:<separator>%}
+        // Dynamic tags replacement with optional custom separator and leading flag:
+        // {%tags%}, {%tags:<separator>%}, {%tags:<separator>:<leading>%}, {%tags:before%}
         $result = (string) preg_replace_callback(
-            '/\{%(?:tags|tag|post_tags|post_tag)(?::([^%]*))?%\}/',
+            '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
-                $separator = isset($matches[1]) && $matches[1] !== '' ? $matches[1] : ', ';
-                return $this->renderTaxonomyTerms($post, 'post_tag', $separator);
+                $rawSep = $matches[1] ?? '';
+                $rawLead = $matches[2] ?? '';
+
+                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
+                    $separator = ', ';
+                    $leading = true;
+                } else {
+                    $separator = $rawSep !== '' ? $rawSep : ', ';
+                    $leading = $this->isLeadingFlag($rawLead);
+                }
+
+                return $this->renderTaxonomyTerms($post, 'post_tag', $separator, $leading);
             },
             $result
         );
 
-        // Dynamic taxonomy replacement with optional custom separator:
-        // {%taxonomy:<tax_name>%}, {%taxonomy:<tax_name>:<separator>%}, {%tax_<tax_name>%}, etc.
+        // Dynamic taxonomy replacement with optional custom separator and leading flag:
+        // {%taxonomy:<tax_name>%}, {%taxonomy:<tax_name>:<separator>%}, {%taxonomy:<tax_name>:<separator>:<leading>%}
         $result = (string) preg_replace_callback(
-            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
+            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
-                $separator = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : ', ';
-                return $this->renderTaxonomyTerms($post, $taxonomy, $separator);
+                $rawSep = $matches[2] ?? '';
+                $rawLead = $matches[3] ?? '';
+
+                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
+                    $separator = ', ';
+                    $leading = true;
+                } else {
+                    $separator = $rawSep !== '' ? $rawSep : ', ';
+                    $leading = $this->isLeadingFlag($rawLead);
+                }
+
+                return $this->renderTaxonomyTerms($post, $taxonomy, $separator, $leading);
             },
             $result
         );
 
-        // Dynamic post meta replacement with optional custom separator:
-        // {%meta:<key>%}, {%meta:<key>:<separator>%}, {%post_meta:<key>%}, {%custom_field:<key>%}
+        // Dynamic post meta replacement with optional custom separator and leading flag:
+        // {%meta:<key>%}, {%meta:<key>:<separator>%}, {%meta:<key>:<separator>:<leading>%}
         return (string) preg_replace_callback(
-            '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::([^%]*))?%\}/',
+            '/\{%(?:meta|post_meta|custom_field|cf):([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|true|1|\+|yes))?%\}/i',
             function (array $matches) use ($post): string {
                 $metaKey = $matches[1];
-                $separator = isset($matches[2]) && $matches[2] !== '' ? $matches[2] : ', ';
-                return $this->renderPostMeta($post, $metaKey, $separator);
+                $rawSep = $matches[2] ?? '';
+                $rawLead = $matches[3] ?? '';
+
+                if ($rawLead === '' && $this->isLeadingFlag($rawSep)) {
+                    $separator = ', ';
+                    $leading = true;
+                } else {
+                    $separator = $rawSep !== '' ? $rawSep : ', ';
+                    $leading = $this->isLeadingFlag($rawLead);
+                }
+
+                return $this->renderPostMeta($post, $metaKey, $separator, $leading);
             },
             $result
         );
@@ -396,14 +438,15 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render separated terms for a given taxonomy and post.
+     * Render separated terms for a given taxonomy and post with optional leading separator.
      *
      * @param \WP_Post $post         Current post object.
      * @param string   $taxonomyName Taxonomy slug.
      * @param string   $separator    Separator string (defaults to ', ').
+     * @param bool     $leading      Whether to prepend separator before the first item.
      * @return string Separated list of term names.
      */
-    private function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', '): string
+    private function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', ', bool $leading = false): string
     {
         if (!taxonomy_exists($taxonomyName)) {
             return '';
@@ -416,19 +459,30 @@ class PlaceholderRenderer
         }
 
         $termNames = wp_list_pluck($terms, 'name');
-        $separator = $this->parseSeparator($separator);
+        $parsedSeparator = $this->parseSeparator($separator);
 
         /**
          * Filter rendered terms list for a taxonomy placeholder.
          *
-         * @param array<int, string> $termNames    Array of term names.
-         * @param \WP_Post           $post         Current post object.
-         * @param string             $taxonomyName Taxonomy slug.
-         * @param string             $separator    Separator string.
+         * @param array<int, string> $termNames       Array of term names.
+         * @param \WP_Post           $post            Current post object.
+         * @param string             $taxonomyName    Taxonomy slug.
+         * @param string             $parsedSeparator Separator string.
+         * @param bool               $leading         Whether leading separator is enabled.
          */
-        $termNames = apply_filters('iz_md_placeholder_taxonomy_terms', $termNames, $post, $taxonomyName, $separator);
+        $termNames = apply_filters('iz_md_placeholder_taxonomy_terms', $termNames, $post, $taxonomyName, $parsedSeparator, $leading);
 
-        return implode($separator, $termNames);
+        if (empty($termNames)) {
+            return '';
+        }
+
+        $result = implode($parsedSeparator, $termNames);
+
+        if ($leading && $result !== '') {
+            $result = $parsedSeparator . $result;
+        }
+
+        return $result;
     }
 
     /**
@@ -516,14 +570,15 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render post meta field value as string with recursive array support.
+     * Render post meta field value as string with recursive array and leading separator support.
      *
      * @param \WP_Post $post      Current post object.
      * @param string   $metaKey   Post meta key identifier.
      * @param string   $separator Separator string for array values (defaults to ', ').
+     * @param bool     $leading   Whether to prepend separator before the first item.
      * @return string Rendered post meta value.
      */
-    private function renderPostMeta(\WP_Post $post, string $metaKey, string $separator = ', '): string
+    private function renderPostMeta(\WP_Post $post, string $metaKey, string $separator = ', ', bool $leading = false): string
     {
         if (!function_exists('get_post_meta')) {
             return '';
@@ -533,6 +588,10 @@ class PlaceholderRenderer
         $parsedSeparator = $this->parseSeparator($separator);
         $value = $this->formatMetaValue($metaValue, $parsedSeparator);
 
+        if ($leading && $value !== '') {
+            $value = $parsedSeparator . $value;
+        }
+
         /**
          * Filter to customize rendered post meta field value.
          *
@@ -540,8 +599,9 @@ class PlaceholderRenderer
          * @param string   $metaKey   Post meta key.
          * @param \WP_Post $post      Current post object.
          * @param mixed    $metaValue Original raw meta value.
+         * @param bool     $leading   Whether leading separator is enabled.
          */
-        return (string) apply_filters('iz_md_render_post_meta', $value, $metaKey, $post, $metaValue);
+        return (string) apply_filters('iz_md_render_post_meta', $value, $metaKey, $post, $metaValue, $leading);
     }
 
     /**
@@ -575,6 +635,22 @@ class PlaceholderRenderer
         }
 
         $isAssoc = array_keys($metaValue) !== range(0, count($metaValue) - 1);
+        $elements = $this->formatMetaArrayElements($metaValue, $separator, $depth, $isAssoc);
+
+        return implode($separator, $elements);
+    }
+
+    /**
+     * Format elements of a meta array into a list of string items.
+     *
+     * @param array<int|string, mixed> $metaValue Meta array elements.
+     * @param string                   $separator Separator for nested array elements.
+     * @param int                      $depth     Current recursion depth.
+     * @param bool                     $isAssoc   Whether the array is associative.
+     * @return array<int, string> List of formatted string elements.
+     */
+    private function formatMetaArrayElements(array $metaValue, string $separator, int $depth, bool $isAssoc): array
+    {
         $elements = [];
 
         foreach ($metaValue as $key => $item) {
@@ -598,6 +674,18 @@ class PlaceholderRenderer
             }
         }
 
-        return implode($separator, $elements);
+        return $elements;
+    }
+
+    /**
+     * Check if a modifier string represents a leading separator flag.
+     *
+     * @param string $flag Modifier string.
+     * @return bool True if flag enables leading separator, false otherwise.
+     */
+    private function isLeadingFlag(string $flag): bool
+    {
+        $normalized = strtolower(trim($flag));
+        return in_array($normalized, ['1', 'true', 'before', 'leading', 'prefix', '+', 'yes'], true);
     }
 }
