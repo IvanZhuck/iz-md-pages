@@ -1,41 +1,79 @@
 @use 'vars' as *;
 
-.iz-md-meta-box-content {
-    .checkbox-label{
-        cursor: pointer;
+#iz_md_page_meta_box {
+    background-color: $color-bg-page;
+
+    .postbox-header {
+        background-color: $color-bg-white;
+        border-bottom: 1px solid $color-border;
     }
 
-    .iz-md-manual-content-wrapper {
-        &.is-hidden {
-            display: none;
+    .inside {
+        background-color: $color-bg-page;
+        padding: 16px 20px 20px;
+    }
+
+    .iz-md-meta-box-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px 20px;
+        background-color: $color-bg-white;
+        border: 1px solid $color-border;
+        border-radius: 4px;
+        box-sizing: border-box;
+
+        .checkbox-label {
+            cursor: pointer;
         }
 
-        textarea {
-            width: 100%;
-            font-family: monospace;
-            resize: vertical;
-        }
+        .iz-md-manual-content-wrapper {
+            &.is-hidden {
+                display: none;
+            }
 
-        .iz-md-manual-content-actions {
-            margin-top: 8px;
-            margin-bottom: 8px;
+            textarea {
+                width: 100%;
+                font-family: monospace;
+                resize: vertical;
+            }
 
-            .button {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
+            .iz-md-manual-content-actions {
+                margin-top: 8px;
+                margin-bottom: 8px;
 
-                .dashicons {
-                    width: 14px;
-                    height: 14px;
-                    font-size: 14px;
-                    line-height: 1;
+                .iz-md-reset-default-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    color: $color-text-muted;
+                    border-color: $color-border;
+                    background: $color-bg-white;
+
+                    .dashicons {
+                        width: 16px;
+                        height: 16px;
+                        font-size: 16px;
+                        line-height: 1;
+                        color: $color-text-muted;
+                    }
+
+                    &:hover,
+                    &:focus {
+                        color: $color-text-main;
+                        border-color: $color-text-muted;
+                        background: $color-bg-page;
+
+                        .dashicons {
+                            color: $color-text-main;
+                        }
+                    }
                 }
             }
-        }
 
-        .description {
-            color: $color-text-muted;
+            .description {
+                color: $color-text-muted;
+            }
         }
     }
 }
+

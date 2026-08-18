@@ -1,5 +1,6 @@
 // WordPress Admin CSS Variables with standard admin fallbacks
 $color-bg-white: var(--wp-admin-background-color, #fff);
+$color-bg-page: var(--wp-admin-page-background-color, #f0f0f1);
 $color-border: var(--wp-admin-border-color, #ccd0d4);
 $color-border-light: var(--wp-admin-border-light, #e0e0e0);
 $color-text-main: var(--wp-admin-text-color, #1d2327);
