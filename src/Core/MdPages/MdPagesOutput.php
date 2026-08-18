@@ -101,16 +101,16 @@ class MdPagesOutput
     private function maybeRedirect(\WP_Post $post): void
     {
         $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
+        $permalink = (string) get_permalink($post->ID);
+        $isDisabled = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_DISABLED, true);
 
-        if (!in_array($post->post_type, $enabledTypes, true)) {
-            $permalink = (string) get_permalink($post->ID);
+        if (!in_array($post->post_type, $enabledTypes, true) || $isDisabled) {
             wp_safe_redirect($permalink, 301);
             exit;
         }
 
         $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
         $isQueryVarRequest = isset($_GET['md']);
-        $permalink = (string) get_permalink($post->ID);
 
         if ($suffixType === 'endpoint' && $isQueryVarRequest) {
             $targetUrl = user_trailingslashit(rtrim($permalink, '/') . '/md');
@@ -138,6 +138,12 @@ class MdPagesOutput
         $post = get_queried_object();
 
         if (!$post instanceof \WP_Post) {
+            return;
+        }
+
+        $isDisabled = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_DISABLED, true);
+
+        if ($isDisabled) {
             return;
         }
 

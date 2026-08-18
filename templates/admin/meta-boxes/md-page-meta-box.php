@@ -5,13 +5,15 @@ declare(strict_types=1);
 /**
  * Meta box view for Markdown Page settings.
  *
- * @var \WP_Post $post               Current post object.
- * @var string   $nonceAction        Nonce action string.
- * @var string   $nonceName          Nonce field name.
- * @var string   $fieldManualEnabled Checkbox field name.
- * @var string   $fieldManualContent Textarea field name.
- * @var bool     $isManual           Whether manual Markdown mode is active.
- * @var string   $manualContent      Custom Markdown content.
+ * @var \WP_Post $post                Current post object.
+ * @var string   $nonceAction         Nonce action string.
+ * @var string   $nonceName           Nonce field name.
+ * @var string   $fieldDisabled       Disable checkbox field name.
+ * @var string   $fieldManualEnabled  Checkbox field name.
+ * @var string   $fieldManualContent  Textarea field name.
+ * @var bool     $isDisabled          Whether MD version is disabled for this page.
+ * @var bool     $isManual            Whether manual Markdown mode is active.
+ * @var string   $manualContent       Custom Markdown content.
  */
 
 if (!defined('ABSPATH')) {
@@ -21,6 +23,19 @@ if (!defined('ABSPATH')) {
 wp_nonce_field($nonceAction, $nonceName);
 ?>
 <div class="iz-md-meta-box-content">
+    <p>
+        <label for="<?php echo esc_attr($fieldDisabled); ?>">
+            <input
+                type="checkbox"
+                name="<?php echo esc_attr($fieldDisabled); ?>"
+                id="<?php echo esc_attr($fieldDisabled); ?>"
+                value="1"
+                <?php checked($isDisabled); ?>
+            />
+            <?php echo esc_html__('Disable MD version for this page', 'iz-md-pages'); ?>
+        </label>
+    </p>
+
     <p>
         <label for="<?php echo esc_attr($fieldManualEnabled); ?>">
             <input

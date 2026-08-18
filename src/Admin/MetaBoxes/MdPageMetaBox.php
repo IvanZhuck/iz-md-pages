@@ -28,6 +28,16 @@ class MdPageMetaBox
     public const NONCE_NAME = 'iz_md_meta_box_nonce';
 
     /**
+     * Post meta key for disabling the Markdown page.
+     */
+    public const META_KEY_DISABLED = '_iz_md_disabled';
+
+    /**
+     * Form field name for disable checkbox.
+     */
+    public const FIELD_DISABLED = 'iz_md_disabled';
+
+    /**
      * Post meta key for enabling manual Markdown content.
      */
     public const META_KEY_MANUAL_ENABLED = '_iz_md_manual_enabled';
@@ -102,6 +112,7 @@ class MdPageMetaBox
      */
     public function renderMetaBox(\WP_Post $post, array $args = []): void
     {
+        $isDisabled = (bool) get_post_meta($post->ID, self::META_KEY_DISABLED, true);
         $isManual = (bool) get_post_meta($post->ID, self::META_KEY_MANUAL_ENABLED, true);
         $manualContent = (string) get_post_meta($post->ID, self::META_KEY_MANUAL_CONTENT, true);
 
@@ -109,8 +120,10 @@ class MdPageMetaBox
             'post' => $post,
             'nonceAction' => self::NONCE_ACTION,
             'nonceName' => self::NONCE_NAME,
+            'fieldDisabled' => self::FIELD_DISABLED,
             'fieldManualEnabled' => self::FIELD_MANUAL_ENABLED,
             'fieldManualContent' => self::FIELD_MANUAL_CONTENT,
+            'isDisabled' => $isDisabled,
             'isManual' => $isManual,
             'manualContent' => $manualContent,
         ];
@@ -144,6 +157,12 @@ class MdPageMetaBox
 
         if (!current_user_can('edit_post', $postId)) {
             return;
+        }
+
+        if (isset($_POST[self::FIELD_DISABLED])) {
+            update_post_meta($postId, self::META_KEY_DISABLED, '1');
+        } else {
+            delete_post_meta($postId, self::META_KEY_DISABLED);
         }
 
         if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
