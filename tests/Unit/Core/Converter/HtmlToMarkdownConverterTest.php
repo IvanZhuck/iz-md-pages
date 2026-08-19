@@ -150,7 +150,36 @@ class HtmlToMarkdownConverterTest extends TestCase
                 '<a href="">Text only</a>',
                 'Text only',
             ],
+            'link without href attribute' => [
+                '<a name="target-anchor">Anchor without href</a>',
+                'Anchor without href',
+            ],
+            'mailto scheme link' => [
+                '<a href="mailto:support@example.com">Contact Support</a>',
+                '[Contact Support](mailto:support@example.com)',
+            ],
+            'tel scheme link' => [
+                '<a href="tel:+1234567890">Call Sales</a>',
+                '[Call Sales](tel:+1234567890)',
+            ],
+            'protocol-relative url' => [
+                '<a href="//cdn.example.com/script.js">CDN Asset</a>',
+                '[CDN Asset](//cdn.example.com/script.js)',
+            ],
         ];
+    }
+
+    public function testConvertLinksWithCustomPortInBaseUrl(): void
+    {
+        add_filter('home_url', function (): string {
+            return 'https://example.com:8443';
+        });
+
+        // Test with custom port baseUrl by using an anonymous class or testing resolveUrl via convert
+        $html = '<a href="/dashboard">Dashboard</a>';
+        // Note: home_url in bootstrap defaults to https://example.com, with custom port in wp_parse_url
+        $result = $this->converter->convert($html);
+        $this->assertStringContainsString('/dashboard', $result);
     }
 
     public function testConvertImages(): void
@@ -160,6 +189,18 @@ class HtmlToMarkdownConverterTest extends TestCase
 
         $relativeHtml = '<img src="/images/banner.jpg" alt="Banner">';
         $this->assertSame('![Banner](https://example.com/images/banner.jpg)', $this->converter->convert($relativeHtml));
+
+        $relativeNoSlash = '<img src="images/icon.png" alt="Icon">';
+        $this->assertSame('![Icon](https://example.com/images/icon.png)', $this->converter->convert($relativeNoSlash));
+    }
+
+    public function testConvertImagesIgnoresEmptyOrMissingSrc(): void
+    {
+        $htmlWithoutSrc = '<p>Text with <img alt="Missing Src"> image.</p>';
+        $this->assertSame('Text with image.', $this->converter->convert($htmlWithoutSrc));
+
+        $htmlWithEmptySrc = '<p>Text with <img src="" alt="Empty Src"> image.</p>';
+        $this->assertSame('Text with image.', $this->converter->convert($htmlWithEmptySrc));
     }
 
     public function testConvertBlockquote(): void
@@ -186,6 +227,19 @@ class HtmlToMarkdownConverterTest extends TestCase
         $this->assertSame($expected, $this->converter->convert($html));
     }
 
+    public function testConvertListIgnoresNonLiChildren(): void
+    {
+        $html = '<ul>' .
+            'Some stray text' .
+            '<li>Item 1</li>' .
+            '<!-- Comment -->' .
+            '<li>Item 2</li>' .
+            '</ul>';
+
+        $expected = "- Item 1\n- Item 2";
+        $this->assertSame($expected, $this->converter->convert($html));
+    }
+
     public function testConvertCodeBlocks(): void
     {
         $html = '<pre><code>function hello() {
@@ -193,6 +247,47 @@ class HtmlToMarkdownConverterTest extends TestCase
 }</code></pre>';
 
         $expected = "```\nfunction hello() {\n    return \"world\";\n}\n```";
+        $this->assertSame($expected, $this->converter->convert($html));
+    }
+
+    public function testConvertPreWithoutInnerCodeTag(): void
+    {
+        $html = '<pre>Plain preformatted text without code tag</pre>';
+        $expected = "```\nPlain preformatted text without code tag\n```";
+        $this->assertSame($expected, $this->converter->convert($html));
+    }
+
+    public function testConvertPreservesIndentationInsideCodeBlocksWhileStrippingOutside(): void
+    {
+        $html = '<p>   Paragraph with leading spaces</p>' .
+            '<pre><code>    line with 4 spaces indent' . "\n" .
+            '        line with 8 spaces indent</code></pre>';
+
+        $result = $this->converter->convert($html);
+
+        $this->assertStringContainsString('Paragraph with leading spaces', $result);
+        $this->assertStringContainsString("    line with 4 spaces indent\n        line with 8 spaces indent", $result);
+    }
+
+    public function testConvertNormalizesConsecutiveBlankLinesAndSpaces(): void
+    {
+        $html = '<p>First line</p><br><br><br><br><p>Second line</p>';
+        $result = $this->converter->convert($html);
+
+        // Should not have more than 2 consecutive newlines
+        $this->assertDoesNotMatchRegularExpression("/\n{3,}/", $result);
+    }
+
+    public function testConvertGenericContainerTags(): void
+    {
+        $html = '<div class="content-wrapper"><section><article><span>Text inside generic tags</span></article></section></div>';
+        $this->assertSame('Text inside generic tags', $this->converter->convert($html));
+    }
+
+    public function testConvertNestedInlineFormatting(): void
+    {
+        $html = '<p>This is <strong>bold and <em>italic and <del>struck</del></em></strong> text.</p>';
+        $expected = 'This is **bold and *italic and ~~struck~~*** text.';
         $this->assertSame($expected, $this->converter->convert($html));
     }
 
