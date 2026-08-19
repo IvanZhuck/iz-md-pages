@@ -549,4 +549,205 @@ class PlaceholderRendererTest extends TestCase
         $supported = PlaceholderRenderer::getSupportedPlaceholders();
         $this->assertContains('{%custom_addon_tag%}', $supported);
     }
+
+    public function testRenderFeaturedImageFallsBackToPostTitleWhenAltMetaIsEmpty(): void
+    {
+        $post = new \WP_Post([
+            'ID' => 501,
+            'post_title' => 'Article Fallback Alt Title',
+        ]);
+        $post->thumbnail_url = 'https://example.com/images/no-alt.png';
+        $post->thumbnail_id = 601;
+
+        $template = "Image: {%post_featured_image%}\nThumb: {%post_thumbnail%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Image: ![Article Fallback Alt Title](https://example.com/images/no-alt.png)', $result);
+        $this->assertStringContainsString('Thumb: ![Article Fallback Alt Title](https://example.com/images/no-alt.png)', $result);
+    }
+
+    public function testRenderFeaturedImageReturnsEmptyStringWhenNoThumbnail(): void
+    {
+        $post = new \WP_Post([
+            'ID' => 502,
+            'post_title' => 'Post without thumbnail',
+        ]);
+
+        $template = "Image: [{%post_featured_image%}]\nThumb: [{%post_thumbnail%}]\nURL: [{%post_thumbnail_url%}]";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Image: []', $result);
+        $this->assertStringContainsString('Thumb: []', $result);
+        $this->assertStringContainsString('URL: []', $result);
+    }
+
+    public function testRenderPostExcerptAppliesFilterAndHandlesEmptyExcerpt(): void
+    {
+        $postWithoutExcerpt = new \WP_Post([
+            'ID' => 503,
+            'post_title' => 'Empty Excerpt Post',
+            'post_excerpt' => '',
+        ]);
+
+        $this->assertSame('Excerpt: []', $this->renderer->render('Excerpt: [{%post_excerpt%}]', $postWithoutExcerpt));
+
+        add_filter('iz_md_placeholder_render_post_excerpt', function (string $excerpt, \WP_Post $post): string {
+            return '<p>Custom filtered excerpt for ' . $post->post_title . '</p>';
+        }, 10, 2);
+
+        $postWithFilter = new \WP_Post([
+            'ID' => 504,
+            'post_title' => 'Filtered Excerpt Post',
+            'post_excerpt' => 'Raw excerpt',
+        ]);
+
+        $result = $this->renderer->render('Excerpt: {%post_excerpt%}', $postWithFilter);
+        $this->assertStringContainsString('Excerpt: Custom filtered excerpt for Filtered Excerpt Post', $result);
+    }
+
+    public function testFilterAllowsModifyingPredefinedPlaceholdersMap(): void
+    {
+        add_filter('iz_md_pages_placeholders', function (array $placeholders, \WP_Post $post, string $template): array {
+            $placeholders['{%custom_static_token%}'] = 'Injected Static Value';
+            $placeholders['{%post_title%}'] = strtoupper($placeholders['{%post_title%}']);
+            return $placeholders;
+        }, 10, 3);
+
+        $post = new \WP_Post([
+            'ID' => 505,
+            'post_title' => 'Sample uppercase title',
+        ]);
+
+        $template = "Title: {%post_title%}\nCustom: {%custom_static_token%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Title: SAMPLE UPPERCASE TITLE', $result);
+        $this->assertStringContainsString('Custom: Injected Static Value', $result);
+    }
+
+    public function testRenderCategoriesAndTagsWithDirectLeadingModifierWithoutCustomSeparator(): void
+    {
+        global $wp_terms_storage, $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 506, 'post_type' => 'post']);
+        $wp_terms_storage[506]['category'] = [
+            (object) ['name' => 'Tech'],
+            (object) ['name' => 'AI'],
+        ];
+        $wp_terms_storage[506]['post_tag'] = [
+            (object) ['name' => 'php'],
+            (object) ['name' => 'testing'],
+        ];
+        $wp_post_meta[506] = [
+            'features' => ['Fast', 'Reliable'],
+        ];
+
+        $template = "Cat: [{%categories:leading%}]\nTags: [{%tags:before%}]\nMeta: [{%meta:features:prefix%}]";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Cat: [, Tech, AI]', $result);
+        $this->assertStringContainsString('Tags: [, php, testing]', $result);
+        $this->assertStringContainsString('Meta: [, Fast, Reliable]', $result);
+    }
+
+    public function testRenderDynamicPlaceholderAliases(): void
+    {
+        global $wp_terms_storage;
+
+        $post = new \WP_Post(['ID' => 507, 'post_type' => 'post']);
+        $wp_terms_storage[507]['category'] = [
+            (object) ['name' => 'General'],
+        ];
+        $wp_terms_storage[507]['post_tag'] = [
+            (object) ['name' => 'news'],
+        ];
+        $wp_terms_storage[507]['series'] = [
+            (object) ['name' => 'Season 1'],
+        ];
+
+        $template = "Cat: {%category%}\nTag1: {%tag%}\nTag2: {%post_tags%}\nTag3: {%post_tag%}\nTax1: {%tax_series%}\nTax2: {%taxonomy_series%}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Cat: General', $result);
+        $this->assertStringContainsString('Tag1: news', $result);
+        $this->assertStringContainsString('Tag2: news', $result);
+        $this->assertStringContainsString('Tag3: news', $result);
+        $this->assertStringContainsString('Tax1: Season 1', $result);
+        $this->assertStringContainsString('Tax2: Season 1', $result);
+    }
+
+    public function testRenderPostMetaHandlesObjects(): void
+    {
+        global $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 508, 'post_title' => 'Object Meta Post']);
+        $wp_post_meta[508]['device_info'] = (object) [
+            'brand' => 'Apple',
+            'model' => 'MacBook Pro',
+        ];
+
+        $template = "Device: {%meta:device_info: | %}";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Device: brand: Apple | model: MacBook Pro', $result);
+    }
+
+    public function testRenderPostMetaStopsRecursionAtMaxDepth(): void
+    {
+        global $wp_post_meta;
+
+        // Build deeply nested array (> 10 levels)
+        $deep = 'Deep Value';
+        for ($i = 0; $i < 15; $i++) {
+            $deep = ['level_' . $i => $deep];
+        }
+
+        $post = new \WP_Post(['ID' => 509, 'post_title' => 'Deep Meta Post']);
+        $wp_post_meta[509]['deep_data'] = $deep;
+
+        $template = "Deep: {%meta:deep_data%}";
+        $result = $this->renderer->render($template, $post);
+
+        // Should render without error or stack overflow
+        $this->assertIsString($result);
+        $this->assertStringContainsString('Deep:', $result);
+    }
+
+    public function testParseSeparatorDecodesEscapeSequences(): void
+    {
+        global $wp_terms_storage;
+
+        $post = new \WP_Post(['ID' => 510, 'post_type' => 'post']);
+        $wp_terms_storage[510]['category'] = [
+            (object) ['name' => 'First'],
+            (object) ['name' => 'Second'],
+        ];
+
+        $template = "Tabs: [{%categories:\\t%}]";
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString("Tabs: [First\tSecond]", $result);
+    }
+
+    public function testConstructorAcceptsCustomConverterAndBlockRenderer(): void
+    {
+        $mockConverter = $this->createMock(\IZMDPages\Core\Converter\HtmlToMarkdownConverter::class);
+        $mockBlockRenderer = $this->createMock(\IZMDPages\Core\MdPages\BlockRenderer::class);
+
+        $mockBlockRenderer->expects($this->once())
+            ->method('render')
+            ->willReturn('Custom Mocked Block Content');
+
+        $renderer = new PlaceholderRenderer($mockConverter, $mockBlockRenderer);
+
+        $post = new \WP_Post([
+            'ID' => 511,
+            'post_title' => 'DI Test Post',
+            'post_content' => '<p>Some content</p>',
+        ]);
+
+        $result = $renderer->render('Content: {%post_content%}', $post);
+
+        $this->assertSame('Content: Custom Mocked Block Content', $result);
+    }
 }

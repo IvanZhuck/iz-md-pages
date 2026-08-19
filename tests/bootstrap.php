@@ -412,7 +412,29 @@ if (!function_exists('get_object_taxonomies')) {
 if (!function_exists('taxonomy_exists')) {
     function taxonomy_exists(string $taxonomy): bool
     {
-        return in_array($taxonomy, ['category', 'post_tag', 'genre', 'topic'], true);
+        global $wp_taxonomies_storage, $wp_terms_storage;
+
+        if (in_array($taxonomy, ['category', 'post_tag', 'genre', 'topic', 'series'], true)) {
+            return true;
+        }
+
+        if (isset($wp_taxonomies_storage) && is_array($wp_taxonomies_storage)) {
+            foreach ($wp_taxonomies_storage as $taxList) {
+                if (is_array($taxList) && in_array($taxonomy, $taxList, true)) {
+                    return true;
+                }
+            }
+        }
+
+        if (isset($wp_terms_storage) && is_array($wp_terms_storage)) {
+            foreach ($wp_terms_storage as $postTerms) {
+                if (is_array($postTerms) && isset($postTerms[$taxonomy])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
 
