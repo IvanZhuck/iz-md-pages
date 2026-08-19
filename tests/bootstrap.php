@@ -134,7 +134,7 @@ if (!class_exists('WP_Comment')) {
 }
 
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen, $wp_meta_boxes, $wp_post_revisions_storage, $wp_current_user_capabilities;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -154,6 +154,9 @@ $wp_query = new WP_Query();
 $wp_enqueued_styles = [];
 $wp_enqueued_scripts = [];
 $wp_current_screen = null;
+$wp_meta_boxes = [];
+$wp_post_revisions_storage = [];
+$wp_current_user_capabilities = [];
 
 // WordPress Mock Functions
 if (!function_exists('add_action')) {
@@ -494,6 +497,152 @@ if (!function_exists('get_post_meta')) {
             return $single ? '' : [];
         }
         return $single ? $wp_post_meta[$post_id][$key] : [$wp_post_meta[$post_id][$key]];
+    }
+}
+
+if (!function_exists('update_post_meta')) {
+    /**
+     * @param int $post_id
+     * @param string $meta_key
+     * @param mixed $meta_value
+     * @param mixed $prev_value
+     * @return bool
+     */
+    function update_post_meta(int $post_id, string $meta_key, $meta_value, $prev_value = ''): bool
+    {
+        global $wp_post_meta;
+        if (!isset($wp_post_meta[$post_id])) {
+            $wp_post_meta[$post_id] = [];
+        }
+        $wp_post_meta[$post_id][$meta_key] = $meta_value;
+        return true;
+    }
+}
+
+if (!function_exists('delete_post_meta')) {
+    /**
+     * @param int $post_id
+     * @param string $meta_key
+     * @param mixed $meta_value
+     * @return bool
+     */
+    function delete_post_meta(int $post_id, string $meta_key, $meta_value = ''): bool
+    {
+        global $wp_post_meta;
+        if (isset($wp_post_meta[$post_id][$meta_key])) {
+            unset($wp_post_meta[$post_id][$meta_key]);
+            return true;
+        }
+        return false;
+    }
+}
+
+if (!function_exists('add_meta_box')) {
+    /**
+     * @param string $id
+     * @param string $title
+     * @param callable $callback
+     * @param mixed $screen
+     * @param string $context
+     * @param string $priority
+     * @param mixed $callback_args
+     * @return void
+     */
+    function add_meta_box(string $id, string $title, $callback, $screen = null, string $context = 'advanced', string $priority = 'default', $callback_args = null): void
+    {
+        global $wp_meta_boxes;
+        if (!is_array($wp_meta_boxes)) {
+            $wp_meta_boxes = [];
+        }
+        $wp_meta_boxes[$id] = [
+            'id' => $id,
+            'title' => $title,
+            'callback' => $callback,
+            'screen' => $screen,
+            'context' => $context,
+            'priority' => $priority,
+            'callback_args' => $callback_args,
+        ];
+    }
+}
+
+if (!function_exists('wp_create_nonce')) {
+    function wp_create_nonce($action = -1): string
+    {
+        return 'test_nonce_' . (string) $action;
+    }
+}
+
+if (!function_exists('wp_verify_nonce')) {
+    /**
+     * @param mixed $nonce
+     * @param mixed $action
+     * @return bool
+     */
+    function wp_verify_nonce($nonce, $action = -1): bool
+    {
+        if (!is_string($nonce) || $nonce === '') {
+            return false;
+        }
+        return $nonce === 'test_nonce_' . (string) $action || $nonce === 'valid_nonce';
+    }
+}
+
+if (!function_exists('wp_nonce_field')) {
+    function wp_nonce_field($action = -1, string $name = '_wpnonce', bool $referer = true, bool $echo = true): string
+    {
+        $nonce = wp_create_nonce($action);
+        $field = '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($nonce) . '" />';
+        if ($echo) {
+            echo $field;
+        }
+        return $field;
+    }
+}
+
+if (!function_exists('wp_is_post_revision')) {
+    /**
+     * @param mixed $post
+     * @return mixed
+     */
+    function wp_is_post_revision($post)
+    {
+        global $wp_post_revisions_storage;
+        $postId = is_object($post) && isset($post->ID) ? (int) $post->ID : (int) $post;
+        return $wp_post_revisions_storage[$postId] ?? false;
+    }
+}
+
+if (!function_exists('current_user_can')) {
+    function current_user_can(string $capability, ...$args): bool
+    {
+        global $wp_current_user_capabilities;
+        if (isset($wp_current_user_capabilities[$capability])) {
+            return (bool) $wp_current_user_capabilities[$capability];
+        }
+        return true;
+    }
+}
+
+if (!function_exists('wp_unslash')) {
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    function wp_unslash($value)
+    {
+        return is_string($value) ? stripslashes($value) : $value;
+    }
+}
+
+if (!function_exists('checked')) {
+    function checked($checked, $current = true, bool $echo = true): string
+    {
+        $result = ((string) $checked === (string) $current) ? " checked='checked'" : '';
+        if ($echo) {
+            echo $result;
+        }
+        return $result;
     }
 }
 
