@@ -45,31 +45,31 @@ if (!defined('ABSPATH')) {
 
         <table class="form-table" role="presentation">
             <tbody>
-                <?php foreach ($postTypes as $postType) : ?>
+                <?php foreach ($postTypes as $izMdPostType) : ?>
                     <?php
-                    $isOverridden = TemplatesSettingsPage::isTemplateOverridden($postType->name);
-                    $templateValue = $isOverridden
-                        ? TemplatesSettingsPage::getTemplateForPostType($postType->name)
-                        : (array_key_exists($postType->name, $templates) ? $templates[$postType->name] : $defaultTemplate);
+                    $izMdIsOverridden = TemplatesSettingsPage::isTemplateOverridden($izMdPostType->name);
+                    $izMdTemplateValue = $izMdIsOverridden
+                        ? TemplatesSettingsPage::getTemplateForPostType($izMdPostType->name)
+                        : (array_key_exists($izMdPostType->name, $templates) ? $templates[$izMdPostType->name] : $defaultTemplate);
                     ?>
                     <tr>
                         <th scope="row">
-                            <label for="iz_md_template_<?php echo esc_attr($postType->name); ?>">
-                                <strong><?php echo esc_html($postType->label); ?></strong>
+                            <label for="iz_md_template_<?php echo esc_attr($izMdPostType->name); ?>">
+                                <strong><?php echo esc_html($izMdPostType->label); ?></strong>
                                 <br />
-                                <code>(<?php echo esc_html($postType->name); ?>)</code>
+                                <code>(<?php echo esc_html($izMdPostType->name); ?>)</code>
                             </label>
                         </th>
                         <td>
                             <textarea
-                                name="<?php echo esc_attr($optionKey); ?>[<?php echo esc_attr($postType->name); ?>]"
-                                id="iz_md_template_<?php echo esc_attr($postType->name); ?>"
+                                name="<?php echo esc_attr($optionKey); ?>[<?php echo esc_attr($izMdPostType->name); ?>]"
+                                id="iz_md_template_<?php echo esc_attr($izMdPostType->name); ?>"
                                 rows="8"
                                 class="large-text code"
                                 placeholder="<?php echo esc_attr($defaultTemplate); ?>"
-                                <?php disabled($isOverridden, true); ?>
-                            ><?php echo esc_textarea($templateValue); ?></textarea>
-                            <?php if ($isOverridden) : ?>
+                                <?php disabled($izMdIsOverridden, true); ?>
+                            ><?php echo esc_textarea($izMdTemplateValue); ?></textarea>
+                            <?php if ($izMdIsOverridden) : ?>
                                 <p class="description" style="color: #d63638; margin-top: 6px;">
                                     <?php esc_html_e('This template is overridden via filter hook and cannot be edited here.', 'iz-md-pages'); ?>
                                 </p>

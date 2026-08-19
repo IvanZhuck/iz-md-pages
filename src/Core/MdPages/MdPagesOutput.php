@@ -119,6 +119,7 @@ class MdPagesOutput
         }
 
         $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not applicable for public GET routing query parameters.
         $isQueryVarRequest = isset($_GET['md']);
 
         if ($suffixType === 'endpoint' && $isQueryVarRequest) {
@@ -275,6 +276,7 @@ class MdPagesOutput
     {
         header('Content-Type: text/markdown; charset=utf-8');
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Direct output of Markdown formatted content for text/markdown MIME response.
         echo $this->renderContent($post);
         exit;
     }

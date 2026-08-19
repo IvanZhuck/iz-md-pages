@@ -993,6 +993,31 @@ if (!function_exists('sanitize_key')) {
     }
 }
 
+if (!function_exists('sanitize_text_field')) {
+    /**
+     * @param mixed $str
+     * @return string
+     */
+    function sanitize_text_field($str): string
+    {
+        $filtered = is_scalar($str) ? (string) $str : '';
+        $filtered = preg_replace('/[\r\n\t ]+/', ' ', strip_tags($filtered));
+        return trim($filtered ?? '');
+    }
+}
+
+if (!function_exists('sanitize_textarea_field')) {
+    /**
+     * @param mixed $str
+     * @return string
+     */
+    function sanitize_textarea_field($str): string
+    {
+        $filtered = is_scalar($str) ? (string) $str : '';
+        return trim(strip_tags($filtered));
+    }
+}
+
 if (!function_exists('plugins_url')) {
     function plugins_url(string $path = '', string $plugin = ''): string
     {

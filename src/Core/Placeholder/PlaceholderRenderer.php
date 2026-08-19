@@ -360,8 +360,11 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_AUTHOR_LAST_NAME => __('Author last name', 'iz-md-pages'),
             ],
             'Taxonomies' => [
+                // translators: Example placeholder tag syntax: {%categories:separator%}
                 self::PLACEHOLDER_CATEGORIES => __('Post categories (comma-separated or {%categories:separator%})', 'iz-md-pages'),
+                // translators: Example placeholder tag syntax: {%tags:separator%}
                 self::PLACEHOLDER_TAGS => __('Post tags (comma-separated or {%tags:separator%})', 'iz-md-pages'),
+                // translators: Example placeholder tag syntax: {%taxonomy:name:separator%}
                 self::PLACEHOLDER_TAXONOMY => __('Terms of any taxonomy (comma-separated or {%taxonomy:name:separator%}), e.g. {%taxonomy:product_cat%}', 'iz-md-pages'),
             ],
             'Comments' => [
@@ -369,6 +372,7 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_COMMENTS_COUNT => __('Number of approved comments', 'iz-md-pages'),
             ],
             'Custom Fields' => [
+                // translators: Example placeholder tag syntax: {%meta:price%}, {%meta:_sku%}, or {%meta:items:\n* %}
                 self::PLACEHOLDER_META => __('Post custom field / meta value (e.g. {%meta:price%}, {%meta:_sku%}, or {%meta:items:\\n* %})', 'iz-md-pages'),
             ],
         ];

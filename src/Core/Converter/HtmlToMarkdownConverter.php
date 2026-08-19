@@ -33,7 +33,7 @@ class HtmlToMarkdownConverter
 
         $wrapper = $dom->getElementById('md-root-wrapper');
         if (!$wrapper) {
-            return trim(strip_tags($html));
+            return trim(wp_strip_all_tags($html));
         }
 
         $markdown = $this->convertNode($wrapper);

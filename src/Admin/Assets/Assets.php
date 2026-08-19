@@ -89,7 +89,8 @@ abstract class Assets
      */
     protected function isPluginPage(string $hook = ''): bool
     {
-        $currentPage = isset($_GET['page']) && is_string($_GET['page']) ? sanitize_key($_GET['page']) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required for read-only admin screen routing checks.
+        $currentPage = isset($_GET['page']) && is_string($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
         $settingsPages = [
             SettingsPage::PAGE_SLUG,
             TemplatesSettingsPage::PAGE_SLUG,

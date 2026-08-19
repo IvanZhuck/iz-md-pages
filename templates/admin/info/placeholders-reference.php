@@ -30,13 +30,13 @@ if (!defined('ABSPATH')) {
 
         <?php if (!empty($groupedPlaceholders)) : ?>
             <div class="iz-md-docs-grid">
-                <?php foreach ($groupedPlaceholders as $groupTitle => $placeholders) : ?>
+                <?php foreach ($groupedPlaceholders as $izMdGroupTitle => $izMdPlaceholders) : ?>
                     <div>
-                        <strong><?php echo esc_html($groupTitle); ?></strong>
+                        <strong><?php echo esc_html($izMdGroupTitle); ?></strong>
                         <ul>
-                            <?php foreach ($placeholders as $tag => $description) : ?>
+                            <?php foreach ($izMdPlaceholders as $izMdTag => $izMdDescription) : ?>
                                 <li>
-                                    <code><?php echo esc_html($tag); ?></code> &mdash; <span class="iz-md-docs-desc"><?php echo esc_html($description); ?></span>
+                                    <code><?php echo esc_html($izMdTag); ?></code> &mdash; <span class="iz-md-docs-desc"><?php echo esc_html($izMdDescription); ?></span>
                                 </li>
                             <?php endforeach; ?>
                         </ul>

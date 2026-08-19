@@ -110,17 +110,17 @@ if (!defined('ABSPATH')) {
                             <legend class="screen-reader-text">
                                 <span><?php esc_html_e('Post Types for MD Pages', 'iz-md-pages'); ?></span>
                             </legend>
-                            <?php foreach ($postTypes as $postType) : ?>
-                                <label for="iz_md_pt_<?php echo esc_attr($postType->name); ?>" style="display: block; margin-bottom: 8px;">
+                            <?php foreach ($postTypes as $izMdPostType) : ?>
+                                <label for="iz_md_pt_<?php echo esc_attr($izMdPostType->name); ?>" style="display: block; margin-bottom: 8px;">
                                     <input
                                         type="checkbox"
                                         name="<?php echo esc_attr($optionKey); ?>[]"
-                                        id="iz_md_pt_<?php echo esc_attr($postType->name); ?>"
-                                        value="<?php echo esc_attr($postType->name); ?>"
-                                        <?php checked(in_array($postType->name, $enabledTypes, true)); ?>
+                                        id="iz_md_pt_<?php echo esc_attr($izMdPostType->name); ?>"
+                                        value="<?php echo esc_attr($izMdPostType->name); ?>"
+                                        <?php checked(in_array($izMdPostType->name, $enabledTypes, true)); ?>
                                     />
-                                    <strong><?php echo esc_html($postType->label); ?></strong>
-                                    <code>(<?php echo esc_html($postType->name); ?>)</code>
+                                    <strong><?php echo esc_html($izMdPostType->label); ?></strong>
+                                    <code>(<?php echo esc_html($izMdPostType->name); ?>)</code>
                                 </label>
                             <?php endforeach; ?>
                         </fieldset>

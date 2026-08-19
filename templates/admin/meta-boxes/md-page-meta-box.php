@@ -91,7 +91,10 @@ wp_nonce_field($nonceAction, $nonceName);
             </p>
         <?php endif; ?>
         <p class="description">
-            <?php esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages'); ?>
+            <?php
+            // translators: Example placeholder tags: {%post_title%}, {%post_content%}, etc.
+            esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages');
+            ?>
         </p>
     </div>
 

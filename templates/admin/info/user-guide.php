@@ -55,7 +55,10 @@ if (!defined('ABSPATH')) {
                         <?php esc_html_e('Navigate to Settings &rarr; IZ MD Pages &rarr; Templates.', 'iz-md-pages'); ?>
                     </li>
                     <li>
-                        <?php esc_html_e('Define a Markdown layout for each enabled post type using placeholders like {%post_title%}, {%post_content%}, {%post_date%}, {%author_name%}, {%categories%}, and {%meta:key%}.', 'iz-md-pages'); ?>
+                        <?php
+                        // translators: Example placeholder tags: {%post_title%}, {%post_content%}, etc.
+                        esc_html_e('Define a Markdown layout for each enabled post type using placeholders like {%post_title%}, {%post_content%}, {%post_date%}, {%author_name%}, {%categories%}, and {%meta:key%}.', 'iz-md-pages');
+                        ?>
                     </li>
                     <li>
                         <?php esc_html_e('If a template is dynamically filtered by a theme or custom plugin hook, the field is automatically locked to avoid conflicting edits.', 'iz-md-pages'); ?>

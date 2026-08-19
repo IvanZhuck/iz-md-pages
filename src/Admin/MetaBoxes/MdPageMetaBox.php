@@ -171,11 +171,11 @@ class MdPageMetaBox
      */
     public function saveMetaBoxData(int $postId, \WP_Post $post): void
     {
-        if (
-            !isset($_POST[self::NONCE_NAME])
-            || !is_string($_POST[self::NONCE_NAME])
-            || !wp_verify_nonce($_POST[self::NONCE_NAME], self::NONCE_ACTION)
-        ) {
+        $nonce = isset($_POST[self::NONCE_NAME]) && is_string($_POST[self::NONCE_NAME])
+            ? sanitize_text_field(wp_unslash($_POST[self::NONCE_NAME]))
+            : '';
+
+        if (!wp_verify_nonce($nonce, self::NONCE_ACTION)) {
             return;
         }
 
@@ -201,6 +201,7 @@ class MdPageMetaBox
             if (isset($_POST[self::FIELD_MANUAL_ENABLED])) {
                 update_post_meta($postId, self::META_KEY_MANUAL_ENABLED, '1');
                 if (isset($_POST[self::FIELD_MANUAL_CONTENT]) && is_string($_POST[self::FIELD_MANUAL_CONTENT])) {
+                    // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw Markdown template content may contain arbitrary HTML and Markdown tokens and is sanitized on rendering.
                     update_post_meta($postId, self::META_KEY_MANUAL_CONTENT, wp_unslash($_POST[self::FIELD_MANUAL_CONTENT]));
                 }
             } else {

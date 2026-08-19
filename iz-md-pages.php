@@ -13,6 +13,10 @@
 
 declare(strict_types=1);
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use IZMDPages\Admin\Assets\MdPageMetaboxAssets;
 use IZMDPages\Admin\Assets\SettingsAssets;
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
@@ -44,26 +48,13 @@ spl_autoload_register(function (string $class): void {
 /**
  * Plugin initialization.
  */
-$adminAssets = new SettingsAssets();
-$adminAssets->init();
-
-$metaBoxAssets = new MdPageMetaboxAssets();
-$metaBoxAssets->init();
-
-$settingsPage = new SettingsPage();
-$settingsPage->init();
-
-$templatesSettingsPage = new TemplatesSettingsPage();
-$templatesSettingsPage->init();
-
-$documentationSettingsPage = new DocumentationSettingsPage();
-$documentationSettingsPage->init();
-
-$mdPagesOutput = new MdPagesOutput();
-$mdPagesOutput->init();
-
-$mdPageMetaBox = new MdPageMetaBox();
-$mdPageMetaBox->init();
+(new SettingsAssets())->init();
+(new MdPageMetaboxAssets())->init();
+(new SettingsPage())->init();
+(new TemplatesSettingsPage())->init();
+(new DocumentationSettingsPage())->init();
+(new MdPagesOutput())->init();
+(new MdPageMetaBox())->init();
 
 /**
  * Plugin activation hook: register rewrite endpoints and flush rewrite rules.

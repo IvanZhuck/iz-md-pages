@@ -185,6 +185,7 @@ class BlockRenderer
      */
     private function renderClassicContent(string $rawContent, \WP_Post $post): string
     {
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentionally applying WordPress core 'the_content' filter to render classic post content.
         $htmlContent = (string) apply_filters('the_content', $rawContent);
         $htmlContent = (string) apply_filters('iz_md_placeholder_render_post_content', $htmlContent, $post);
 
