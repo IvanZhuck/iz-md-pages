@@ -133,8 +133,36 @@ if (!class_exists('WP_Comment')) {
     }
 }
 
+if (!class_exists('WP_Post_Type')) {
+    class WP_Post_Type
+    {
+        public string $name = '';
+        public string $label = '';
+        /** @var object */
+        public $labels;
+        public bool $public = true;
+
+        /**
+         * @param string $name
+         * @param array<string, mixed> $args
+         */
+        public function __construct(string $name, array $args = [])
+        {
+            $this->name = $name;
+            $this->label = $args['label'] ?? ucfirst($name);
+            $this->labels = is_object($args['labels'] ?? null)
+                ? $args['labels']
+                : (object) ($args['labels'] ?? ['singular_name' => $this->label, 'name' => $this->label]);
+            $this->public = $args['public'] ?? true;
+            foreach ($args as $key => $value) {
+                $this->{$key} = $value;
+            }
+        }
+    }
+}
+
 // Global state initialization
-global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen, $wp_meta_boxes, $wp_post_revisions_storage, $wp_current_user_capabilities;
+global $wp_filter, $wp_actions, $wp_options, $wp_post_meta, $wp_rewrite_endpoints, $wp_redirect_calls, $wp_is_singular, $wp_is_front_page, $wp_is_home, $wp_queried_object, $wp_posts_storage, $wp_terms_storage, $wp_taxonomies_storage, $wp_comments_storage, $wp_query, $wp_enqueued_styles, $wp_enqueued_scripts, $wp_current_screen, $wp_meta_boxes, $wp_post_revisions_storage, $wp_current_user_capabilities, $wp_menu_pages, $wp_submenu_pages, $wp_registered_settings, $wp_rewrite_rules_flushed, $wp_post_types_storage;
 
 $wp_filter = [];
 $wp_actions = [];
@@ -157,6 +185,11 @@ $wp_current_screen = null;
 $wp_meta_boxes = [];
 $wp_post_revisions_storage = [];
 $wp_current_user_capabilities = [];
+$wp_menu_pages = [];
+$wp_submenu_pages = [];
+$wp_registered_settings = [];
+$wp_rewrite_rules_flushed = false;
+$wp_post_types_storage = [];
 
 // WordPress Mock Functions
 if (!function_exists('add_action')) {
@@ -277,6 +310,62 @@ if (!function_exists('get_post')) {
         }
         $id = (int) $post;
         return $wp_posts_storage[$id] ?? null;
+    }
+}
+
+if (!function_exists('get_post_types')) {
+    /**
+     * @param array<string, mixed> $args
+     * @param string $output 'names' or 'objects'
+     * @param string $operator 'and' or 'or' or 'not'
+     * @return array<string, string>|array<string, \WP_Post_Type>
+     */
+    function get_post_types(array $args = [], string $output = 'names', string $operator = 'and'): array
+    {
+        global $wp_post_types_storage;
+
+        if (!is_array($wp_post_types_storage) || empty($wp_post_types_storage)) {
+            $wp_post_types_storage = [
+                'post' => new \WP_Post_Type('post', [
+                    'label' => 'Posts',
+                    'public' => true,
+                    'labels' => (object) ['singular_name' => 'Post', 'name' => 'Posts'],
+                ]),
+                'page' => new \WP_Post_Type('page', [
+                    'label' => 'Pages',
+                    'public' => true,
+                    'labels' => (object) ['singular_name' => 'Page', 'name' => 'Pages'],
+                ]),
+                'attachment' => new \WP_Post_Type('attachment', [
+                    'label' => 'Media',
+                    'public' => true,
+                    'labels' => (object) ['singular_name' => 'Media', 'name' => 'Media'],
+                ]),
+            ];
+        }
+
+        $filtered = [];
+        foreach ($wp_post_types_storage as $name => $postType) {
+            $match = true;
+            if (!empty($args)) {
+                foreach ($args as $key => $value) {
+                    $prop = $postType->{$key} ?? null;
+                    if ($operator === 'and' && $prop !== $value) {
+                        $match = false;
+                        break;
+                    }
+                    if ($operator === 'not' && $prop === $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+            }
+            if ($match) {
+                $filtered[$name] = $output === 'objects' ? $postType : $name;
+            }
+        }
+
+        return $filtered;
     }
 }
 
@@ -643,6 +732,79 @@ if (!function_exists('checked')) {
             echo $result;
         }
         return $result;
+    }
+}
+
+if (!function_exists('add_menu_page')) {
+    function add_menu_page(string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', string $icon_url = '', $position = null): string
+    {
+        global $wp_menu_pages;
+        if (!is_array($wp_menu_pages)) {
+            $wp_menu_pages = [];
+        }
+        $wp_menu_pages[$menu_slug] = [
+            'page_title' => $page_title,
+            'menu_title' => $menu_title,
+            'capability' => $capability,
+            'menu_slug' => $menu_slug,
+            'callback' => $callback,
+            'icon_url' => $icon_url,
+            'position' => $position,
+        ];
+        return $menu_slug;
+    }
+}
+
+if (!function_exists('add_submenu_page')) {
+    function add_submenu_page(string $parent_slug, string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', $position = null): string
+    {
+        global $wp_submenu_pages;
+        if (!is_array($wp_submenu_pages)) {
+            $wp_submenu_pages = [];
+        }
+        if (!isset($wp_submenu_pages[$parent_slug])) {
+            $wp_submenu_pages[$parent_slug] = [];
+        }
+        $wp_submenu_pages[$parent_slug][$menu_slug] = [
+            'parent_slug' => $parent_slug,
+            'page_title' => $page_title,
+            'menu_title' => $menu_title,
+            'capability' => $capability,
+            'menu_slug' => $menu_slug,
+            'callback' => $callback,
+            'position' => $position,
+        ];
+        return $menu_slug;
+    }
+}
+
+if (!function_exists('register_setting')) {
+    function register_setting(string $option_group, string $option_name, array $args = []): void
+    {
+        global $wp_registered_settings;
+        if (!is_array($wp_registered_settings)) {
+            $wp_registered_settings = [];
+        }
+        if (!isset($wp_registered_settings[$option_group])) {
+            $wp_registered_settings[$option_group] = [];
+        }
+        $wp_registered_settings[$option_group][$option_name] = $args;
+    }
+}
+
+if (!function_exists('admin_url')) {
+    function admin_url(string $path = '', string $scheme = 'admin'): string
+    {
+        $base = 'https://example.com/wp-admin/';
+        return $path !== '' ? $base . ltrim($path, '/') : $base;
+    }
+}
+
+if (!function_exists('flush_rewrite_rules')) {
+    function flush_rewrite_rules(bool $hard = true): void
+    {
+        global $wp_rewrite_rules_flushed;
+        $wp_rewrite_rules_flushed = true;
     }
 }
 
