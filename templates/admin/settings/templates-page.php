@@ -8,8 +8,12 @@ declare(strict_types=1);
  * @var string                                         $currentTab            Current active tab identifier.
  * @var string                                         $settingsGroup         Settings group name.
  * @var string                                         $optionKey             Templates option key.
+ * @var string                                         $optionHeaderTemplateKey Header template option key.
+ * @var string                                         $optionFooterTemplateKey Footer template option key.
  * @var array<string, \WP_Post_Type>                   $postTypes             Target public post types.
  * @var array<string, string>                          $templates             Configured templates map.
+ * @var string                                         $headerTemplate        Universal header template.
+ * @var string                                         $footerTemplate        Universal footer template.
  * @var string                                         $defaultTemplate       Default Markdown template string.
  * @var array<int, string>                             $supportedPlaceholders Supported placeholder tokens.
  * @var array<string, array<string, string>>           $groupedPlaceholders   Grouped placeholder definitions.
@@ -33,6 +37,11 @@ if (!defined('ABSPATH')) {
 
     <form method="post" action="options.php">
         <?php settings_fields($settingsGroup); ?>
+
+        <h2><?php echo esc_html__('Post Type Templates', 'iz-md-pages'); ?></h2>
+        <p class="description">
+            <?php echo esc_html__('Configure individual Markdown layout templates for each enabled post type.', 'iz-md-pages'); ?>
+        </p>
 
         <table class="form-table" role="presentation">
             <tbody>
@@ -68,6 +77,56 @@ if (!defined('ABSPATH')) {
                         </td>
                     </tr>
                 <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <hr style="margin: 30px 0 20px;" />
+
+        <h2><?php echo esc_html__('Universal Header & Footer Templates', 'iz-md-pages'); ?></h2>
+        <p class="description">
+            <?php echo esc_html__('These templates are automatically prepended and appended to all Markdown pages across your site, regardless of post type, manual edits, or hooks.', 'iz-md-pages'); ?>
+        </p>
+
+        <table class="form-table" role="presentation">
+            <tbody>
+                <tr>
+                    <th scope="row">
+                        <label for="<?php echo esc_attr($optionHeaderTemplateKey); ?>">
+                            <strong><?php echo esc_html__('Header Template (Prepend)', 'iz-md-pages'); ?></strong>
+                        </label>
+                    </th>
+                    <td>
+                        <textarea
+                            name="<?php echo esc_attr($optionHeaderTemplateKey); ?>"
+                            id="<?php echo esc_attr($optionHeaderTemplateKey); ?>"
+                            rows="6"
+                            class="large-text code"
+                            placeholder="<?php echo esc_attr__('# Enter header markdown (optional)...', 'iz-md-pages'); ?>"
+                        ><?php echo esc_textarea($headerTemplate); ?></textarea>
+                        <p class="description">
+                            <?php esc_html_e('Universal Markdown markup output at the very beginning of every MD page. Supports template placeholders.', 'iz-md-pages'); ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        <label for="<?php echo esc_attr($optionFooterTemplateKey); ?>">
+                            <strong><?php echo esc_html__('Footer Template (Append)', 'iz-md-pages'); ?></strong>
+                        </label>
+                    </th>
+                    <td>
+                        <textarea
+                            name="<?php echo esc_attr($optionFooterTemplateKey); ?>"
+                            id="<?php echo esc_attr($optionFooterTemplateKey); ?>"
+                            rows="6"
+                            class="large-text code"
+                            placeholder="<?php echo esc_attr__('# Enter footer markdown (optional)...', 'iz-md-pages'); ?>"
+                        ><?php echo esc_textarea($footerTemplate); ?></textarea>
+                        <p class="description">
+                            <?php esc_html_e('Universal Markdown markup output at the very end of every MD page. Supports template placeholders.', 'iz-md-pages'); ?>
+                        </p>
+                    </td>
+                </tr>
             </tbody>
         </table>
 

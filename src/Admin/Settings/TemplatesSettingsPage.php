@@ -17,6 +17,16 @@ class TemplatesSettingsPage extends Settings
     public const OPTION_KEY = 'iz_md_templates';
 
     /**
+     * Option key for universal header template.
+     */
+    public const OPTION_HEADER_TEMPLATE_KEY = 'iz_md_header_template';
+
+    /**
+     * Option key for universal footer template.
+     */
+    public const OPTION_FOOTER_TEMPLATE_KEY = 'iz_md_footer_template';
+
+    /**
      * Settings group name for WordPress Settings API.
      */
     public const SETTINGS_GROUP = 'iz_md_templates_group';
@@ -30,6 +40,28 @@ class TemplatesSettingsPage extends Settings
      * Default template string used when no specific template is defined.
      */
     public const DEFAULT_TEMPLATE = "# {%post_title%}\n\n{%post_content%}";
+
+    /**
+     * Get universal header template string prepended to all MD pages.
+     *
+     * @return string Header Markdown template string.
+     */
+    public static function getHeaderTemplate(): string
+    {
+        $template = get_option(self::OPTION_HEADER_TEMPLATE_KEY, '');
+        return is_string($template) ? $template : '';
+    }
+
+    /**
+     * Get universal footer template string appended to all MD pages.
+     *
+     * @return string Footer Markdown template string.
+     */
+    public static function getFooterTemplate(): string
+    {
+        $template = get_option(self::OPTION_FOOTER_TEMPLATE_KEY, '');
+        return is_string($template) ? $template : '';
+    }
 
     /**
      * Get the template string configured for a specific post type or default template.
@@ -79,6 +111,37 @@ class TemplatesSettingsPage extends Settings
                 'default' => [],
             ]
         );
+
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::OPTION_HEADER_TEMPLATE_KEY,
+            [
+                'type' => 'string',
+                'sanitize_callback' => [$this, 'sanitizeHeaderFooterTemplate'],
+                'default' => '',
+            ]
+        );
+
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::OPTION_FOOTER_TEMPLATE_KEY,
+            [
+                'type' => 'string',
+                'sanitize_callback' => [$this, 'sanitizeHeaderFooterTemplate'],
+                'default' => '',
+            ]
+        );
+    }
+
+    /**
+     * Sanitize header or footer template string.
+     *
+     * @param mixed $input Value submitted from settings form.
+     * @return string Sanitized template string.
+     */
+    public function sanitizeHeaderFooterTemplate(mixed $input): string
+    {
+        return is_string($input) ? wp_unslash($input) : '';
     }
 
     /**
@@ -141,8 +204,12 @@ class TemplatesSettingsPage extends Settings
             'currentTab' => 'templates',
             'settingsGroup' => self::SETTINGS_GROUP,
             'optionKey' => self::OPTION_KEY,
+            'optionHeaderTemplateKey' => self::OPTION_HEADER_TEMPLATE_KEY,
+            'optionFooterTemplateKey' => self::OPTION_FOOTER_TEMPLATE_KEY,
             'postTypes' => $this->getTargetPostTypes(),
             'templates' => (array) get_option(self::OPTION_KEY, []),
+            'headerTemplate' => self::getHeaderTemplate(),
+            'footerTemplate' => self::getFooterTemplate(),
             'defaultTemplate' => self::DEFAULT_TEMPLATE,
             'supportedPlaceholders' => PlaceholderRenderer::getSupportedPlaceholders(),
             'groupedPlaceholders' => PlaceholderRenderer::getGroupedPlaceholders(),

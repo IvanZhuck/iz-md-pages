@@ -243,7 +243,28 @@ class MdPagesOutput
          */
         $content = (string) apply_filters('iz_md_page_content', $content, $post);
 
-        echo $content;
+        $headerTemplate = TemplatesSettingsPage::getHeaderTemplate();
+        $footerTemplate = TemplatesSettingsPage::getFooterTemplate();
+
+        $output = '';
+
+        if ($headerTemplate !== '') {
+            $renderedHeader = trim($this->placeholderRenderer->render($headerTemplate, $post));
+            if ($renderedHeader !== '') {
+                $output .= $renderedHeader . "\n\n";
+            }
+        }
+
+        $output .= ltrim($content);
+
+        if ($footerTemplate !== '') {
+            $renderedFooter = trim($this->placeholderRenderer->render($footerTemplate, $post));
+            if ($renderedFooter !== '') {
+                $output = rtrim($output) . "\n\n" . $renderedFooter;
+            }
+        }
+
+        echo $output;
         exit;
     }
 }
