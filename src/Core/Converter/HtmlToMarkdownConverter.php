@@ -38,16 +38,7 @@ class HtmlToMarkdownConverter
 
         $markdown = $this->convertNode($wrapper);
 
-        $result = trim($markdown);
-
-        // Normalize multiple consecutive blank lines
-        $result = (string) preg_replace("/\n{3,}/", "\n\n", $result);
-
-        // Collapse multiple consecutive spaces within each line
-        // while preserving Markdown line-break (two trailing spaces before \n)
-        $result = (string) preg_replace('/(?<=\S) {2,}(?=\S)/', ' ', $result);
-
-        return $this->stripLeadingWhitespace($result);
+        return $this->stripLeadingWhitespace(trim($markdown));
     }
 
     /**
@@ -203,7 +194,7 @@ class HtmlToMarkdownConverter
                     break;
 
                 case 'pre':
-                    $output .= "\n\n```\n" . trim($innerText) . "\n```\n\n";
+                    $output .= "\n\n```\n" . trim($innerText, "\r\n") . "\n```\n\n";
                     break;
 
                 case 'br':
@@ -243,10 +234,21 @@ class HtmlToMarkdownConverter
                 continue;
             }
 
-            $cleaned[] = $inCodeBlock ? $line : ltrim($line);
+            if ($inCodeBlock) {
+                $cleaned[] = $line;
+            } else {
+                $trimmed = ltrim($line);
+                // Collapse multiple consecutive spaces within each non-code line
+                // while preserving Markdown line-break (two trailing spaces before newline)
+                $trimmed = (string) preg_replace('/(?<=\S) {2,}(?=\S)/', ' ', $trimmed);
+                $cleaned[] = $trimmed;
+            }
         }
 
-        return implode("\n", $cleaned);
+        $result = implode("\n", $cleaned);
+
+        // Normalize multiple consecutive blank lines
+        return (string) preg_replace("/\n{3,}/", "\n\n", trim($result));
     }
 
     /**
