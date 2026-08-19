@@ -146,7 +146,7 @@ class MdPagesOutput
         $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
 
         if ($suffixType === 'query_var') {
-            return add_query_arg('md', '', $permalink);
+            return add_query_arg('md', $permalink);
         }
 
         return user_trailingslashit(rtrim($permalink, '/') . '/md');
@@ -193,14 +193,13 @@ class MdPagesOutput
     }
 
     /**
-     * Generate and output Markdown representation of a post.
+     * Build and render the complete Markdown output for a post including header, template, and footer.
      *
      * @param \WP_Post $post Post object to render.
+     * @return string Final assembled Markdown string.
      */
-    private function renderMdPage(\WP_Post $post): void
+    public function renderContent(\WP_Post $post): string
     {
-        header('Content-Type: text/markdown; charset=utf-8');
-
         $isManual = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_ENABLED, true);
 
         if ($isManual && !MdPageMetaBox::isPostTemplateOverridden($post->ID)) {
@@ -264,7 +263,19 @@ class MdPagesOutput
             }
         }
 
-        echo $output;
+        return $output;
+    }
+
+    /**
+     * Generate and output Markdown representation of a post.
+     *
+     * @param \WP_Post $post Post object to render.
+     */
+    private function renderMdPage(\WP_Post $post): void
+    {
+        header('Content-Type: text/markdown; charset=utf-8');
+
+        echo $this->renderContent($post);
         exit;
     }
 }

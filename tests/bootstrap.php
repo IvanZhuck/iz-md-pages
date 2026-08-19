@@ -203,6 +203,28 @@ if (!function_exists('apply_filters')) {
     }
 }
 
+if (!function_exists('has_filter')) {
+    /**
+     * @param string $tag
+     * @param mixed $callback
+     * @return bool|int
+     */
+    function has_filter(string $tag, $callback = false)
+    {
+        global $wp_filter;
+
+        if (!isset($wp_filter[$tag]) || empty($wp_filter[$tag])) {
+            return false;
+        }
+
+        if ($callback === false) {
+            return true;
+        }
+
+        return in_array($callback, $wp_filter[$tag], true);
+    }
+}
+
 if (!function_exists('remove_all_filters')) {
     function remove_all_filters(string $tag): void
     {
