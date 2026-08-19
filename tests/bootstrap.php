@@ -578,6 +578,76 @@ if (!function_exists('esc_url')) {
     }
 }
 
+if (!function_exists('esc_html')) {
+    /**
+     * @param mixed $text
+     * @return string
+     */
+    function esc_html($text): string
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_html_e')) {
+    /**
+     * @param mixed $text
+     * @param string $domain
+     * @return void
+     */
+    function esc_html_e($text, string $domain = 'default'): void
+    {
+        echo esc_html($text);
+    }
+}
+
+if (!function_exists('esc_html__')) {
+    /**
+     * @param mixed $text
+     * @param string $domain
+     * @return string
+     */
+    function esc_html__($text, string $domain = 'default'): string
+    {
+        return esc_html($text);
+    }
+}
+
+if (!function_exists('esc_attr')) {
+    /**
+     * @param mixed $text
+     * @return string
+     */
+    function esc_attr($text): string
+    {
+        return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('esc_attr_e')) {
+    /**
+     * @param mixed $text
+     * @param string $domain
+     * @return void
+     */
+    function esc_attr_e($text, string $domain = 'default'): void
+    {
+        echo esc_attr($text);
+    }
+}
+
+if (!function_exists('esc_attr__')) {
+    /**
+     * @param mixed $text
+     * @param string $domain
+     * @return string
+     */
+    function esc_attr__($text, string $domain = 'default'): string
+    {
+        return esc_attr($text);
+    }
+}
+
 if (!function_exists('home_url')) {
     function home_url(string $path = ''): string
     {
