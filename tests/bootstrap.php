@@ -702,3 +702,87 @@ if (!function_exists('get_comments_number')) {
         return 0;
     }
 }
+
+if (!function_exists('has_blocks')) {
+    /**
+     * @param string|\WP_Post|null $post
+     * @return bool
+     */
+    function has_blocks($post = null): bool
+    {
+        if ($post instanceof \WP_Post) {
+            $content = (string) $post->post_content;
+        } else {
+            $content = (string) $post;
+        }
+        return strpos($content, '<!-- wp:') !== false;
+    }
+}
+
+if (!function_exists('parse_blocks')) {
+    /**
+     * @param string $content
+     * @return array<int, array<string, mixed>>
+     */
+    function parse_blocks(string $content): array
+    {
+        if (empty($content)) {
+            return [];
+        }
+
+        $blocks = [];
+        $pattern = '/<!--\s+wp:([a-z0-9_\/-]+)(\s+(\{[^>]*\}))?\s+-->(.*?)<!--\s+\/wp:\1\s+-->/s';
+
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $blockName = $match[1];
+                $attrs = !empty($match[3]) ? json_decode($match[3], true) : [];
+                $innerHTML = $match[4];
+
+                $blocks[] = [
+                    'blockName' => $blockName,
+                    'attrs' => is_array($attrs) ? $attrs : [],
+                    'innerBlocks' => [],
+                    'innerHTML' => $innerHTML,
+                    'innerContent' => [$innerHTML],
+                ];
+            }
+        }
+
+        $voidPattern = '/<!--\s+wp:([a-z0-9_\/-]+)(\s+(\{[^>]*\}))?\s+\/-->/s';
+        if (preg_match_all($voidPattern, $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $blocks[] = [
+                    'blockName' => $match[1],
+                    'attrs' => !empty($match[3]) ? (json_decode($match[3], true) ?: []) : [],
+                    'innerBlocks' => [],
+                    'innerHTML' => '',
+                    'innerContent' => [],
+                ];
+            }
+        }
+
+        if (empty($blocks) && strpos($content, '<!-- wp:') !== false) {
+            $blocks[] = [
+                'blockName' => 'core/freeform',
+                'attrs' => [],
+                'innerBlocks' => [],
+                'innerHTML' => $content,
+                'innerContent' => [$content],
+            ];
+        }
+
+        return $blocks;
+    }
+}
+
+if (!function_exists('render_block')) {
+    /**
+     * @param array<string, mixed> $block
+     * @return string
+     */
+    function render_block(array $block): string
+    {
+        return isset($block['innerHTML']) && is_string($block['innerHTML']) ? $block['innerHTML'] : '';
+    }
+}
