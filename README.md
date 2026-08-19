@@ -10,7 +10,6 @@ Generate and serve clean, lightweight, and AI/LLM-friendly Markdown versions of 
 
 Optimized for **AI search engines, Large Language Models (LLMs), developer documentation, CLI tools, and feed readers**, IZ MD Pages enables instant retrieval of your content in plain text Markdown with zero boilerplate.
 
----
 
 ## Key Features
 
@@ -30,8 +29,6 @@ Optimized for **AI search engines, Large Language Models (LLMs), developer docum
 * **Developer-Friendly & Extensible**: Over 15 WordPress filter hooks allowing full customization of template rendering, block conversions, custom placeholder evaluation, and final page output.
 * **High Performance**: Pure PHP conversion with no external dependencies or remote API calls.
 
----
-
 ## Developer Guide
 
 For developers contributing to this plugin or extending it in local environments, several Composer and pnpm scripts are configured to streamline testing, linting, and asset compilation.
@@ -49,8 +46,6 @@ composer install
 pnpm install
 ```
 
----
-
 ### Composer Commands (`composer.json`)
 
 ```bash
@@ -63,8 +58,6 @@ composer phpcs
 # Automatically fix code style errors
 composer phpcbf
 ```
-
----
 
 ### NPM Commands (`package.json`)
 
@@ -81,8 +74,6 @@ pnpm stylelint
 pnpm eslint-fix
 pnpm stylelint-fix
 ```
-
----
 
 ## License
 
