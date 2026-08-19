@@ -492,4 +492,61 @@ class MdPagesOutputTest extends TestCase
         $this->assertStringNotContainsString('HEADER_STAMP', $passedToFilter);
         $this->assertStringNotContainsString('FOOTER_STAMP', $passedToFilter);
     }
+
+    public function testRenderAlternateLinkDoesNotRenderWhenPostIsDisabledViaMeta(): void
+    {
+        global $wp_options, $wp_queried_object, $wp_is_singular, $wp_post_meta;
+
+        $post = new \WP_Post(['ID' => 150, 'post_type' => 'post']);
+        $wp_queried_object = $post;
+        $wp_is_singular = true;
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_post_meta[150][\IZMDPages\Admin\MetaBoxes\MdPageMetaBox::META_KEY_DISABLED] = '1';
+
+        ob_start();
+        $this->output->renderAlternateLink();
+        $output = ob_get_clean();
+
+        $this->assertSame('', $output);
+    }
+
+    public function testConstructorAcceptsCustomPlaceholderRenderer(): void
+    {
+        $mockRenderer = $this->createMock(\IZMDPages\Core\Placeholder\PlaceholderRenderer::class);
+        $mockRenderer->expects($this->once())
+            ->method('render')
+            ->willReturn('# Mocked Rendered Content');
+
+        $customOutput = new MdPagesOutput($mockRenderer);
+
+        $post = new \WP_Post([
+            'ID' => 160,
+            'post_title' => 'Mock Post',
+            'post_content' => '<p>Some content</p>',
+            'post_type' => 'post',
+        ]);
+
+        $result = $customOutput->renderContent($post);
+        $this->assertSame('# Mocked Rendered Content', $result);
+    }
+
+    public function testRenderContentHandlesEmptyOrWhitespaceHeaderAndFooterTemplates(): void
+    {
+        global $wp_options;
+
+        $wp_options[\IZMDPages\Admin\Settings\TemplatesSettingsPage::OPTION_HEADER_TEMPLATE_KEY] = "   \n\n   ";
+        $wp_options[\IZMDPages\Admin\Settings\TemplatesSettingsPage::OPTION_FOOTER_TEMPLATE_KEY] = "   ";
+
+        $post = new \WP_Post([
+            'ID' => 170,
+            'post_title' => 'Clean Post',
+            'post_content' => '<p>Clean body.</p>',
+            'post_type' => 'post',
+        ]);
+
+        $content = $this->output->renderContent($post);
+
+        $this->assertStringContainsString('# Clean Post', $content);
+        $this->assertStringContainsString('Clean body.', $content);
+    }
 }
