@@ -1,7 +1,7 @@
 === IZ MD Pages ===
 Contributors: IvanZhuck
 Donate link: https://izhuck.ru/
-Tags: seo, geo, md, markdown, ai, llm, content, conversion
+Tags: seo, md, markdown, ai, content
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
