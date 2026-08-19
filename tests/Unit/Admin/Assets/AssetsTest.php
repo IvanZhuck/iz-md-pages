@@ -108,6 +108,9 @@ class AssetsTest extends TestCase
         $_GET['page'] = TemplatesSettingsPage::PAGE_SLUG;
         $this->assertTrue($this->assets->testIsPluginPage());
 
+        $_GET['page'] = \IZMDPages\Admin\Settings\DocumentationSettingsPage::PAGE_SLUG;
+        $this->assertTrue($this->assets->testIsPluginPage());
+
         $_GET['page'] = 'other_page';
         $this->assertFalse($this->assets->testIsPluginPage());
     }
@@ -122,6 +125,9 @@ class AssetsTest extends TestCase
         $wp_current_screen = new \WP_Screen('iz-md-pages_page_' . TemplatesSettingsPage::PAGE_SLUG);
         $this->assertTrue($this->assets->testIsPluginPage());
 
+        $wp_current_screen = new \WP_Screen('iz-md-pages_page_' . \IZMDPages\Admin\Settings\DocumentationSettingsPage::PAGE_SLUG);
+        $this->assertTrue($this->assets->testIsPluginPage());
+
         $wp_current_screen = new \WP_Screen('edit-post');
         $this->assertFalse($this->assets->testIsPluginPage());
     }
@@ -130,6 +136,7 @@ class AssetsTest extends TestCase
     {
         $this->assertTrue($this->assets->testIsPluginPage('toplevel_page_' . SettingsPage::PAGE_SLUG));
         $this->assertTrue($this->assets->testIsPluginPage('iz-md-pages_page_' . TemplatesSettingsPage::PAGE_SLUG));
+        $this->assertTrue($this->assets->testIsPluginPage('iz-md-pages_page_' . \IZMDPages\Admin\Settings\DocumentationSettingsPage::PAGE_SLUG));
         $this->assertFalse($this->assets->testIsPluginPage('index.php'));
     }
 
