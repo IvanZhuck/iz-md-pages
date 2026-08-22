@@ -34,6 +34,10 @@ Optimized for **AI search engines, LLMs, developer documentation, CLI tools, and
 * **Developer-Friendly & Extensible**: Over 15 WordPress filter hooks allowing full customization of template rendering, block conversions, custom placeholder evaluation, and final page output.
 * **High Performance**: Pure PHP conversion with no external dependencies or remote API calls.
 
+== How to contribute ==
+
+If you would like to help with the development of this plugin, please visit its GitHub repository: [https://github.com/IvanZhuck/iz-md-pages](https://github.com/IvanZhuck/iz-md-pages). The repository contains the source code and tools for development.
+
 == Installation ==
 
 ### Automatic Installation
