@@ -78,7 +78,7 @@ class MdPagesOutput
             $post = $queried;
         } elseif ($queried instanceof \WP_Post) {
             $blogHomePageId = (int) get_option('page_for_posts');
-            if ($queried->ID === $blogHomePageId){
+            if ($queried->ID === $blogHomePageId) {
                 $post = get_post($blogHomePageId);
             }
         } elseif (get_option('show_on_front') === 'page') {

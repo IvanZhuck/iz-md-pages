@@ -1018,6 +1018,17 @@ if (!function_exists('sanitize_textarea_field')) {
     }
 }
 
+if (!function_exists('wp_kses_post')) {
+    /**
+     * @param mixed $data
+     * @return string
+     */
+    function wp_kses_post($data): string
+    {
+        return is_scalar($data) ? (string) $data : '';
+    }
+}
+
 if (!function_exists('plugins_url')) {
     function plugins_url(string $path = '', string $plugin = ''): string
     {

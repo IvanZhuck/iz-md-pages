@@ -141,7 +141,7 @@ class TemplatesSettingsPage extends Settings
      */
     public function sanitizeHeaderFooterTemplate(mixed $input): string
     {
-        return is_string($input) ? wp_unslash($input) : '';
+        return is_string($input) ? wp_kses_post(wp_unslash($input)) : '';
     }
 
     /**
@@ -163,13 +163,13 @@ class TemplatesSettingsPage extends Settings
         foreach ($validPostTypes as $postType) {
             if (self::isTemplateOverridden($postType)) {
                 if (isset($existingTemplates[$postType]) && is_string($existingTemplates[$postType])) {
-                    $sanitized[$postType] = $existingTemplates[$postType];
+                    $sanitized[$postType] = wp_kses_post($existingTemplates[$postType]);
                 }
                 continue;
             }
 
             if (isset($input[$postType]) && is_string($input[$postType])) {
-                $sanitized[$postType] = wp_unslash($input[$postType]);
+                $sanitized[$postType] = wp_kses_post(wp_unslash($input[$postType]));
             }
         }
 
