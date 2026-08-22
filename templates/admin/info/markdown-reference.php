@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Admin Markdown syntax reference info block template.
  */
+
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
