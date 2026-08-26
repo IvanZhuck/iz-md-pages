@@ -79,7 +79,17 @@
             margin-top: 16px;
             padding-top: 12px;
             border-top: 1px solid $color-border-light;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
 
+            .iz-md-footer-separator {
+                color: $color-border;
+                user-select: none;
+            }
+
+            .iz-md-docs-link,
             .iz-md-view-link {
                 display: inline-flex;
                 align-items: center;
@@ -100,7 +110,8 @@
                 &:focus {
                     color: $color-primary-hover;
 
-                    .iz-md-view-link-text{
+                    .iz-md-docs-link-text,
+                    .iz-md-view-link-text {
                         text-decoration: underline;
                     }
                 }

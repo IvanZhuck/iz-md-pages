@@ -95,11 +95,30 @@ wp_nonce_field($nonceAction, $nonceName);
             // translators: Example placeholder tags: {%post_title%}, {%post_content%}, etc.
             esc_html_e('You can use template placeholders here (e.g. {%post_title%}, {%post_content%}, {%author_name%}, {%categories%}, etc.).', 'iz-md-pages');
             ?>
+            <a
+                href="<?php echo esc_url(admin_url('admin.php?page=iz-md-docs')); ?>"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <?php echo esc_html__('View Documentation', 'iz-md-pages'); ?> &rarr;
+            </a>
         </p>
     </div>
 
-    <?php if ($isPublished && !empty($mdUrl)) : ?>
-        <div class="iz-md-meta-box-footer">
+    <div class="iz-md-meta-box-footer">
+        <a
+            href="<?php echo esc_url(admin_url('admin.php?page=iz-md-docs')); ?>"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="iz-md-docs-link"
+        >
+            <span class="dashicons dashicons-book" aria-hidden="true"></span>
+            <span class="iz-md-docs-link-text">
+                <?php echo esc_html__('Documentation', 'iz-md-pages'); ?>
+            </span>
+        </a>
+        <?php if ($isPublished && !empty($mdUrl)) : ?>
+            <span class="iz-md-footer-separator" aria-hidden="true">|</span>
             <a
                 href="<?php echo esc_url($mdUrl); ?>"
                 target="_blank"
@@ -111,6 +130,6 @@ wp_nonce_field($nonceAction, $nonceName);
                     <?php echo esc_html__('View Markdown version', 'iz-md-pages'); ?>
                 </span>
             </a>
-        </div>
-    <?php endif; ?>
+        <?php endif; ?>
+    </div>
 </div>
