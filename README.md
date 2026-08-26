@@ -59,7 +59,7 @@ composer phpcs
 composer phpcbf
 ```
 
-### NPM Commands (`package.json`)
+### PNPM Commands (`package.json`)
 
 ```bash
 # Compile all front-end assets (JS and CSS)
