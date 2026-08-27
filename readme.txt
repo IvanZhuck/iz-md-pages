@@ -86,7 +86,7 @@ Yes. IZ MD Pages provides extensive filter hooks such as `iz_md_post_type_templa
 == Changelog ==
 
 = 1.0.0 =
-* Initial public release.
+* The first public release.
 * Support for `/md` URL endpoint and `?md` query variable routing with canonical 301 redirection.
 * Gutenberg block renderer and HTML-to-Markdown converter.
 * Flexible post type templates with customizable header and footer options.

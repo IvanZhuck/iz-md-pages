@@ -1,0 +1,36 @@
+# Files
+/.DS_Store
+/.babelrc
+/.coveralls.yml
+/.distignore
+/.editorconfig
+/.gitignore
+/.phpcs.cache
+/.phpunit.result.cache
+/.pnp.*
+/.yarnrc.yml
+/.stylelintrc.json
+/Thumbs.db
+/AGENTS.md
+/README.md
+/composer.json
+/composer.lock
+/package.json
+/phpcs.xml
+/phpunit.xml.dist
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
+/eslint.config.mjs
+/webpack.config.js
+
+# Directories
+/.git
+/.github
+/.idea
+/.make
+/.wordpress-org
+/.pnpm
+/assets/src
+/node_modules
+/tests
+/vendor
