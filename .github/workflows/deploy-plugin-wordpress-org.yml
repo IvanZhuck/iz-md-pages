@@ -25,4 +25,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ steps.deploy.outputs.zip-path
+          files: ${{ steps.deploy.outputs.zip-path }}
