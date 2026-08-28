@@ -1,6 +1,10 @@
 # IZ MD Pages
 
+[![WordPress Plugin](https://badgen.net/static/wordpress.org/download/blue?icon=wordpress)](https://wordpress.org/plugins/iz-md-pages/)
+
 Generate and serve clean, lightweight, and AI/LLM-friendly Markdown versions of your WordPress posts, pages, and custom post types.
+
+**WordPress.org Plugin Page:** https://wordpress.org/plugins/iz-md-pages/
 
 ---
 
