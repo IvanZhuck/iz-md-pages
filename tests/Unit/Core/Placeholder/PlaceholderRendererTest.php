@@ -444,6 +444,41 @@ class PlaceholderRendererTest extends TestCase
         $this->assertStringContainsString("Tags Hash:\n -release -v2", $result);
     }
 
+    public function testRenderTaxonomiesWithArchiveLinksModifier(): void
+    {
+        global $wp_terms_storage;
+
+        $post = new \WP_Post(['ID' => 308, 'post_type' => 'post']);
+        $wp_terms_storage[308]['category'] = [
+            (object) ['name' => 'News', 'slug' => 'news', 'taxonomy' => 'category'],
+            (object) ['name' => 'Tech', 'slug' => 'tech', 'taxonomy' => 'category'],
+        ];
+        $wp_terms_storage[308]['post_tag'] = [
+            (object) ['name' => 'WordPress', 'slug' => 'wordpress', 'taxonomy' => 'post_tag'],
+            (object) ['name' => 'Plugins', 'slug' => 'plugins', 'taxonomy' => 'post_tag'],
+        ];
+        $wp_terms_storage[308]['genre'] = [
+            (object) ['name' => 'Fiction', 'slug' => 'fiction', 'taxonomy' => 'genre'],
+            (object) ['name' => 'Drama', 'slug' => 'drama', 'taxonomy' => 'genre'],
+        ];
+
+        $template = implode("\n", [
+            'Categories Default Links: {%categories:links%}',
+            'Categories Link Alias: {%category:links%}',
+            'Tags Custom Sep Links: {%tags: | :links%}',
+            'Genre List Links Before: {%taxonomy:genre:\\n* :before:links%}',
+            'Genre List Links Leading Reversed: {%taxonomy:genre:\\n- :links:leading%}',
+        ]);
+
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Categories Default Links: [News](https://example.com/category/news/), [Tech](https://example.com/category/tech/)', $result);
+        $this->assertStringContainsString('Categories Link Alias: [News](https://example.com/category/news/), [Tech](https://example.com/category/tech/)', $result);
+        $this->assertStringContainsString('Tags Custom Sep Links: [WordPress](https://example.com/post_tag/wordpress/) | [Plugins](https://example.com/post_tag/plugins/)', $result);
+        $this->assertStringContainsString("Genre List Links Before: \n* [Fiction](https://example.com/genre/fiction/)\n* [Drama](https://example.com/genre/drama/)", $result);
+        $this->assertStringContainsString("Genre List Links Leading Reversed: \n- [Fiction](https://example.com/genre/fiction/)\n- [Drama](https://example.com/genre/drama/)", $result);
+    }
+
     public function testRenderHandlesNonExistentOrEmptyPostMeta(): void
     {
         $post = new \WP_Post(['ID' => 306, 'post_title' => 'Empty Meta Post']);
