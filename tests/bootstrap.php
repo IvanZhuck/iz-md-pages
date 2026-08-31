@@ -583,6 +583,21 @@ if (!function_exists('get_the_terms')) {
     }
 }
 
+if (!function_exists('get_term_link')) {
+    /**
+     * @param object|int|string $term
+     * @param string            $taxonomy
+     * @return string|\WP_Error
+     */
+    function get_term_link($term, string $taxonomy = '')
+    {
+        $slug = is_object($term) ? ($term->slug ?? sanitize_title((string) ($term->name ?? 'term'))) : (string) $term;
+        $tax = is_object($term) ? ($term->taxonomy ?? $taxonomy) : $taxonomy;
+        $tax = !empty($tax) ? $tax : 'category';
+        return 'https://example.com/' . $tax . '/' . $slug . '/';
+    }
+}
+
 if (!function_exists('wp_list_pluck')) {
     function wp_list_pluck(array $list, string $field): array
     {

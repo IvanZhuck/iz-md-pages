@@ -139,10 +139,10 @@ class PlaceholderRenderer
     private function replaceCategoryPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
+            '/\{%(?:categories|category)(?::(.*?))?(?::(before|leading|prefix|links))?(?::(before|leading|prefix|links))?%\}/i',
             function (array $matches) use ($post): string {
-                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
-                return $this->renderTaxonomyTerms($post, 'category', $separator, $leading);
+                [$separator, $leading, $links] = $this->parseTaxonomyArgs($matches[1] ?? '', $matches[2] ?? '', $matches[3] ?? '');
+                return $this->renderTaxonomyTerms($post, 'category', $separator, $leading, $links);
             },
             $content
         );
@@ -158,10 +158,10 @@ class PlaceholderRenderer
     private function replaceTagPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
+            '/\{%(?:tags|tag|post_tags|post_tag)(?::(.*?))?(?::(before|leading|prefix|links))?(?::(before|leading|prefix|links))?%\}/i',
             function (array $matches) use ($post): string {
-                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[1] ?? '', $matches[2] ?? '');
-                return $this->renderTaxonomyTerms($post, 'post_tag', $separator, $leading);
+                [$separator, $leading, $links] = $this->parseTaxonomyArgs($matches[1] ?? '', $matches[2] ?? '', $matches[3] ?? '');
+                return $this->renderTaxonomyTerms($post, 'post_tag', $separator, $leading, $links);
             },
             $content
         );
@@ -177,11 +177,11 @@ class PlaceholderRenderer
     private function replaceTaxonomyPlaceholders(string $content, \WP_Post $post): string
     {
         return (string) preg_replace_callback(
-            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix))?%\}/i',
+            '/\{%(?:taxonomy:|tax_|taxonomy_)([a-zA-Z0-9_\-]+)(?::(.*?))?(?::(before|leading|prefix|links))?(?::(before|leading|prefix|links))?%\}/i',
             function (array $matches) use ($post): string {
                 $taxonomy = $matches[1];
-                [$separator, $leading] = $this->parseSeparatorAndLeading($matches[2] ?? '', $matches[3] ?? '');
-                return $this->renderTaxonomyTerms($post, $taxonomy, $separator, $leading);
+                [$separator, $leading, $links] = $this->parseTaxonomyArgs($matches[2] ?? '', $matches[3] ?? '', $matches[4] ?? '');
+                return $this->renderTaxonomyTerms($post, $taxonomy, $separator, $leading, $links);
             },
             $content
         );
@@ -272,6 +272,41 @@ class PlaceholderRenderer
         $leading = $this->isLeadingFlag($rawLead);
 
         return [$separator, $leading];
+    }
+
+    /**
+     * Parse arguments for taxonomy placeholders (separator, leading flag, and links flag).
+     *
+     * @param string $arg1 First parameter (separator or modifier).
+     * @param string $arg2 Second parameter (modifier).
+     * @param string $arg3 Third parameter (modifier).
+     * @return array{0: string, 1: bool, 2: bool} Tuple of [separator, isLeading, isLinks].
+     */
+    private function parseTaxonomyArgs(string $arg1, string $arg2, string $arg3): array
+    {
+        $separator = ', ';
+        $leading = false;
+        $links = false;
+
+        $args = [$arg1, $arg2, $arg3];
+        $separatorFound = false;
+
+        foreach ($args as $arg) {
+            if ($arg === '') {
+                continue;
+            }
+
+            if ($this->isLeadingFlag($arg)) {
+                $leading = true;
+            } elseif ($this->isLinksFlag($arg)) {
+                $links = true;
+            } elseif (!$separatorFound) {
+                $separator = $arg;
+                $separatorFound = true;
+            }
+        }
+
+        return [$separator, $leading, $links];
     }
 
     /**
@@ -601,15 +636,16 @@ class PlaceholderRenderer
     }
 
     /**
-     * Render separated terms for a given taxonomy and post with optional leading separator.
+     * Render separated terms for a given taxonomy and post with optional leading separator and markdown links.
      *
      * @param \WP_Post $post         Current post object.
      * @param string   $taxonomyName Taxonomy slug.
      * @param string   $separator    Separator string (defaults to ', ').
      * @param bool     $leading      Whether to prepend separator before the first item.
-     * @return string Separated list of term names.
+     * @param bool     $links        Whether to format terms as markdown links to archive pages.
+     * @return string Separated list of term names or markdown links.
      */
-    private function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', ', bool $leading = false): string
+    private function renderTaxonomyTerms(\WP_Post $post, string $taxonomyName, string $separator = ', ', bool $leading = false, bool $links = false): string
     {
         if (!taxonomy_exists($taxonomyName)) {
             return '';
@@ -621,25 +657,43 @@ class PlaceholderRenderer
             return '';
         }
 
-        $termNames = wp_list_pluck($terms, 'name');
+        $termItems = [];
+        foreach ($terms as $term) {
+            $termName = (string) (is_object($term) ? ($term->name ?? '') : (is_array($term) ? ($term['name'] ?? '') : $term));
+            if ($termName === '') {
+                continue;
+            }
+
+            if ($links && function_exists('get_term_link')) {
+                $termLink = get_term_link($term, $taxonomyName);
+                if (is_string($termLink) && !is_wp_error($termLink)) {
+                    $termItems[] = '[' . $termName . '](' . esc_url($termLink) . ')';
+                    continue;
+                }
+            }
+
+            $termItems[] = $termName;
+        }
+
         $parsedSeparator = $this->parseSeparator($separator);
 
         /**
          * Filter rendered terms list for a taxonomy placeholder.
          *
-         * @param array<int, string> $termNames       Array of term names.
+         * @param array<int, string> $termItems       Array of term names or links.
          * @param \WP_Post           $post            Current post object.
          * @param string             $taxonomyName    Taxonomy slug.
          * @param string             $parsedSeparator Separator string.
          * @param bool               $leading         Whether leading separator is enabled.
+         * @param bool               $links           Whether terms are formatted as links.
          */
-        $termNames = apply_filters('iz_md_placeholder_taxonomy_terms', $termNames, $post, $taxonomyName, $parsedSeparator, $leading);
+        $termItems = apply_filters('iz_md_placeholder_taxonomy_terms', $termItems, $post, $taxonomyName, $parsedSeparator, $leading, $links);
 
-        if (empty($termNames)) {
+        if (empty($termItems)) {
             return '';
         }
 
-        $result = implode($parsedSeparator, $termNames);
+        $result = implode($parsedSeparator, $termItems);
 
         if ($leading && $result !== '') {
             $result = $parsedSeparator . $result;
@@ -850,5 +904,17 @@ class PlaceholderRenderer
     {
         $normalized = strtolower(trim($flag));
         return in_array($normalized, ['before', 'leading', 'prefix'], true);
+    }
+
+    /**
+     * Check if a modifier string represents a 'links' flag.
+     *
+     * @param string $flag Modifier string.
+     * @return bool True if flag enables links, false otherwise.
+     */
+    private function isLinksFlag(string $flag): bool
+    {
+        $normalized = strtolower(trim($flag));
+        return in_array($normalized, ['links'], true);
     }
 }
