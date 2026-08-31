@@ -83,6 +83,7 @@ class PlaceholderRendererTest extends TestCase
             'post_time' => '10:00:00',
             'post_modified' => '2026-06-02 12:00:00',
             'post_modified_gmt' => '2026-06-02 09:00:00',
+            'post_modified_time' => '12:00:00',
         ]);
 
         $post->thumbnail_url = 'https://example.com/images/thumb.png';
@@ -91,28 +92,60 @@ class PlaceholderRendererTest extends TestCase
         global $wp_post_meta;
         $wp_post_meta[202]['_wp_attachment_image_alt'] = 'Thumbnail Alt Text';
 
-        $template = "# {%post_title%}\nID: {%post_id%}\nSlug: {%post_slug%}\nName: {%post_name%}\nType: {%post_type%}\nStatus: {%post_status%}\nDate: {%post_date%}\nDate GMT: {%post_date_gmt%}\nTime: {%post_time%}\nModified: {%post_modified%}\nModified GMT: {%post_modified_gmt%}\nPermalink: {%post_permalink%}\nURL: {%post_url%}\nThumb URL: {%post_thumbnail_url%}\nFeatured URL: {%post_featured_image_url%}\nThumb: {%post_thumbnail%}\nFeatured: {%post_featured_image%}\n\n{%post_content%}\n\n{%post_excerpt%}";
+        $template = implode("\n", [
+            'Title: {%post_title%}',
+            'ID: {%post_id%}',
+            'Slug: {%post_slug%}',
+            'Name: {%post_name%}',
+            'Type: {%post_type%}',
+            'Status: {%post_status%}',
+            'Date: {%post_date%}',
+            'Time: {%post_time%}',
+            'DateTime: {%post_date_time%}',
+            'DateTime GMT: {%post_date_time_gmt%}',
+            'DateTime GMT ISO: {%post_date_time_gmt_iso%}',
+            'Modified Date: {%post_modified_date%}',
+            'Modified Time: {%post_modified_time%}',
+            'Modified DateTime: {%post_modified_date_time%}',
+            'Modified DateTime GMT: {%post_modified_date_time_gmt%}',
+            'Modified DateTime GMT ISO: {%post_modified_date_time_gmt_iso%}',
+            'Modified GMT ISO: {%post_modified_gmt_iso%}',
+            'Permalink: {%post_permalink%}',
+            'URL: {%post_url%}',
+            'Thumb URL: {%post_thumbnail_url%}',
+            'Featured URL: {%post_featured_image_url%}',
+            'Thumb: {%post_thumbnail%}',
+            'Featured: {%post_featured_image%}',
+            'Content: {%post_content%}',
+            'Excerpt: {%post_excerpt%}',
+        ]);
 
         $result = $this->renderer->render($template, $post);
 
-        $this->assertStringContainsString('# Sample Article Title', $result);
+        $this->assertStringContainsString('Title: Sample Article Title', $result);
         $this->assertStringContainsString('ID: 101', $result);
         $this->assertStringContainsString('Slug: sample-article-title', $result);
         $this->assertStringContainsString('Name: sample-article-title', $result);
         $this->assertStringContainsString('Type: post', $result);
         $this->assertStringContainsString('Status: publish', $result);
         $this->assertStringContainsString('Date: 2026-06-01 10:00:00', $result);
-        $this->assertStringContainsString('Date GMT: 2026-06-01 07:00:00', $result);
         $this->assertStringContainsString('Time: 10:00:00', $result);
-        $this->assertStringContainsString('Modified: 2026-06-02 12:00:00', $result);
-        $this->assertStringContainsString('Modified GMT: 2026-06-02 09:00:00', $result);
+        $this->assertStringContainsString('DateTime: 2026-06-01 10:00:00', $result);
+        $this->assertStringContainsString('DateTime GMT: 2026-06-01 07:00:00', $result);
+        $this->assertStringContainsString('DateTime GMT ISO: 2026-06-01T07:00:00+00:00', $result);
+        $this->assertStringContainsString('Modified Date: 2026-06-02 12:00:00', $result);
+        $this->assertStringContainsString('Modified Time: 12:00:00', $result);
+        $this->assertStringContainsString('Modified DateTime: 2026-06-02 12:00:00', $result);
+        $this->assertStringContainsString('Modified DateTime GMT: 2026-06-02 09:00:00', $result);
+        $this->assertStringContainsString('Modified DateTime GMT ISO: 2026-06-02T09:00:00+00:00', $result);
         $this->assertStringContainsString('Permalink: https://example.com/?p=101', $result);
         $this->assertStringContainsString('URL: https://example.com/?p=101', $result);
         $this->assertStringContainsString('Thumb URL: https://example.com/images/thumb.png', $result);
         $this->assertStringContainsString('Featured URL: https://example.com/images/thumb.png', $result);
-        $this->assertStringContainsString('![Thumbnail Alt Text](https://example.com/images/thumb.png)', $result);
-        $this->assertStringContainsString('Paragraph with **bold** text.', $result);
-        $this->assertStringContainsString('A brief article summary.', $result);
+        $this->assertStringContainsString('Thumb: ![Thumbnail Alt Text](https://example.com/images/thumb.png)', $result);
+        $this->assertStringContainsString('Featured: ![Thumbnail Alt Text](https://example.com/images/thumb.png)', $result);
+        $this->assertStringContainsString('Content: Paragraph with **bold** text.', $result);
+        $this->assertStringContainsString('Excerpt: A brief article summary.', $result);
     }
 
     public function testRenderReplacesAllAuthorPlaceholders(): void
@@ -409,6 +442,41 @@ class PlaceholderRendererTest extends TestCase
         $this->assertStringContainsString("Categories List:\n\n* News\n* Updates", $result);
         $this->assertStringContainsString("Tags Hash:\n #release #v2", $result);
         $this->assertStringContainsString("Tags Hash:\n -release -v2", $result);
+    }
+
+    public function testRenderTaxonomiesWithArchiveLinksModifier(): void
+    {
+        global $wp_terms_storage;
+
+        $post = new \WP_Post(['ID' => 308, 'post_type' => 'post']);
+        $wp_terms_storage[308]['category'] = [
+            (object) ['name' => 'News', 'slug' => 'news', 'taxonomy' => 'category'],
+            (object) ['name' => 'Tech', 'slug' => 'tech', 'taxonomy' => 'category'],
+        ];
+        $wp_terms_storage[308]['post_tag'] = [
+            (object) ['name' => 'WordPress', 'slug' => 'wordpress', 'taxonomy' => 'post_tag'],
+            (object) ['name' => 'Plugins', 'slug' => 'plugins', 'taxonomy' => 'post_tag'],
+        ];
+        $wp_terms_storage[308]['genre'] = [
+            (object) ['name' => 'Fiction', 'slug' => 'fiction', 'taxonomy' => 'genre'],
+            (object) ['name' => 'Drama', 'slug' => 'drama', 'taxonomy' => 'genre'],
+        ];
+
+        $template = implode("\n", [
+            'Categories Default Links: {%categories:links%}',
+            'Categories Link Alias: {%category:links%}',
+            'Tags Custom Sep Links: {%tags: | :links%}',
+            'Genre List Links Before: {%taxonomy:genre:\\n* :before:links%}',
+            'Genre List Links Leading Reversed: {%taxonomy:genre:\\n- :links:leading%}',
+        ]);
+
+        $result = $this->renderer->render($template, $post);
+
+        $this->assertStringContainsString('Categories Default Links: [News](https://example.com/category/news/), [Tech](https://example.com/category/tech/)', $result);
+        $this->assertStringContainsString('Categories Link Alias: [News](https://example.com/category/news/), [Tech](https://example.com/category/tech/)', $result);
+        $this->assertStringContainsString('Tags Custom Sep Links: [WordPress](https://example.com/post_tag/wordpress/) | [Plugins](https://example.com/post_tag/plugins/)', $result);
+        $this->assertStringContainsString("Genre List Links Before: \n* [Fiction](https://example.com/genre/fiction/)\n* [Drama](https://example.com/genre/drama/)", $result);
+        $this->assertStringContainsString("Genre List Links Leading Reversed: \n- [Fiction](https://example.com/genre/fiction/)\n- [Drama](https://example.com/genre/drama/)", $result);
     }
 
     public function testRenderHandlesNonExistentOrEmptyPostMeta(): void

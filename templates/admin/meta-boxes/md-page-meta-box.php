@@ -70,7 +70,7 @@ wp_nonce_field($nonceAction, $nonceName);
                 style="width: 100%; font-family: monospace; resize: vertical;"
                 placeholder="<?php echo esc_attr__('# Enter markdown here...', 'iz-md-pages'); ?>"
                 <?php disabled($isTemplateOverridden, true); ?>
-            ><?php echo esc_textarea($manualContent); ?></textarea>
+            ><?php echo esc_textarea(addslashes($manualContent)); ?></textarea>
         </p>
         <?php if ($isTemplateOverridden) : ?>
             <p class="description" style="color: #d63638; margin-top: 6px;">
@@ -82,7 +82,7 @@ wp_nonce_field($nonceAction, $nonceName);
                     type="button"
                     class="button button-secondary iz-md-reset-default-btn"
                     id="iz-md-reset-default-btn"
-                    data-default-template="<?php echo esc_attr($defaultTemplate); ?>"
+                    data-default-template="<?php echo esc_attr(addslashes($defaultTemplate)); ?>"
                     data-confirm-message="<?php echo esc_attr__('Are you sure you want to reset the content to the default template for this post type?', 'iz-md-pages'); ?>"
                 >
                     <span class="dashicons dashicons-image-rotate" aria-hidden="true"></span>

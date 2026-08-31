@@ -55,8 +55,8 @@ if (!defined('ABSPATH')) {
                         <code>{%categories: | %}</code>, <code>{%tags: / %}</code>, <code>{%taxonomy:product_cat: &bull; %}</code>.
                     </li>
                     <li>
-                        <?php esc_html_e('Control characters like newline (', 'iz-md-pages'); ?><code>\n</code><?php esc_html_e(') and tab (', 'iz-md-pages'); ?><code>\t</code><?php esc_html_e(') are supported for Markdown lists or multiline output, for example: ', 'iz-md-pages'); ?>
-                        <code>{%categories:\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\n\t%}</code>.
+                        <?php esc_html_e('Control characters like newline (', 'iz-md-pages'); ?><code>\\n</code><?php esc_html_e(') and tab (', 'iz-md-pages'); ?><code>\\t</code><?php esc_html_e(') are supported for Markdown lists or multiline output, for example: ', 'iz-md-pages'); ?>
+                        <code>{%categories:\\n* %}</code> <?php esc_html_e('or', 'iz-md-pages'); ?> <code>{%tags:\\n\t%}</code>.
                     </li>
                 </ul>
 
@@ -65,7 +65,16 @@ if (!defined('ABSPATH')) {
                     <li>
                         <?php esc_html_e('To show the separator before the first element (e.g. for complete Markdown lists), append ', 'iz-md-pages'); ?>
                         <code>:before</code> (<?php esc_html_e('or', 'iz-md-pages'); ?> <code>:leading</code> / <code>:prefix</code>):<br>
-                        <code>{%categories:\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\n- :leading%}</code>, <code>{%meta:features:\n* :prefix%}</code>.
+                        <code>{%categories:\\n* :before%}</code>, <code>{%tags: #:before%}</code>, <code>{%taxonomy:genre:\\n- :leading%}</code>, <code>{%meta:features:\\n* :prefix%}</code>.
+                    </li>
+                </ul>
+
+                <p><strong><?php esc_html_e('Taxonomy Links to Archive Pages:', 'iz-md-pages'); ?></strong></p>
+                <ul>
+                    <li>
+                        <?php esc_html_e('To output taxonomy terms formatted as Markdown links to their archive pages (e.g. [Term](url)), append ', 'iz-md-pages'); ?>
+                        <code>:links</code>):<br>
+                        <code>{%categories:links%}</code>, <code>{%tags: | :links%}</code>, <code>{%taxonomy:genre:\\n* :before:links%}</code>.
                     </li>
                 </ul>
 
@@ -77,7 +86,7 @@ if (!defined('ABSPATH')) {
                     </li>
                     <li>
                         <?php esc_html_e('If the meta value is an array or object, it is formatted recursively with an optional separator:', 'iz-md-pages'); ?>
-                        <code>{%meta:my_list_key:, %}</code>, <code>{%meta:specs:\n- %}</code>, <code>{%meta:specs:\n- :before%}</code>.
+                        <code>{%meta:my_list_key:, %}</code>, <code>{%meta:specs:\\n- %}</code>, <code>{%meta:specs:\\n- :before%}</code>.
                     </li>
                 </ul>
             </div>

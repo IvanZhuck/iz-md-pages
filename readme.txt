@@ -5,7 +5,7 @@ Tags: seo, md, markdown, ai, content
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -25,7 +25,7 @@ Optimized for **AI search engines, LLMs, developer documentation, CLI tools, and
 * **Flexible Post Type Templates**: Customize layout templates for each enabled post type using powerful placeholders (e.g., `# {%post_title%}\n\n{%post_content%}`).
 * **Universal Header & Footer Templates**: Configure global Markdown headers and footers (such as metadata banners, licensing, or call-to-actions) appended to all rendered Markdown pages.
 * **Rich Placeholder Engine**:
-  * **Core Fields**: `{%post_title%}`, `{%post_content%}`, `{%post_excerpt%}`, `{%post_url%}`, `{%post_date%}`, `{%post_date_gmt%}`, `{%post_time%}`, `{%post_modified%}`, `{%thumbnail_url%}`, `{%thumbnail_id%}`.
+  * **Core Fields**: `{%post_title%}`, `{%post_content%}`, `{%post_excerpt%}`, `{%post_url%}`, `{%post_date%}`, `{%post_time%}`, `{%post_date_time%}`, `{%post_date_time_gmt%}`, `{%post_date_time_gmt_iso%}`, `{%thumbnail_url%}`, `{%thumbnail_id%}`, etc.
   * **Author Info**: `{%author_name%}`, `{%author_email%}`, `{%author_url%}`, `{%author_bio%}`, `{%author_first_name%}`, `{%author_last_name%}`.
   * **Taxonomies**: `{%categories%}`, `{%tags%}`, `{%taxonomy:taxonomy_name%}` with customizable separators and prefixing (`\n*`, `\t`, `:before`, `:leading`).
   * **Comments & Counts**: `{%comments%}`, `{%comments_count%}`.
@@ -84,6 +84,12 @@ Yes! You can use `{%taxonomy:your_tax_name%}` for any custom taxonomy, and `{%me
 Yes. IZ MD Pages provides extensive filter hooks such as `iz_md_post_type_template_{$postType}`, `iz_md_post_template_{$postId}`, `iz_md_render_block_{$blockName}`, `iz_md_render_custom_placeholder_{$tag}`, and `iz_md_page_content`.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added `:links` modifiers for taxonomy placeholders (`{%categories:links%}`, `{%tags:links%}`, `{%taxonomy:<name>:links%}`) to output terms as Markdown links to their archive pages.
+* Enhanced date and time placeholders with expanded post date and modified date/time formats (`{%post_date_time%}`, `{%post_date_time_gmt%}`, `{%post_date_time_gmt_iso%}`, `{%post_date_gmt_iso%}`, `{%post_modified_date%}`, `{%post_modified_time%}`, `{%post_modified_date_time%}`, `{%post_modified_date_time_gmt%}`, `{%post_modified_date_time_gmt_iso%}`, `{%post_modified_gmt_iso%}`).
+* Added slash escaping (`addslashes`) when rendering template textarea fields and reset button attributes on settings pages and the post meta box.
+* Added documentation for taxonomy archive links in the admin reference block.
 
 = 1.0.0 =
 * The first public release.

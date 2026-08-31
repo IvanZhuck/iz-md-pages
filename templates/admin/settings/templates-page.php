@@ -66,9 +66,9 @@ if (!defined('ABSPATH')) {
                                 id="iz_md_template_<?php echo esc_attr($izMdPostType->name); ?>"
                                 rows="8"
                                 class="large-text code"
-                                placeholder="<?php echo esc_attr($defaultTemplate); ?>"
+                                placeholder="<?php echo esc_attr(addslashes($defaultTemplate)); ?>"
                                 <?php disabled($izMdIsOverridden, true); ?>
-                            ><?php echo esc_textarea($izMdTemplateValue); ?></textarea>
+                            ><?php echo esc_textarea(addslashes($izMdTemplateValue)); ?></textarea>
                             <?php if ($izMdIsOverridden) : ?>
                                 <p class="description" style="color: #d63638; margin-top: 6px;">
                                     <?php esc_html_e('This template is overridden via filter hook and cannot be edited here.', 'iz-md-pages'); ?>
@@ -102,7 +102,7 @@ if (!defined('ABSPATH')) {
                             rows="6"
                             class="large-text code"
                             placeholder="<?php echo esc_attr__('# Enter header markdown (optional)...', 'iz-md-pages'); ?>"
-                        ><?php echo esc_textarea($headerTemplate); ?></textarea>
+                        ><?php echo esc_textarea(addslashes($headerTemplate)); ?></textarea>
                         <p class="description">
                             <?php esc_html_e('Universal Markdown markup output at the very beginning of every MD page. Supports template placeholders.', 'iz-md-pages'); ?>
                         </p>
@@ -121,7 +121,7 @@ if (!defined('ABSPATH')) {
                             rows="6"
                             class="large-text code"
                             placeholder="<?php echo esc_attr__('# Enter footer markdown (optional)...', 'iz-md-pages'); ?>"
-                        ><?php echo esc_textarea($footerTemplate); ?></textarea>
+                        ><?php echo esc_textarea(addslashes($footerTemplate)); ?></textarea>
                         <p class="description">
                             <?php esc_html_e('Universal Markdown markup output at the very end of every MD page. Supports template placeholders.', 'iz-md-pages'); ?>
                         </p>

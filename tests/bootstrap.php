@@ -59,6 +59,7 @@ if (!class_exists('WP_Post')) {
         public string $post_date_gmt = '2026-01-01 12:00:00';
         public string $post_time = '12:00:00';
         public string $post_modified = '2026-01-02 12:00:00';
+        public string $post_modified_time = '';
         public string $post_modified_gmt = '2026-01-02 12:00:00';
         public string $thumbnail_url = '';
         public int $thumbnail_id = 0;
@@ -435,6 +436,44 @@ if (!function_exists('get_the_modified_date')) {
     }
 }
 
+if (!function_exists('get_the_modified_time')) {
+    function get_the_modified_time(string $format = '', $post = null): string
+    {
+        $p = $post instanceof \WP_Post ? $post : get_post($post);
+        return $p ? ($p->post_modified_time ?? $p->post_time ?? '') : '';
+    }
+}
+
+if (!function_exists('mysql2date')) {
+    /**
+     * @param string $format
+     * @param string $date
+     * @param bool   $translate
+     * @return string|int|false
+     */
+    function mysql2date(string $format, string $date, bool $translate = true)
+    {
+        if (empty($date)) {
+            return false;
+        }
+
+        if ($format === 'G') {
+            return strtotime($date . ' UTC');
+        }
+
+        if ($format === 'U') {
+            return strtotime($date);
+        }
+
+        $datetime = date_create($date);
+        if (!$datetime) {
+            return false;
+        }
+
+        return $datetime->format($format);
+    }
+}
+
 if (!function_exists('get_the_post_thumbnail_url')) {
     /**
      * @param mixed $post
@@ -541,6 +580,21 @@ if (!function_exists('get_the_terms')) {
         global $wp_terms_storage;
         $id = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
         return $wp_terms_storage[$id][$taxonomy] ?? false;
+    }
+}
+
+if (!function_exists('get_term_link')) {
+    /**
+     * @param object|int|string $term
+     * @param string            $taxonomy
+     * @return string|\WP_Error
+     */
+    function get_term_link($term, string $taxonomy = '')
+    {
+        $slug = is_object($term) ? ($term->slug ?? sanitize_title((string) ($term->name ?? 'term'))) : (string) $term;
+        $tax = is_object($term) ? ($term->taxonomy ?? $taxonomy) : $taxonomy;
+        $tax = !empty($tax) ? $tax : 'category';
+        return 'https://example.com/' . $tax . '/' . $slug . '/';
     }
 }
 
