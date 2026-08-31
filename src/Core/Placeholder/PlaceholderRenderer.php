@@ -22,10 +22,15 @@ class PlaceholderRenderer
     public const PLACEHOLDER_POST_TYPE = '{%post_type%}';
     public const PLACEHOLDER_POST_STATUS = '{%post_status%}';
     public const PLACEHOLDER_POST_DATE = '{%post_date%}';
-    public const PLACEHOLDER_POST_DATE_GMT = '{%post_date_gmt%}';
     public const PLACEHOLDER_POST_TIME = '{%post_time%}';
-    public const PLACEHOLDER_POST_MODIFIED = '{%post_modified%}';
-    public const PLACEHOLDER_POST_MODIFIED_GMT = '{%post_modified_gmt%}';
+    public const PLACEHOLDER_POST_DATE_TIME = '{%post_date_time%}';
+    public const PLACEHOLDER_POST_DATE_TIME_GMT = '{%post_date_time_gmt%}';
+    public const PLACEHOLDER_POST_DATE_TIME_GMT_ISO = '{%post_date_time_gmt_iso%}';
+    public const PLACEHOLDER_POST_MODIFIED_DATE = '{%post_modified_date%}';
+    public const PLACEHOLDER_POST_MODIFIED_TIME = '{%post_modified_time%}';
+    public const PLACEHOLDER_POST_MODIFIED_DATE_TIME = '{%post_modified_date_time%}';
+    public const PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT = '{%post_modified_date_time_gmt%}';
+    public const PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT_ISO = '{%post_modified_date_time_gmt_iso%}';
     public const PLACEHOLDER_POST_PERMALINK = '{%post_permalink%}';
     public const PLACEHOLDER_POST_URL = '{%post_url%}';
     public const PLACEHOLDER_POST_THUMBNAIL_URL = '{%post_thumbnail_url%}';
@@ -288,10 +293,15 @@ class PlaceholderRenderer
             self::PLACEHOLDER_POST_TYPE => $this->renderPostField('post_type', $post),
             self::PLACEHOLDER_POST_STATUS => $this->renderPostField('post_status', $post),
             self::PLACEHOLDER_POST_DATE => $this->renderPostField('post_date', $post),
-            self::PLACEHOLDER_POST_DATE_GMT => $this->renderPostField('post_date_gmt', $post),
             self::PLACEHOLDER_POST_TIME => $this->renderPostField('post_time', $post),
-            self::PLACEHOLDER_POST_MODIFIED => $this->renderPostField('post_modified', $post),
-            self::PLACEHOLDER_POST_MODIFIED_GMT => $this->renderPostField('post_modified_gmt', $post),
+            self::PLACEHOLDER_POST_DATE_TIME => $this->renderPostField('post_date_time', $post),
+            self::PLACEHOLDER_POST_DATE_TIME_GMT => $this->renderPostField('post_date_time_gmt', $post),
+            self::PLACEHOLDER_POST_DATE_TIME_GMT_ISO => $this->renderPostField('post_date_time_gmt_iso', $post),
+            self::PLACEHOLDER_POST_MODIFIED_DATE => $this->renderPostField('post_modified_date', $post),
+            self::PLACEHOLDER_POST_MODIFIED_TIME => $this->renderPostField('post_modified_time', $post),
+            self::PLACEHOLDER_POST_MODIFIED_DATE_TIME => $this->renderPostField('post_modified_date_time', $post),
+            self::PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT => $this->renderPostField('post_modified_date_time_gmt', $post),
+            self::PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT_ISO => $this->renderPostField('post_modified_date_time_gmt_iso', $post),
             self::PLACEHOLDER_POST_PERMALINK => $this->renderPostField('permalink', $post),
             self::PLACEHOLDER_POST_URL => $this->renderPostField('permalink', $post),
             self::PLACEHOLDER_POST_THUMBNAIL_URL => $this->renderPostField('thumbnail_url', $post),
@@ -344,12 +354,21 @@ class PlaceholderRenderer
                 self::PLACEHOLDER_POST_SLUG => __('Post slug / URL slug', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_TYPE => __('Post type name', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_STATUS => __('Post publication status', 'iz-md-pages'),
-                self::PLACEHOLDER_POST_DATE => __('Post published date', 'iz-md-pages'),
-                self::PLACEHOLDER_POST_TIME => __('Post published time', 'iz-md-pages'),
-                self::PLACEHOLDER_POST_MODIFIED => __('Post last modified date', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_PERMALINK => __('Post permalink URL', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_FEATURED_IMAGE_URL => __('Featured image URL', 'iz-md-pages'),
                 self::PLACEHOLDER_POST_FEATURED_IMAGE => __('Featured image Markdown tag', 'iz-md-pages'),
+            ],
+            'Date & Time' => [
+                self::PLACEHOLDER_POST_DATE => __('Post published date (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_TIME => __('Post published time (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_DATE_TIME => __('Post published date and time (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_DATE_TIME_GMT => __('Post published date and time (GMT)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_DATE_TIME_GMT_ISO => __('Post published date and time in ISO 8601 format (GMT)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_MODIFIED_DATE => __('Post last modified date (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_MODIFIED_TIME => __('Post last modified time (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_MODIFIED_DATE_TIME => __('Post last modified date and time (local timezone)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT => __('Post last modified date and time (GMT)', 'iz-md-pages'),
+                self::PLACEHOLDER_POST_MODIFIED_DATE_TIME_GMT_ISO => __('Post last modified date and time in ISO 8601 format (GMT)', 'iz-md-pages'),
             ],
             'Author' => [
                 self::PLACEHOLDER_AUTHOR_NAME => __('Author display name', 'iz-md-pages'),
@@ -416,15 +435,63 @@ class PlaceholderRenderer
                 break;
 
             case 'post_date':
-                $value = (string) get_the_date('', $post);
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $value = (string) get_the_date($dateFormat, $post);
                 break;
 
             case 'post_time':
-                $value = (string) get_the_time('', $post);
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = (string) get_the_time($timeFormat, $post);
                 break;
 
-            case 'post_modified':
-                $value = (string) get_the_modified_date('', $post);
+            case 'post_date_time':
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = (string) get_the_date($dateFormat . ' ' . $timeFormat, $post);
+                break;
+
+            case 'post_date_time_gmt':
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = function_exists('mysql2date')
+                    ? (string) mysql2date($dateFormat . ' ' . $timeFormat, (string) ($post->post_date_gmt ?? ''))
+                    : (string) ($post->post_date_gmt ?? '');
+                break;
+
+            case 'post_date_time_gmt_iso':
+                $value = function_exists('mysql2date')
+                    ? (string) mysql2date('c', (string) ($post->post_date_gmt ?? ''))
+                    : (string) ($post->post_date_gmt ?? '');
+                break;
+
+            case 'post_modified_date':
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $value = (string) get_the_modified_date($dateFormat, $post);
+                break;
+
+            case 'post_modified_time':
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = (string) get_the_modified_time($timeFormat, $post);
+                break;
+
+            case 'post_modified_date_time':
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = (string) get_the_modified_date($dateFormat . ' ' . $timeFormat, $post);
+                break;
+
+            case 'post_modified_date_time_gmt':
+                $dateFormat = (string) (get_option('date_format') ?: 'Y-m-d');
+                $timeFormat = (string) (get_option('time_format') ?: 'H:i:s');
+                $value = function_exists('mysql2date')
+                    ? (string) mysql2date($dateFormat . ' ' . $timeFormat, (string) ($post->post_modified_gmt ?? ''))
+                    : (string) ($post->post_modified_gmt ?? '');
+                break;
+
+            case 'post_modified_date_time_gmt_iso':
+                $value = function_exists('mysql2date')
+                    ? (string) mysql2date('c', (string) ($post->post_modified_gmt ?? ''))
+                    : (string) ($post->post_modified_gmt ?? '');
                 break;
 
             case 'permalink':
