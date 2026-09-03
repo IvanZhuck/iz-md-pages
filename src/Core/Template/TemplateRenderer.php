@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace IZMDPages\Core\Template;
 
+use IZMDPages\Core\Settings\CoreSettings;
+
 /**
  * Handles template rendering and variable extraction.
  */
@@ -23,7 +25,7 @@ class TemplateRenderer
     {
         $this->templatesDir = $templatesDir !== null
             ? rtrim($templatesDir, '/\\') . '/'
-            : dirname(__DIR__, 3) . '/templates/';
+            : CoreSettings::getTemplatesDir();
     }
 
     /**

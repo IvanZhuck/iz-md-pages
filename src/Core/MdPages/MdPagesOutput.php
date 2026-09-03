@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace IZMDPages\Core\MdPages;
 
 use IZMDPages\Admin\MetaBoxes\MdPageMetaBox;
-use IZMDPages\Admin\Settings\SettingsPage;
-use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 use IZMDPages\Core\Placeholder\PlaceholderRenderer;
+use IZMDPages\Core\Settings\CoreSettings;
 
 /**
  * Handles Markdown page output and URL routing.
@@ -107,18 +106,16 @@ class MdPagesOutput
      */
     private function maybeRedirect(\WP_Post $post): void
     {
-        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
         $permalink = (string) get_permalink($post->ID);
         $isDisabled = (bool) get_post_meta($post->ID, MdPageMetaBox::META_KEY_DISABLED, true);
         $isFrontPage = ($post->ID === (int) get_option('page_on_front') && get_option('show_on_front') === 'page');
-        $isFrontPageEnabled = (bool) get_option(SettingsPage::OPTION_FRONT_PAGE_KEY, true);
 
-        if (($isFrontPage && !$isFrontPageEnabled) || !in_array($post->post_type, $enabledTypes, true) || $isDisabled) {
+        if (($isFrontPage && !CoreSettings::isFrontPageEnabled()) || !CoreSettings::isPostTypeEnabled($post->post_type) || $isDisabled) {
             wp_safe_redirect($permalink, 301);
             exit;
         }
 
-        $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
+        $suffixType = CoreSettings::getUrlSuffixType();
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not applicable for public GET routing query parameters.
         $isQueryVarRequest = isset($_GET['md']);
 
@@ -144,7 +141,7 @@ class MdPagesOutput
     public static function getMdUrl(\WP_Post $post): string
     {
         $permalink = (string) get_permalink($post->ID);
-        $suffixType = (string) get_option(SettingsPage::OPTION_SUFFIX_KEY, 'endpoint');
+        $suffixType = CoreSettings::getUrlSuffixType();
 
         if ($suffixType === 'query_var') {
             return add_query_arg('md', $permalink);
@@ -170,9 +167,8 @@ class MdPagesOutput
         }
 
         $isFrontPage = ($post->ID === (int) get_option('page_on_front') && get_option('show_on_front') === 'page');
-        $isFrontPageEnabled = (bool) get_option(SettingsPage::OPTION_FRONT_PAGE_KEY, true);
 
-        if ($isFrontPage && !$isFrontPageEnabled) {
+        if ($isFrontPage && !CoreSettings::isFrontPageEnabled()) {
             return;
         }
 
@@ -182,9 +178,7 @@ class MdPagesOutput
             return;
         }
 
-        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
-
-        if (!in_array($post->post_type, $enabledTypes, true)) {
+        if (!CoreSettings::isPostTypeEnabled($post->post_type)) {
             return;
         }
 
@@ -206,7 +200,7 @@ class MdPagesOutput
         if ($isManual && !MdPageMetaBox::isPostTemplateOverridden($post->ID)) {
             $template = (string) get_post_meta($post->ID, MdPageMetaBox::META_KEY_MANUAL_CONTENT, true);
         } else {
-            $template = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
+            $template = CoreSettings::getTemplateForPostType($post->post_type);
         }
 
         /**
@@ -243,8 +237,8 @@ class MdPagesOutput
          */
         $content = (string) apply_filters('iz_md_page_content', $content, $post);
 
-        $headerTemplate = TemplatesSettingsPage::getHeaderTemplate();
-        $footerTemplate = TemplatesSettingsPage::getFooterTemplate();
+        $headerTemplate = CoreSettings::getHeaderTemplate();
+        $footerTemplate = CoreSettings::getFooterTemplate();
 
         $output = '';
 

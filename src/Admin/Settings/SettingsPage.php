@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Settings;
 
-use IZMDPages\Core\Settings\Settings as CoreSettings;
+use IZMDPages\Core\Settings\CoreSettings;
 
 /**
  * Handles administration settings page for IZ MD Pages.
@@ -14,17 +14,17 @@ class SettingsPage extends Settings
     /**
      * Option key for enabled post types in wp_options table.
      */
-    public const OPTION_KEY = 'iz_md_enabled_post_types';
+    public const OPTION_KEY = CoreSettings::OPTION_ENABLED_POST_TYPES;
 
     /**
      * Option key for URL suffix format in wp_options table.
      */
-    public const OPTION_SUFFIX_KEY = 'iz_md_url_suffix_type';
+    public const OPTION_SUFFIX_KEY = CoreSettings::OPTION_URL_SUFFIX_TYPE;
 
     /**
      * Option key for enabling/disabling Markdown version on the front page.
      */
-    public const OPTION_FRONT_PAGE_KEY = 'iz_md_enable_front_page';
+    public const OPTION_FRONT_PAGE_KEY = CoreSettings::OPTION_ENABLE_FRONT_PAGE;
 
     /**
      * Page slug for the general settings page.
