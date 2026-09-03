@@ -5,7 +5,7 @@ Tags: seo, md, markdown, ai, content
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -84,6 +84,14 @@ Yes! You can use `{%taxonomy:your_tax_name%}` for any custom taxonomy, and `{%me
 Yes. IZ MD Pages provides extensive filter hooks such as `iz_md_post_type_template_{$postType}`, `iz_md_post_template_{$postId}`, `iz_md_render_block_{$blockName}`, `iz_md_render_custom_placeholder_{$tag}`, and `iz_md_page_content`.
 
 == Changelog ==
+
+= 1.2.0 =
+* Added global template and helper functions `iz_md_is_md_page()` and `iz_md_get_md_url()`.
+* Added a "Settings" shortcut link in the WordPress plugins table.
+* Added a default value for the universal header template.
+* Added support for plain/standard permalinks: Markdown URL formatting and redirects now automatically adapt when pretty permalinks are disabled.
+* Added a disabled state and notification warning in settings when `/md` permalink suffix is selected without active pretty permalinks.
+* Extracted and centralized core plugin settings into `CoreSettings`.
 
 = 1.1.0 =
 * Added `:links` modifiers for taxonomy placeholders (`{%categories:links%}`, `{%tags:links%}`, `{%taxonomy:<name>:links%}`) to output terms as Markdown links to their archive pages.
