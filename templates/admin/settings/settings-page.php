@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @var bool                         $frontPageEnabled
  * @var bool                         $isStaticFrontPage
  * @var string                       $readingSettingsUrl
+ * @var bool                         $hasPrettyPermalinks
+ * @var string                       $permalinksSettingsUrl
  * @var string                       $settingsGroup
  * @var string                       $optionKey
  * @var string                       $optionSuffixKey
@@ -41,24 +43,36 @@ if (!defined('ABSPATH')) {
                             <legend class="screen-reader-text">
                                 <span><?php esc_html_e('URL Format for MD Pages', 'iz-md-pages'); ?></span>
                             </legend>
-                            <label for="iz_md_suffix_endpoint" style="display: block; margin-bottom: 8px;">
+                            <label for="iz_md_suffix_endpoint" style="display: block; margin-bottom: 8px;<?php echo !$hasPrettyPermalinks ? ' opacity: 0.6;' : ''; ?>">
                                 <input
                                     type="radio"
                                     name="<?php echo esc_attr($optionSuffixKey); ?>"
                                     id="iz_md_suffix_endpoint"
                                     value="endpoint"
-                                    <?php checked($suffixType, 'endpoint'); ?>
+                                    <?php checked($hasPrettyPermalinks && $suffixType === 'endpoint'); ?>
+                                    <?php disabled(!$hasPrettyPermalinks); ?>
                                 />
                                 <strong><?php esc_html_e('Permalink Suffix (/md)', 'iz-md-pages'); ?></strong>
                                 <code>(e.g., /page-name/md)</code>
                             </label>
+                            <?php if (!$hasPrettyPermalinks) : ?>
+                                <p class="description" style="color: #d63638; margin: -4px 0 8px 24px;">
+                                    <?php
+                                    printf(
+                                        /* translators: %s: URL to WordPress permalinks settings page */
+                                        esc_html__('Requires pretty permalinks to be enabled. Please configure your permalinks in %s.', 'iz-md-pages'),
+                                        '<a href="' . esc_url($permalinksSettingsUrl) . '">' . esc_html__('Settings &rarr; Permalinks', 'iz-md-pages') . '</a>'
+                                    );
+                                    ?>
+                                </p>
+                            <?php endif; ?>
                             <label for="iz_md_suffix_query_var" style="display: block; margin-bottom: 8px;">
                                 <input
                                     type="radio"
                                     name="<?php echo esc_attr($optionSuffixKey); ?>"
                                     id="iz_md_suffix_query_var"
                                     value="query_var"
-                                    <?php checked($suffixType, 'query_var'); ?>
+                                    <?php checked(!$hasPrettyPermalinks || $suffixType === 'query_var'); ?>
                                 />
                                 <strong><?php esc_html_e('GET Parameter (/?md)', 'iz-md-pages'); ?></strong>
                                 <code>(e.g., /page-name/?md)</code>

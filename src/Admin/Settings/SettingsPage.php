@@ -103,6 +103,10 @@ class SettingsPage extends Settings
      */
     public function sanitizeUrlSuffixType(mixed $input): string
     {
+        if (!get_option('permalink_structure')) {
+            return 'query_var';
+        }
+
         $allowed = ['endpoint', 'query_var'];
         return is_string($input) && in_array($input, $allowed, true) ? $input : 'endpoint';
     }
@@ -170,6 +174,7 @@ class SettingsPage extends Settings
         $showOnFront = (string) get_option('show_on_front', 'posts');
         $frontPageId = (int) get_option('page_on_front', 0);
         $isStaticFrontPage = ($showOnFront === 'page' && $frontPageId > 0);
+        $hasPrettyPermalinks = (bool) get_option('permalink_structure');
 
         $data = [
             'currentTab' => 'general',
@@ -179,6 +184,8 @@ class SettingsPage extends Settings
             'frontPageEnabled' => (bool) get_option(self::OPTION_FRONT_PAGE_KEY, 1),
             'isStaticFrontPage' => $isStaticFrontPage,
             'readingSettingsUrl' => admin_url('options-reading.php'),
+            'hasPrettyPermalinks' => $hasPrettyPermalinks,
+            'permalinksSettingsUrl' => admin_url('options-permalink.php'),
             'settingsGroup' => self::SETTINGS_GROUP,
             'optionKey' => self::OPTION_KEY,
             'optionSuffixKey' => self::OPTION_SUFFIX_KEY,

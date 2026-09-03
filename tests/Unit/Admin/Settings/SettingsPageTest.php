@@ -88,6 +88,16 @@ class SettingsPageTest extends TestCase
 
     public function testSanitizeUrlSuffixType(): void
     {
+        global $wp_options;
+
+        // When permalinks are disabled (empty permalink_structure), always return query_var
+        $wp_options['permalink_structure'] = '';
+        $this->assertSame('query_var', $this->settingsPage->sanitizeUrlSuffixType('endpoint'));
+        $this->assertSame('query_var', $this->settingsPage->sanitizeUrlSuffixType('query_var'));
+        $this->assertSame('query_var', $this->settingsPage->sanitizeUrlSuffixType('invalid_value'));
+
+        // When pretty permalinks are enabled
+        $wp_options['permalink_structure'] = '/%postname%/';
         $this->assertSame('endpoint', $this->settingsPage->sanitizeUrlSuffixType('endpoint'));
         $this->assertSame('query_var', $this->settingsPage->sanitizeUrlSuffixType('query_var'));
         $this->assertSame('endpoint', $this->settingsPage->sanitizeUrlSuffixType('invalid_value'));
@@ -143,6 +153,8 @@ class SettingsPageTest extends TestCase
                         && $data['suffixType'] === 'query_var'
                         && $data['frontPageEnabled'] === false
                         && $data['isStaticFrontPage'] === true
+                        && isset($data['hasPrettyPermalinks'])
+                        && isset($data['permalinksSettingsUrl'])
                         && $data['settingsGroup'] === SettingsPage::SETTINGS_GROUP
                         && $data['optionKey'] === SettingsPage::OPTION_KEY
                         && $data['optionSuffixKey'] === SettingsPage::OPTION_SUFFIX_KEY
