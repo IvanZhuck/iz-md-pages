@@ -378,6 +378,18 @@ if (!function_exists('get_permalink')) {
     function get_permalink($post = 0): string
     {
         $id = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
+        $postObj = $post instanceof \WP_Post ? $post : get_post($id);
+
+        if ($id > 0 && get_option('show_on_front') === 'page' && (int) get_option('page_on_front') === $id) {
+            return home_url('/');
+        }
+
+        $structure = (string) get_option('permalink_structure', '');
+        if ($structure !== '') {
+            $slug = !empty($postObj->post_name) ? $postObj->post_name : 'post-' . $id;
+            return 'https://example.com/' . $slug . '/';
+        }
+
         return 'https://example.com/?p=' . $id;
     }
 }

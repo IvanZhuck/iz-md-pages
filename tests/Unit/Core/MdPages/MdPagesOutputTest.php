@@ -81,7 +81,7 @@ class MdPagesOutputTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertStringContainsString('<link rel="alternate" type="text/markdown"', $output);
-        $this->assertStringContainsString('https://example.com/?p=10/md/', $output);
+        $this->assertStringContainsString('https://example.com/?p=10&md', $output);
     }
 
     public function testRenderAlternateLinkRendersForSingularPostWithQueryVarSuffix(): void
@@ -196,10 +196,24 @@ class MdPagesOutputTest extends TestCase
         $post = new \WP_Post(['ID' => 50, 'post_type' => 'post']);
 
         $wp_options[SettingsPage::OPTION_SUFFIX_KEY] = 'endpoint';
-        $this->assertSame('https://example.com/?p=50/md/', MdPagesOutput::getMdUrl($post));
+        $this->assertSame('https://example.com/?p=50&md=', MdPagesOutput::getMdUrl($post));
 
         $wp_options[SettingsPage::OPTION_SUFFIX_KEY] = 'query_var';
-        $this->assertSame('https://example.com/?p=50&md', MdPagesOutput::getMdUrl($post));
+        $this->assertSame('https://example.com/?p=50&md=', MdPagesOutput::getMdUrl($post));
+    }
+
+    public function testGetMdUrlReturnsEndpointAndQueryVarUrlsPrettyPermalinks(): void
+    {
+        global $wp_options;
+
+        $post = new \WP_Post(['ID' => 50, 'post_type' => 'post']);
+        $wp_options['permalink_structure'] = '/%postname%/';
+
+        $wp_options[SettingsPage::OPTION_SUFFIX_KEY] = 'endpoint';
+        $this->assertSame('https://example.com/post-50/md/', MdPagesOutput::getMdUrl($post));
+
+        $wp_options[SettingsPage::OPTION_SUFFIX_KEY] = 'query_var';
+        $this->assertSame('https://example.com/post-50/?md=', MdPagesOutput::getMdUrl($post));
     }
 
     public function testRenderContentUsesDefaultTemplateWhenNoSpecificTemplateConfigured(): void
