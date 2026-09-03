@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Settings;
 
+use IZMDPages\Core\Settings\Settings as CoreSettings;
+
 /**
  * Handles administration settings page for IZ MD Pages.
  */
@@ -43,6 +45,7 @@ class SettingsPage extends Settings
         add_action('update_option_' . self::OPTION_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_SUFFIX_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_FRONT_PAGE_KEY, 'flush_rewrite_rules');
+        add_filter('plugin_action_links_' . CoreSettings::getPluginBaseName(), [$this, 'addPluginActionLinks']);
     }
 
     /**
@@ -183,5 +186,25 @@ class SettingsPage extends Settings
         ];
 
         $this->templateRenderer->render('admin/settings/settings-page.php', $data);
+    }
+
+    /**
+     * Add settings link to plugin action links on plugins.php page.
+     *
+     * @param array<int|string, string> $actions Existing action links.
+     * @return array<int|string, string> Updated action links.
+     */
+    public function addPluginActionLinks(array $actions): array
+    {
+        $settingsUrl = admin_url('admin.php?page=' . self::PAGE_SLUG);
+        $settingsLink = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url($settingsUrl),
+            esc_html__('Settings', 'iz-md-pages')
+        );
+
+        $actions['settings'] = $settingsLink;
+
+        return $actions;
     }
 }
