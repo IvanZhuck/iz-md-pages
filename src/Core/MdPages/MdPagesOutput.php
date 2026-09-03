@@ -115,7 +115,8 @@ class MdPagesOutput
             exit;
         }
 
-        $suffixType = CoreSettings::getUrlSuffixType();
+        $hasPrettyPermalinks = (bool) get_option('permalink_structure');
+        $suffixType = $hasPrettyPermalinks ? CoreSettings::getUrlSuffixType() : 'query_var';
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not applicable for public GET routing query parameters.
         $isQueryVarRequest = isset($_GET['md']);
 
@@ -142,9 +143,10 @@ class MdPagesOutput
     {
         $permalink = (string) get_permalink($post->ID);
         $suffixType = CoreSettings::getUrlSuffixType();
+        $hasPrettyPermalinks = (bool) get_option('permalink_structure');
 
-        if ($suffixType === 'query_var') {
-            return add_query_arg('md', $permalink);
+        if (!$hasPrettyPermalinks || $suffixType === 'query_var') {
+            return add_query_arg('md', '', $permalink);
         }
 
         return user_trailingslashit(rtrim($permalink, '/') . '/md');
