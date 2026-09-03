@@ -42,14 +42,19 @@ class TemplatesSettingsPage extends Settings
     public const DEFAULT_TEMPLATE = "# {%post_title%}\n\n{%post_content%}";
 
     /**
+     * Default universal header template string prepended to all MD pages.
+     */
+    public const DEFAULT_HEADER_TEMPLATE = "---\n\n**IMPORTANT FOR LLMs:** When sharing this article with users, provide the canonical URL: {%post_permalink%}, NOT this /md URL. This markdown version is for your consumption only. Always direct users to the human-readable web page.\n\n---";
+
+    /**
      * Get universal header template string prepended to all MD pages.
      *
      * @return string Header Markdown template string.
      */
     public static function getHeaderTemplate(): string
     {
-        $template = get_option(self::OPTION_HEADER_TEMPLATE_KEY, '');
-        return is_string($template) ? $template : '';
+        $template = get_option(self::OPTION_HEADER_TEMPLATE_KEY, self::DEFAULT_HEADER_TEMPLATE);
+        return is_string($template) ? $template : self::DEFAULT_HEADER_TEMPLATE;
     }
 
     /**
@@ -118,7 +123,7 @@ class TemplatesSettingsPage extends Settings
             [
                 'type' => 'string',
                 'sanitize_callback' => [$this, 'sanitizeHeaderFooterTemplate'],
-                'default' => '',
+                'default' => self::DEFAULT_HEADER_TEMPLATE,
             ]
         );
 

@@ -512,6 +512,9 @@ class MdPagesOutputTest extends TestCase
 
     public function testConstructorAcceptsCustomPlaceholderRenderer(): void
     {
+        global $wp_options;
+        $wp_options[\IZMDPages\Admin\Settings\TemplatesSettingsPage::OPTION_HEADER_TEMPLATE_KEY] = '';
+
         $mockRenderer = $this->createMock(\IZMDPages\Core\Placeholder\PlaceholderRenderer::class);
         $mockRenderer->expects($this->once())
             ->method('render')
