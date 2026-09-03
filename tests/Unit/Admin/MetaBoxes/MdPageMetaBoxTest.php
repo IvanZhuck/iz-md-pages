@@ -115,7 +115,7 @@ class MdPageMetaBoxTest extends TestCase
                         && $data['isManual'] === false
                         && $data['isTemplateOverridden'] === false
                         && $data['isPublished'] === true
-                        && $data['mdUrl'] === 'https://example.com/?p=10/md/'
+                        && $data['mdUrl'] === 'https://example.com/?p=10&md='
                         && strpos($data['manualContent'], '# {%post_title%}') !== false;
                 })
             );

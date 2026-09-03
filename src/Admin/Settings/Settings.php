@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Settings;
 
+use IZMDPages\Core\Settings\CoreSettings;
 use IZMDPages\Core\Template\TemplateRenderer;
 
 /**
@@ -52,17 +53,7 @@ abstract class Settings
      */
     protected function getTargetPostTypes(): array
     {
-        $postTypes = get_post_types(
-            [
-                'public' => true,
-            ],
-            'objects'
-        );
-
-        // Exclude media attachments
-        unset($postTypes['attachment']);
-
-        return $postTypes;
+        return CoreSettings::getTargetPostTypes();
     }
 
     /**

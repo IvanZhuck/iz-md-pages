@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\Settings;
 
+use IZMDPages\Core\Settings\CoreSettings;
+
 /**
  * Handles administration settings page for IZ MD Pages.
  */
@@ -12,17 +14,17 @@ class SettingsPage extends Settings
     /**
      * Option key for enabled post types in wp_options table.
      */
-    public const OPTION_KEY = 'iz_md_enabled_post_types';
+    public const OPTION_KEY = CoreSettings::OPTION_ENABLED_POST_TYPES;
 
     /**
      * Option key for URL suffix format in wp_options table.
      */
-    public const OPTION_SUFFIX_KEY = 'iz_md_url_suffix_type';
+    public const OPTION_SUFFIX_KEY = CoreSettings::OPTION_URL_SUFFIX_TYPE;
 
     /**
      * Option key for enabling/disabling Markdown version on the front page.
      */
-    public const OPTION_FRONT_PAGE_KEY = 'iz_md_enable_front_page';
+    public const OPTION_FRONT_PAGE_KEY = CoreSettings::OPTION_ENABLE_FRONT_PAGE;
 
     /**
      * Page slug for the general settings page.
@@ -43,6 +45,7 @@ class SettingsPage extends Settings
         add_action('update_option_' . self::OPTION_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_SUFFIX_KEY, 'flush_rewrite_rules');
         add_action('update_option_' . self::OPTION_FRONT_PAGE_KEY, 'flush_rewrite_rules');
+        add_filter('plugin_action_links_' . CoreSettings::getPluginBaseName(), [$this, 'addPluginActionLinks']);
     }
 
     /**
@@ -100,6 +103,10 @@ class SettingsPage extends Settings
      */
     public function sanitizeUrlSuffixType(mixed $input): string
     {
+        if (!get_option('permalink_structure')) {
+            return 'query_var';
+        }
+
         $allowed = ['endpoint', 'query_var'];
         return is_string($input) && in_array($input, $allowed, true) ? $input : 'endpoint';
     }
@@ -167,6 +174,7 @@ class SettingsPage extends Settings
         $showOnFront = (string) get_option('show_on_front', 'posts');
         $frontPageId = (int) get_option('page_on_front', 0);
         $isStaticFrontPage = ($showOnFront === 'page' && $frontPageId > 0);
+        $hasPrettyPermalinks = (bool) get_option('permalink_structure');
 
         $data = [
             'currentTab' => 'general',
@@ -176,6 +184,8 @@ class SettingsPage extends Settings
             'frontPageEnabled' => (bool) get_option(self::OPTION_FRONT_PAGE_KEY, 1),
             'isStaticFrontPage' => $isStaticFrontPage,
             'readingSettingsUrl' => admin_url('options-reading.php'),
+            'hasPrettyPermalinks' => $hasPrettyPermalinks,
+            'permalinksSettingsUrl' => admin_url('options-permalink.php'),
             'settingsGroup' => self::SETTINGS_GROUP,
             'optionKey' => self::OPTION_KEY,
             'optionSuffixKey' => self::OPTION_SUFFIX_KEY,
@@ -183,5 +193,25 @@ class SettingsPage extends Settings
         ];
 
         $this->templateRenderer->render('admin/settings/settings-page.php', $data);
+    }
+
+    /**
+     * Add settings link to plugin action links on plugins.php page.
+     *
+     * @param array<int|string, string> $actions Existing action links.
+     * @return array<int|string, string> Updated action links.
+     */
+    public function addPluginActionLinks(array $actions): array
+    {
+        $settingsUrl = admin_url('admin.php?page=' . self::PAGE_SLUG);
+        $settingsLink = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url($settingsUrl),
+            esc_html__('Settings', 'iz-md-pages')
+        );
+
+        $actions['settings'] = $settingsLink;
+
+        return $actions;
     }
 }

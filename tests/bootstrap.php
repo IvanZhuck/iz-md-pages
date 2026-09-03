@@ -378,6 +378,18 @@ if (!function_exists('get_permalink')) {
     function get_permalink($post = 0): string
     {
         $id = is_object($post) ? (int) ($post->ID ?? 0) : (int) $post;
+        $postObj = $post instanceof \WP_Post ? $post : get_post($id);
+
+        if ($id > 0 && get_option('show_on_front') === 'page' && (int) get_option('page_on_front') === $id) {
+            return home_url('/');
+        }
+
+        $structure = (string) get_option('permalink_structure', '');
+        if ($structure !== '') {
+            $slug = !empty($postObj->post_name) ? $postObj->post_name : 'post-' . $id;
+            return 'https://example.com/' . $slug . '/';
+        }
+
         return 'https://example.com/?p=' . $id;
     }
 }
@@ -904,6 +916,22 @@ if (!function_exists('add_query_arg')) {
     }
 }
 
+if (!function_exists('get_query_var')) {
+    /**
+     * @param string $var
+     * @param mixed  $default
+     * @return mixed
+     */
+    function get_query_var(string $var, $default = '')
+    {
+        global $wp_query;
+        if (isset($wp_query->query_vars[$var])) {
+            return $wp_query->query_vars[$var];
+        }
+        return $default;
+    }
+}
+
 if (!function_exists('is_singular')) {
     function is_singular($post_types = ''): bool
     {
@@ -1087,6 +1115,21 @@ if (!function_exists('plugins_url')) {
     function plugins_url(string $path = '', string $plugin = ''): string
     {
         return 'https://example.com/wp-content/plugins/iz-md-pages/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('plugin_basename')) {
+    function plugin_basename(string $file): string
+    {
+        $file = str_replace('\\', '/', $file);
+        $pluginDir = str_replace('\\', '/', dirname(__DIR__));
+
+        if (strpos($file, $pluginDir) === 0) {
+            $relative = ltrim(substr($file, strlen($pluginDir)), '/');
+            return basename(dirname($file)) . '/' . basename($file);
+        }
+
+        return basename(dirname($file)) . '/' . basename($file);
     }
 }
 
@@ -1279,3 +1322,6 @@ if (!function_exists('render_block')) {
         return isset($block['innerHTML']) && is_string($block['innerHTML']) ? $block['innerHTML'] : '';
     }
 }
+
+// Load plugin global helper functions
+require_once dirname(__DIR__) . '/inc/functions.php';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IZMDPages\Admin\Settings;
 
 use IZMDPages\Core\Placeholder\PlaceholderRenderer;
+use IZMDPages\Core\Settings\CoreSettings;
 
 /**
  * Handles administration templates settings page for IZ MD Pages.
@@ -14,17 +15,17 @@ class TemplatesSettingsPage extends Settings
     /**
      * Option key for post type templates in wp_options table.
      */
-    public const OPTION_KEY = 'iz_md_templates';
+    public const OPTION_KEY = CoreSettings::OPTION_TEMPLATES;
 
     /**
      * Option key for universal header template.
      */
-    public const OPTION_HEADER_TEMPLATE_KEY = 'iz_md_header_template';
+    public const OPTION_HEADER_TEMPLATE_KEY = CoreSettings::OPTION_HEADER_TEMPLATE;
 
     /**
      * Option key for universal footer template.
      */
-    public const OPTION_FOOTER_TEMPLATE_KEY = 'iz_md_footer_template';
+    public const OPTION_FOOTER_TEMPLATE_KEY = CoreSettings::OPTION_FOOTER_TEMPLATE;
 
     /**
      * Settings group name for WordPress Settings API.
@@ -39,7 +40,12 @@ class TemplatesSettingsPage extends Settings
     /**
      * Default template string used when no specific template is defined.
      */
-    public const DEFAULT_TEMPLATE = "# {%post_title%}\n\n{%post_content%}";
+    public const DEFAULT_TEMPLATE = CoreSettings::DEFAULT_TEMPLATE;
+
+    /**
+     * Default universal header template string prepended to all MD pages.
+     */
+    public const DEFAULT_HEADER_TEMPLATE = CoreSettings::DEFAULT_HEADER_TEMPLATE;
 
     /**
      * Get universal header template string prepended to all MD pages.
@@ -48,8 +54,7 @@ class TemplatesSettingsPage extends Settings
      */
     public static function getHeaderTemplate(): string
     {
-        $template = get_option(self::OPTION_HEADER_TEMPLATE_KEY, '');
-        return is_string($template) ? $template : '';
+        return CoreSettings::getHeaderTemplate();
     }
 
     /**
@@ -59,8 +64,7 @@ class TemplatesSettingsPage extends Settings
      */
     public static function getFooterTemplate(): string
     {
-        $template = get_option(self::OPTION_FOOTER_TEMPLATE_KEY, '');
-        return is_string($template) ? $template : '';
+        return CoreSettings::getFooterTemplate();
     }
 
     /**
@@ -72,18 +76,7 @@ class TemplatesSettingsPage extends Settings
      */
     public static function getTemplateForPostType(string $postType): string
     {
-        $templates = (array) get_option(self::OPTION_KEY, []);
-        $template = isset($templates[$postType]) && is_string($templates[$postType]) && $templates[$postType] !== ''
-            ? $templates[$postType]
-            : self::DEFAULT_TEMPLATE;
-
-        /**
-         * Filter the Markdown template for a specific post type.
-         *
-         * @param string $template Markdown template string.
-         * @param string $postType Post type slug.
-         */
-        return (string) apply_filters("iz_md_post_type_template_{$postType}", $template, $postType);
+        return CoreSettings::getTemplateForPostType($postType);
     }
 
     /**
@@ -94,7 +87,7 @@ class TemplatesSettingsPage extends Settings
      */
     public static function isTemplateOverridden(string $postType): bool
     {
-        return has_filter("iz_md_post_type_template_{$postType}") !== false;
+        return CoreSettings::isTemplateOverridden($postType);
     }
 
     /**
@@ -118,7 +111,7 @@ class TemplatesSettingsPage extends Settings
             [
                 'type' => 'string',
                 'sanitize_callback' => [$this, 'sanitizeHeaderFooterTemplate'],
-                'default' => '',
+                'default' => self::DEFAULT_HEADER_TEMPLATE,
             ]
         );
 

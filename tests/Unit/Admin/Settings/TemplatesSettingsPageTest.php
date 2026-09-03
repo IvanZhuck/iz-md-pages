@@ -51,7 +51,7 @@ class TemplatesSettingsPageTest extends TestCase
     {
         global $wp_options;
 
-        $this->assertSame('', TemplatesSettingsPage::getHeaderTemplate());
+        $this->assertSame(TemplatesSettingsPage::DEFAULT_HEADER_TEMPLATE, TemplatesSettingsPage::getHeaderTemplate());
         $this->assertSame('', TemplatesSettingsPage::getFooterTemplate());
 
         $wp_options[TemplatesSettingsPage::OPTION_HEADER_TEMPLATE_KEY] = '<!-- HEADER -->';

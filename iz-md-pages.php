@@ -3,7 +3,7 @@
 /**
  * Plugin Name: IZ MD Pages
  * Description: WordPress plugin for generating and serving Markdown pages.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Ivan Zhuck
  * Author URI: https://izhuck.ru/
  * License: GPLv3
@@ -44,6 +44,11 @@ spl_autoload_register(function (string $class): void {
         require_once $file;
     }
 });
+
+/**
+ * Load global template and conditional helper functions.
+ */
+require_once __DIR__ . '/inc/functions.php';
 
 /**
  * Plugin initialization.

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace IZMDPages\Admin\MetaBoxes;
 
-use IZMDPages\Admin\Settings\SettingsPage;
-use IZMDPages\Admin\Settings\TemplatesSettingsPage;
 use IZMDPages\Core\MdPages\MdPagesOutput;
+use IZMDPages\Core\Settings\CoreSettings;
 use IZMDPages\Core\Template\TemplateRenderer;
 
 /**
@@ -90,9 +89,7 @@ class MdPageMetaBox
      */
     public function registerMetaBox(string $postType): void
     {
-        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
-
-        if (!in_array($postType, $enabledTypes, true)) {
+        if (!CoreSettings::isPostTypeEnabled($postType)) {
             return;
         }
 
@@ -127,7 +124,7 @@ class MdPageMetaBox
     {
         $isDisabled = (bool) get_post_meta($post->ID, self::META_KEY_DISABLED, true);
         $isTemplateOverridden = self::isPostTemplateOverridden($post->ID);
-        $defaultTemplate = TemplatesSettingsPage::getTemplateForPostType($post->post_type);
+        $defaultTemplate = CoreSettings::getTemplateForPostType($post->post_type);
 
         if ($isTemplateOverridden) {
             $isManual = true;

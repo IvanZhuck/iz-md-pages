@@ -7,6 +7,7 @@ namespace IZMDPages\Admin\Assets;
 use IZMDPages\Admin\Settings\DocumentationSettingsPage;
 use IZMDPages\Admin\Settings\SettingsPage;
 use IZMDPages\Admin\Settings\TemplatesSettingsPage;
+use IZMDPages\Core\Settings\CoreSettings;
 
 /**
  * Base abstract class for managing administration assets.
@@ -20,7 +21,7 @@ abstract class Assets
      */
     protected function getPluginFilePath(): string
     {
-        return dirname(__DIR__, 3) . '/iz-md-pages.php';
+        return CoreSettings::getPluginFilePath();
     }
 
     /**
@@ -123,8 +124,6 @@ abstract class Assets
             return false;
         }
 
-        $enabledTypes = (array) get_option(SettingsPage::OPTION_KEY, ['post', 'page']);
-
-        return in_array($screen->post_type, $enabledTypes, true);
+        return CoreSettings::isPostTypeEnabled($screen->post_type);
     }
 }
