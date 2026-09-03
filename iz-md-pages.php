@@ -46,6 +46,11 @@ spl_autoload_register(function (string $class): void {
 });
 
 /**
+ * Load global template and conditional helper functions.
+ */
+require_once __DIR__ . '/inc/functions.php';
+
+/**
  * Plugin initialization.
  */
 (new SettingsAssets())->init();

@@ -904,6 +904,22 @@ if (!function_exists('add_query_arg')) {
     }
 }
 
+if (!function_exists('get_query_var')) {
+    /**
+     * @param string $var
+     * @param mixed  $default
+     * @return mixed
+     */
+    function get_query_var(string $var, $default = '')
+    {
+        global $wp_query;
+        if (isset($wp_query->query_vars[$var])) {
+            return $wp_query->query_vars[$var];
+        }
+        return $default;
+    }
+}
+
 if (!function_exists('is_singular')) {
     function is_singular($post_types = ''): bool
     {
@@ -1294,3 +1310,6 @@ if (!function_exists('render_block')) {
         return isset($block['innerHTML']) && is_string($block['innerHTML']) ? $block['innerHTML'] : '';
     }
 }
+
+// Load plugin global helper functions
+require_once dirname(__DIR__) . '/inc/functions.php';
