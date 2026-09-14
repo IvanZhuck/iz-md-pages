@@ -75,15 +75,15 @@ class SettingsPageTest extends TestCase
         $this->assertSame(1, $group[SettingsPage::OPTION_FRONT_PAGE_KEY]['default']);
     }
 
-    public function testSanitizeFrontPageOption(): void
+    public function testSanitizeBooleanOption(): void
     {
-        $this->assertSame(1, $this->settingsPage->sanitizeFrontPageOption('1'));
-        $this->assertSame(1, $this->settingsPage->sanitizeFrontPageOption(true));
-        $this->assertSame(1, $this->settingsPage->sanitizeFrontPageOption(1));
-        $this->assertSame(0, $this->settingsPage->sanitizeFrontPageOption('0'));
-        $this->assertSame(0, $this->settingsPage->sanitizeFrontPageOption(0));
-        $this->assertSame(0, $this->settingsPage->sanitizeFrontPageOption(null));
-        $this->assertSame(0, $this->settingsPage->sanitizeFrontPageOption(''));
+        $this->assertSame(1, $this->settingsPage->sanitizeBooleanOption('1'));
+        $this->assertSame(1, $this->settingsPage->sanitizeBooleanOption(true));
+        $this->assertSame(1, $this->settingsPage->sanitizeBooleanOption(1));
+        $this->assertSame(0, $this->settingsPage->sanitizeBooleanOption('0'));
+        $this->assertSame(0, $this->settingsPage->sanitizeBooleanOption(0));
+        $this->assertSame(0, $this->settingsPage->sanitizeBooleanOption(null));
+        $this->assertSame(0, $this->settingsPage->sanitizeBooleanOption(''));
     }
 
     public function testSanitizeUrlSuffixType(): void

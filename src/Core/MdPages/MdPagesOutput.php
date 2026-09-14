@@ -158,6 +158,10 @@ class MdPagesOutput
      */
     public function renderAlternateLink(): void
     {
+        if (!CoreSettings::isAlternateLinkEnabled()) {
+            return;
+        }
+
         if (!is_singular()) {
             return;
         }
