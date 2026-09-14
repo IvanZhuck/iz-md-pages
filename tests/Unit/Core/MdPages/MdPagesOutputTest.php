@@ -31,6 +31,13 @@ class MdPagesOutputTest extends TestCase
         $wp_is_front_page = false;
         $wp_is_home = false;
         $wp_query = new \WP_Query();
+        unset($_SERVER['HTTP_ACCEPT']);
+    }
+
+    protected function tearDown(): void
+    {
+        unset($_SERVER['HTTP_ACCEPT']);
+        parent::tearDown();
     }
 
     public function testInitRegistersAllRequiredHooks(): void
@@ -600,5 +607,105 @@ class MdPagesOutputTest extends TestCase
 
         $this->assertStringContainsString('# Clean Post', $content);
         $this->assertStringContainsString('Clean body.', $content);
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenAcceptHeaderOptionIsDisabled(): void
+    {
+        global $wp_options, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 200, 'post_type' => 'post', 'post_title' => 'Test Header']);
+        $wp_queried_object = $post;
+        $_SERVER['HTTP_ACCEPT'] = 'text/markdown';
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 0;
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenNoHttpAcceptHeaderIsPresent(): void
+    {
+        global $wp_options, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 201, 'post_type' => 'post', 'post_title' => 'Test Header']);
+        $wp_queried_object = $post;
+        unset($_SERVER['HTTP_ACCEPT']);
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenAcceptHeaderDoesNotContainTextMarkdown(): void
+    {
+        global $wp_options, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 202, 'post_type' => 'post', 'post_title' => 'Test Header']);
+        $wp_queried_object = $post;
+        $_SERVER['HTTP_ACCEPT'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenPostTypeIsNotEnabled(): void
+    {
+        global $wp_options, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 203, 'post_type' => 'unsupported_type', 'post_title' => 'Test Header']);
+        $wp_queried_object = $post;
+        $_SERVER['HTTP_ACCEPT'] = 'text/markdown';
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenPostIsDisabledInMetaBox(): void
+    {
+        global $wp_options, $wp_post_meta, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 204, 'post_type' => 'post', 'post_title' => 'Test Header']);
+        $wp_queried_object = $post;
+        $_SERVER['HTTP_ACCEPT'] = 'text/markdown';
+        $wp_options[SettingsPage::OPTION_KEY] = ['post'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
+        $wp_post_meta[204][\IZMDPages\Admin\MetaBoxes\MdPageMetaBox::META_KEY_DISABLED] = '1';
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
+    }
+
+    public function testRenderAsMdIfHasAcceptMarkdownHeaderBailsWhenFrontPageIsDisabled(): void
+    {
+        global $wp_options, $post, $wp_queried_object;
+
+        $mdPagesOutputMock = $this->createMock(MdPagesOutput::class);
+        $mdPagesOutputMock->expects($this->never())->method('renderContent');
+
+        $post = new \WP_Post(['ID' => 205, 'post_type' => 'page', 'post_title' => 'Front Page']);
+        $wp_queried_object = $post;
+        $_SERVER['HTTP_ACCEPT'] = 'text/markdown';
+        $wp_options['show_on_front'] = 'page';
+        $wp_options['page_on_front'] = 205;
+        $wp_options[SettingsPage::OPTION_KEY] = ['page'];
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
+        $wp_options[SettingsPage::OPTION_FRONT_PAGE_KEY] = 0;
+
+        $this->output->renderAsMdIfHasAcceptMarkdownHeader();
     }
 }
