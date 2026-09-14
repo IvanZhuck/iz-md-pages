@@ -91,7 +91,7 @@ class MdPagesOutput
         if (!$post instanceof \WP_Post) {
             if (is_front_page() || is_home()) {
                 wp_safe_redirect(home_url('/'), 301);
-                exit;
+                $this->exit();
             }
             return;
         }
@@ -140,7 +140,7 @@ class MdPagesOutput
 
         if (($isFrontPage && !CoreSettings::isFrontPageEnabled()) || !CoreSettings::isPostTypeEnabled($post->post_type) || $isDisabled) {
             wp_safe_redirect($permalink, 301);
-            exit;
+            $this->exit();
         }
 
         $hasPrettyPermalinks = (bool) get_option('permalink_structure');
@@ -151,13 +151,13 @@ class MdPagesOutput
         if ($suffixType === 'endpoint' && $isQueryVarRequest) {
             $targetUrl = user_trailingslashit(rtrim($permalink, '/') . '/md');
             wp_safe_redirect($targetUrl, 301);
-            exit;
+            $this->exit();
         }
 
         if ($suffixType === 'query_var' && !$isQueryVarRequest) {
             $targetUrl = add_query_arg('md', '', $permalink);
             wp_safe_redirect($targetUrl, 301);
-            exit;
+            $this->exit();
         }
     }
 
@@ -306,6 +306,11 @@ class MdPagesOutput
 
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Direct output of Markdown formatted content for text/markdown MIME response.
         echo $this->renderContent($post);
+        $this->exit();
+    }
+
+    public function exit(): void
+    {
         exit;
     }
 }
