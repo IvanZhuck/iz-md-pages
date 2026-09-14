@@ -189,6 +189,41 @@ class MdPagesOutputTest extends TestCase
         $this->assertSame('', $output);
     }
 
+    public function testRenderAlternateLinkDoesNotRenderWhenAlternateLinkIsDisabled(): void
+    {
+        global $wp_options, $wp_queried_object, $wp_is_singular;
+
+        $post = new \WP_Post(['ID' => 10, 'post_type' => 'post']);
+        $wp_queried_object = $post;
+        $wp_is_singular = true;
+        $wp_options[SettingsPage::OPTION_KEY] = ['post', 'page'];
+        $wp_options[SettingsPage::OPTION_ALTERNATE_LINK_KEY] = 0;
+
+        ob_start();
+        $this->output->renderAlternateLink();
+        $output = ob_get_clean();
+
+        $this->assertSame('', $output);
+    }
+
+    public function testRenderAlternateLinkRendersWhenAlternateLinkIsEnabledExplicitly(): void
+    {
+        global $wp_options, $wp_queried_object, $wp_is_singular;
+
+        $post = new \WP_Post(['ID' => 10, 'post_type' => 'post']);
+        $wp_queried_object = $post;
+        $wp_is_singular = true;
+        $wp_options[SettingsPage::OPTION_KEY] = ['post', 'page'];
+        $wp_options[SettingsPage::OPTION_ALTERNATE_LINK_KEY] = 1;
+
+        ob_start();
+        $this->output->renderAlternateLink();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('<link rel="alternate" type="text/markdown"', $output);
+        $this->assertStringContainsString('https://example.com/?p=10&md', $output);
+    }
+
     public function testGetMdUrlReturnsEndpointAndQueryVarUrls(): void
     {
         global $wp_options;

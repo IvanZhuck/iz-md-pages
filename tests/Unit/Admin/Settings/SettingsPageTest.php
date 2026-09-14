@@ -34,6 +34,7 @@ class SettingsPageTest extends TestCase
         $this->assertSame('iz_md_enabled_post_types', SettingsPage::OPTION_KEY);
         $this->assertSame('iz_md_url_suffix_type', SettingsPage::OPTION_SUFFIX_KEY);
         $this->assertSame('iz_md_enable_front_page', SettingsPage::OPTION_FRONT_PAGE_KEY);
+        $this->assertSame('iz_md_enable_alternate_link', SettingsPage::OPTION_ALTERNATE_LINK_KEY);
         $this->assertSame('iz-md-settings', SettingsPage::PAGE_SLUG);
         $this->assertSame('iz_md_settings_group', SettingsPage::SETTINGS_GROUP);
         $this->assertSame('iz-md-settings', SettingsPage::PARENT_SLUG);
@@ -73,6 +74,10 @@ class SettingsPageTest extends TestCase
         $this->assertArrayHasKey(SettingsPage::OPTION_FRONT_PAGE_KEY, $group);
         $this->assertSame('boolean', $group[SettingsPage::OPTION_FRONT_PAGE_KEY]['type']);
         $this->assertSame(1, $group[SettingsPage::OPTION_FRONT_PAGE_KEY]['default']);
+
+        $this->assertArrayHasKey(SettingsPage::OPTION_ALTERNATE_LINK_KEY, $group);
+        $this->assertSame('boolean', $group[SettingsPage::OPTION_ALTERNATE_LINK_KEY]['type']);
+        $this->assertSame(1, $group[SettingsPage::OPTION_ALTERNATE_LINK_KEY]['default']);
     }
 
     public function testSanitizeBooleanOption(): void

@@ -40,6 +40,7 @@ class CoreSettingsTest extends TestCase
         $this->assertSame('iz_md_enabled_post_types', CoreSettings::OPTION_ENABLED_POST_TYPES);
         $this->assertSame('iz_md_url_suffix_type', CoreSettings::OPTION_URL_SUFFIX_TYPE);
         $this->assertSame('iz_md_enable_front_page', CoreSettings::OPTION_ENABLE_FRONT_PAGE);
+        $this->assertSame('iz_md_enable_alternate_link', CoreSettings::OPTION_ENABLE_ALTERNATE_LINK);
         $this->assertSame('iz_md_templates', CoreSettings::OPTION_TEMPLATES);
         $this->assertSame('iz_md_header_template', CoreSettings::OPTION_HEADER_TEMPLATE);
         $this->assertSame('iz_md_footer_template', CoreSettings::OPTION_FOOTER_TEMPLATE);
@@ -47,6 +48,7 @@ class CoreSettingsTest extends TestCase
         $this->assertSame(['post', 'page'], CoreSettings::DEFAULT_ENABLED_POST_TYPES);
         $this->assertSame('endpoint', CoreSettings::DEFAULT_SUFFIX_TYPE);
         $this->assertSame(1, CoreSettings::DEFAULT_ENABLE_FRONT_PAGE);
+        $this->assertSame(1, CoreSettings::DEFAULT_ENABLE_ALTERNATE_LINK);
         $this->assertSame("# {%post_title%}\n\n{%post_content%}", CoreSettings::DEFAULT_TEMPLATE);
         $this->assertStringContainsString('IMPORTANT FOR LLMs', CoreSettings::DEFAULT_HEADER_TEMPLATE);
     }
@@ -141,6 +143,19 @@ class CoreSettingsTest extends TestCase
 
         $wp_options[CoreSettings::OPTION_ENABLE_FRONT_PAGE] = 1;
         $this->assertTrue(CoreSettings::isFrontPageEnabled());
+    }
+
+    public function testIsAlternateLinkEnabled(): void
+    {
+        global $wp_options;
+
+        $this->assertTrue(CoreSettings::isAlternateLinkEnabled());
+
+        $wp_options[CoreSettings::OPTION_ENABLE_ALTERNATE_LINK] = 0;
+        $this->assertFalse(CoreSettings::isAlternateLinkEnabled());
+
+        $wp_options[CoreSettings::OPTION_ENABLE_ALTERNATE_LINK] = 1;
+        $this->assertTrue(CoreSettings::isAlternateLinkEnabled());
     }
 
     public function testGetHeaderTemplateReturnsDefaultWhenUnset(): void
