@@ -19,6 +19,8 @@ declare(strict_types=1);
  * @var string                       $optionFrontPageKey
  * @var bool                         $alternateLinkEnabled
  * @var string                       $optionAlternateLinkKey
+ * @var bool                         $acceptHeaderEnabled
+ * @var string                       $optionAcceptHeaderKey
  */
 
 if (!defined('ABSPATH')) {
@@ -139,6 +141,29 @@ if (!defined('ABSPATH')) {
                         </fieldset>
                         <p class="description">
                             <?php esc_html_e('Outputs <link rel="alternate" type="text/markdown" href="..."> in the <head> section of singular posts and pages that have Markdown versions enabled.', 'iz-md-pages'); ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Accept Header Support', 'iz-md-pages'); ?></th>
+                    <td>
+                        <fieldset>
+                            <legend class="screen-reader-text">
+                                <span><?php esc_html_e('Accept Header Support', 'iz-md-pages'); ?></span>
+                            </legend>
+                            <label for="iz_md_enable_accept_header" style="display: block; margin-bottom: 8px;">
+                                <input
+                                    type="checkbox"
+                                    name="<?php echo esc_attr($optionAcceptHeaderKey); ?>"
+                                    id="iz_md_enable_accept_header"
+                                    value="1"
+                                    <?php checked($acceptHeaderEnabled); ?>
+                                />
+                                <strong><?php esc_html_e('Serve Markdown when requested via Accept: text/markdown header', 'iz-md-pages'); ?></strong>
+                            </label>
+                        </fieldset>
+                        <p class="description">
+                            <?php esc_html_e('When enabled, requests with the HTTP header "Accept: text/markdown" will receive the Markdown version of the page directly.', 'iz-md-pages'); ?>
                         </p>
                     </td>
                 </tr>

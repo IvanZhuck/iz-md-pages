@@ -35,6 +35,7 @@ class MdPagesOutput
     {
         add_action('init', [$this, 'addRewriteEndpoints']);
         add_filter('query_vars', [$this, 'addQueryVars']);
+        add_action('template_redirect', [$this, 'renderAsMdIfHasAcceptMarkdownHeader']);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp_head', [$this, 'renderAlternateLink'], 2);
     }
@@ -92,6 +93,33 @@ class MdPagesOutput
                 wp_safe_redirect(home_url('/'), 301);
                 exit;
             }
+            return;
+        }
+
+        $this->maybeRedirect($post);
+        $this->renderMdPage($post);
+    }
+
+    /**
+     * Handle template redirect when Accept: text/markdown header is present.
+     */
+    public function renderAsMdIfHasAcceptMarkdownHeader(): void
+    {
+        global $post;
+
+        if (!CoreSettings::isAcceptHeaderEnabled()) {
+            return;
+        }
+
+        $acceptHeader = isset($_SERVER['HTTP_ACCEPT']) && is_string($_SERVER['HTTP_ACCEPT'])
+            ? $_SERVER['HTTP_ACCEPT']
+            : '';
+
+        if (stripos($acceptHeader, 'text/markdown') === false) {
+            return;
+        }
+
+        if (iz_md_get_md_url($post) == '') {
             return;
         }
 
