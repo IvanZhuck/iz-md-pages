@@ -35,6 +35,7 @@ class SettingsPageTest extends TestCase
         $this->assertSame('iz_md_url_suffix_type', SettingsPage::OPTION_SUFFIX_KEY);
         $this->assertSame('iz_md_enable_front_page', SettingsPage::OPTION_FRONT_PAGE_KEY);
         $this->assertSame('iz_md_enable_alternate_link', SettingsPage::OPTION_ALTERNATE_LINK_KEY);
+        $this->assertSame('iz_md_enable_accept_header', SettingsPage::OPTION_ACCEPT_HEADER_KEY);
         $this->assertSame('iz-md-settings', SettingsPage::PAGE_SLUG);
         $this->assertSame('iz_md_settings_group', SettingsPage::SETTINGS_GROUP);
         $this->assertSame('iz-md-settings', SettingsPage::PARENT_SLUG);
@@ -78,6 +79,10 @@ class SettingsPageTest extends TestCase
         $this->assertArrayHasKey(SettingsPage::OPTION_ALTERNATE_LINK_KEY, $group);
         $this->assertSame('boolean', $group[SettingsPage::OPTION_ALTERNATE_LINK_KEY]['type']);
         $this->assertSame(1, $group[SettingsPage::OPTION_ALTERNATE_LINK_KEY]['default']);
+
+        $this->assertArrayHasKey(SettingsPage::OPTION_ACCEPT_HEADER_KEY, $group);
+        $this->assertSame('boolean', $group[SettingsPage::OPTION_ACCEPT_HEADER_KEY]['type']);
+        $this->assertSame(1, $group[SettingsPage::OPTION_ACCEPT_HEADER_KEY]['default']);
     }
 
     public function testSanitizeBooleanOption(): void
@@ -146,6 +151,8 @@ class SettingsPageTest extends TestCase
         $wp_options[SettingsPage::OPTION_KEY] = ['post'];
         $wp_options[SettingsPage::OPTION_SUFFIX_KEY] = 'query_var';
         $wp_options[SettingsPage::OPTION_FRONT_PAGE_KEY] = 0;
+        $wp_options[SettingsPage::OPTION_ALTERNATE_LINK_KEY] = 0;
+        $wp_options[SettingsPage::OPTION_ACCEPT_HEADER_KEY] = 1;
 
         $mockRenderer = $this->createMock(TemplateRenderer::class);
         $mockRenderer->expects($this->once())
@@ -157,13 +164,17 @@ class SettingsPageTest extends TestCase
                         && $data['enabledTypes'] === ['post']
                         && $data['suffixType'] === 'query_var'
                         && $data['frontPageEnabled'] === false
+                        && $data['alternateLinkEnabled'] === false
+                        && $data['acceptHeaderEnabled'] === true
                         && $data['isStaticFrontPage'] === true
                         && isset($data['hasPrettyPermalinks'])
                         && isset($data['permalinksSettingsUrl'])
                         && $data['settingsGroup'] === SettingsPage::SETTINGS_GROUP
                         && $data['optionKey'] === SettingsPage::OPTION_KEY
                         && $data['optionSuffixKey'] === SettingsPage::OPTION_SUFFIX_KEY
-                        && $data['optionFrontPageKey'] === SettingsPage::OPTION_FRONT_PAGE_KEY;
+                        && $data['optionFrontPageKey'] === SettingsPage::OPTION_FRONT_PAGE_KEY
+                        && $data['optionAlternateLinkKey'] === SettingsPage::OPTION_ALTERNATE_LINK_KEY
+                        && $data['optionAcceptHeaderKey'] === SettingsPage::OPTION_ACCEPT_HEADER_KEY;
                 })
             );
 
