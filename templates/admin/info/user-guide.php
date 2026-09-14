@@ -94,7 +94,11 @@ if (!defined('ABSPATH')) {
                 <strong><?php esc_html_e('Step 4: AI & Machine Discovery', 'iz-md-pages'); ?></strong>
                 <ul>
                     <li>
-                        <?php esc_html_e('The plugin automatically injects a <link rel="alternate" type="text/markdown" href="..."> tag into the HTML <head> of enabled posts.', 'iz-md-pages'); ?>
+                        <?php esc_html_e('The plugin automatically injects a <link rel="alternate" type="text/markdown" href="..."> tag into the HTML <head> of enabled posts (this can be enabled or disabled via the "Alternate Link Tag" option in General Settings).', 'iz-md-pages'); ?>
+                    </li>
+                    <li>
+                        <?php esc_html_e('Accept Header Support:', 'iz-md-pages'); ?>
+                        <?php esc_html_e('When enabled in General Settings, clients (e.g. curl, AI agents, automated tools) sending an "Accept: text/markdown" HTTP request header will receive the Markdown version directly from the canonical post URL without needing the /md endpoint.', 'iz-md-pages'); ?>
                     </li>
                     <li>
                         <?php esc_html_e('AI assistants, LLM tools, search engine crawlers, and RSS/data scrapers can easily discover and consume pure text Markdown without HTML clutter.', 'iz-md-pages'); ?>

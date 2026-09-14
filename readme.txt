@@ -5,7 +5,7 @@ Tags: seo, md, markdown, ai, content
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -84,6 +84,11 @@ Yes! You can use `{%taxonomy:your_tax_name%}` for any custom taxonomy, and `{%me
 Yes. IZ MD Pages provides extensive filter hooks such as `iz_md_post_type_template_{$postType}`, `iz_md_post_template_{$postId}`, `iz_md_render_block_{$blockName}`, `iz_md_render_custom_placeholder_{$tag}`, and `iz_md_page_content`.
 
 == Changelog ==
+
+= 1.3.0 =
+* Added "Accept Header Support" setting to serve Markdown directly when requested with `Accept: text/markdown` HTTP header on canonical URLs.
+* Added "Alternate Link Tag" setting to enable or disable `<link rel="alternate" type="text/markdown">` discovery tags in `<head>`.
+* Updated documentation in admin area regarding Accept header support and alternate link tag configuration.
 
 = 1.2.0 =
 * Added global template and helper functions `iz_md_is_md_page()` and `iz_md_get_md_url()`.

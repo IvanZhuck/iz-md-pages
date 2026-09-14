@@ -27,6 +27,16 @@ class SettingsPage extends Settings
     public const OPTION_FRONT_PAGE_KEY = CoreSettings::OPTION_ENABLE_FRONT_PAGE;
 
     /**
+     * Option key for enabling/disabling <link rel="alternate"> in <head>.
+     */
+    public const OPTION_ALTERNATE_LINK_KEY = CoreSettings::OPTION_ENABLE_ALTERNATE_LINK;
+
+    /**
+     * Option key for enabling/disabling Markdown response on Accept: text/markdown header.
+     */
+    public const OPTION_ACCEPT_HEADER_KEY = CoreSettings::OPTION_ENABLE_ACCEPT_HEADER;
+
+    /**
      * Page slug for the general settings page.
      */
     public const PAGE_SLUG = 'iz-md-settings';
@@ -78,19 +88,39 @@ class SettingsPage extends Settings
             self::OPTION_FRONT_PAGE_KEY,
             [
                 'type' => 'boolean',
-                'sanitize_callback' => [$this, 'sanitizeFrontPageOption'],
+                'sanitize_callback' => [$this, 'sanitizeBooleanOption'],
+                'default' => 1,
+            ]
+        );
+
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::OPTION_ALTERNATE_LINK_KEY,
+            [
+                'type' => 'boolean',
+                'sanitize_callback' => [$this, 'sanitizeBooleanOption'],
+                'default' => 1,
+            ]
+        );
+
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::OPTION_ACCEPT_HEADER_KEY,
+            [
+                'type' => 'boolean',
+                'sanitize_callback' => [$this, 'sanitizeBooleanOption'],
                 'default' => 1,
             ]
         );
     }
 
     /**
-     * Sanitize front page enable option.
+     * Sanitize boolean-like checkbox option.
      *
      * @param mixed $input Value submitted from settings form.
      * @return int 1 if enabled, 0 otherwise.
      */
-    public function sanitizeFrontPageOption(mixed $input): int
+    public function sanitizeBooleanOption(mixed $input): int
     {
         return !empty($input) ? 1 : 0;
     }
@@ -182,6 +212,8 @@ class SettingsPage extends Settings
             'enabledTypes' => (array) get_option(self::OPTION_KEY, ['post', 'page']),
             'suffixType' => (string) get_option(self::OPTION_SUFFIX_KEY, 'endpoint'),
             'frontPageEnabled' => (bool) get_option(self::OPTION_FRONT_PAGE_KEY, 1),
+            'alternateLinkEnabled' => (bool) get_option(self::OPTION_ALTERNATE_LINK_KEY, 1),
+            'acceptHeaderEnabled' => (bool) get_option(self::OPTION_ACCEPT_HEADER_KEY, 1),
             'isStaticFrontPage' => $isStaticFrontPage,
             'readingSettingsUrl' => admin_url('options-reading.php'),
             'hasPrettyPermalinks' => $hasPrettyPermalinks,
@@ -190,6 +222,8 @@ class SettingsPage extends Settings
             'optionKey' => self::OPTION_KEY,
             'optionSuffixKey' => self::OPTION_SUFFIX_KEY,
             'optionFrontPageKey' => self::OPTION_FRONT_PAGE_KEY,
+            'optionAlternateLinkKey' => self::OPTION_ALTERNATE_LINK_KEY,
+            'optionAcceptHeaderKey' => self::OPTION_ACCEPT_HEADER_KEY,
         ];
 
         $this->templateRenderer->render('admin/settings/settings-page.php', $data);

@@ -25,6 +25,16 @@ class CoreSettings
     public const OPTION_ENABLE_FRONT_PAGE = 'iz_md_enable_front_page';
 
     /**
+     * Option key for enabling/disabling <link rel="alternate"> in <head>.
+     */
+    public const OPTION_ENABLE_ALTERNATE_LINK = 'iz_md_enable_alternate_link';
+
+    /**
+     * Option key for enabling/disabling Markdown response when Accept: text/markdown header is sent.
+     */
+    public const OPTION_ENABLE_ACCEPT_HEADER = 'iz_md_enable_accept_header';
+
+    /**
      * Option key for post type templates in wp_options table.
      */
     public const OPTION_TEMPLATES = 'iz_md_templates';
@@ -53,6 +63,16 @@ class CoreSettings
      * Default enable front page value.
      */
     public const DEFAULT_ENABLE_FRONT_PAGE = 1;
+
+    /**
+     * Default enable alternate link value.
+     */
+    public const DEFAULT_ENABLE_ALTERNATE_LINK = 1;
+
+    /**
+     * Default enable Accept header detection value.
+     */
+    public const DEFAULT_ENABLE_ACCEPT_HEADER = 1;
 
     /**
      * Default template string used when no specific template is defined.
@@ -167,6 +187,26 @@ class CoreSettings
     public static function isFrontPageEnabled(): bool
     {
         return (bool) get_option(self::OPTION_ENABLE_FRONT_PAGE, (bool) self::DEFAULT_ENABLE_FRONT_PAGE);
+    }
+
+    /**
+     * Check if <link rel="alternate"> in <head> is enabled.
+     *
+     * @return bool True if enabled, false otherwise.
+     */
+    public static function isAlternateLinkEnabled(): bool
+    {
+        return (bool) get_option(self::OPTION_ENABLE_ALTERNATE_LINK, (bool) self::DEFAULT_ENABLE_ALTERNATE_LINK);
+    }
+
+    /**
+     * Check if serving Markdown via Accept: text/markdown header is enabled.
+     *
+     * @return bool True if enabled, false otherwise.
+     */
+    public static function isAcceptHeaderEnabled(): bool
+    {
+        return (bool) get_option(self::OPTION_ENABLE_ACCEPT_HEADER, (bool) self::DEFAULT_ENABLE_ACCEPT_HEADER);
     }
 
     /**
